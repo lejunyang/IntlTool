@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-02-17 17:00:32
+ * @LastEditTime: 2022-05-16 23:31:56
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -131,9 +131,10 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.LaunchEditor, (_, path: string) => {
-    const info = path.split(':');
-    if (info.length === 3) launchEditor(info[0], info[1], info[2]);
-    else launchEditor(path);
+    const info = path.split(':'); // 注意，虽然文件夹和文件名不能包含:，但是C:/xxx磁盘是天生自带冒号的。。
+    console.log('LaunchEditor path', path, ' filePath', info.slice(0, info.length - 2).join(''));
+    if (info.length) launchEditor(info.slice(0, info.length - 2).join(''), info[info.length - 2], info[info.length - 1]);
+    else launchEditor(path, 1, 1);
   })
 }
 
