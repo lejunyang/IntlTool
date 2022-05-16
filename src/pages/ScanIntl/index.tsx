@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-16 22:16:32
+ * @LastEditTime: 2022-05-16 23:30:15
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -106,7 +106,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({ pageData, pageData: { files } })
         开始扫描
       </Button>
       <div className="flex gap-normal">
-        <Form form={form} name="query-fields" className="flex-1" layout="inline">
+        <Form form={form} name="query-fields" className="flex-1" layout="inline" initialValues={{ excludedPrefixes: ['hzero.common'] }}>
           <Form.Item name="excludedPrefixes" label="排除的前缀" style={{ width: 250 }}>
             <Select mode="tags" allowClear>
               <Select.Option value="hzero.common">hzero.common</Select.Option>
