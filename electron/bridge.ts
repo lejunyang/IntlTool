@@ -1,24 +1,60 @@
-import { contextBridge, ipcRenderer } from 'electron'
+/*
+ * @Author: junyang.le@hand-china.com
+ * @Date: 2022-01-20 10:11:01
+ * @LastEditTime: 2022-02-11 15:16:03
+ * @LastEditors: junyang.le@hand-china.com
+ * @Description: your description
+ * @FilePath: \tool\electron\bridge.ts
+ */
+import { contextBridge, ipcRenderer } from 'electron';
+import { Event, BasicFile, ProcessFile } from './types';
 
 export const api = {
-  /**
-   * Here you can expose functions to the renderer process
-   * so they can interact with the main (electron) side
-   * without security problems.
-   *
-   * The function below can accessed using `window.Main.sendMessage`
-   */
+  emit: (event: Event, data?: any) => {
+    ipcRenderer.send(event, data);
+  },
+
+  emitSync: (event: Event, data?: any) => {
+    return ipcRenderer.sendSync(event, data);
+  },
 
   sendMessage: (message: string) => {
-    ipcRenderer.send('message', message)
+    ipcRenderer.send('message', message);
+  },
+
+  // sendSelectedPaths: (paths: string[]) => {
+  //   ipcRenderer.send('selected-paths', paths);
+  // },
+
+  addFile: (file: BasicFile) => {
+    ipcRenderer.send(Event.AddFile, file);
+  },
+
+  removeFile: (file: BasicFile) => {
+    ipcRenderer.send(Event.RemoveFile, file);
+  },
+
+  getFiles: (): ProcessFile[] => {
+    return ipcRenderer.sendSync(Event.GetFilesSync);
+  },
+
+  startProcessCh: () => {
+    ipcRenderer.send('start-process-ch');
   },
 
   /**
-   * Provide an easier way to listen to events
+   * 在渲染进程上注册监听函数
+   * @param channel
+   * @param callback
+   * @returns 返回用于取消监听的函数
    */
-  on: (channel: string, callback: Function) => {
-    ipcRenderer.on(channel, (_, data) => callback(data))
-  }
-}
+  on: (channel: Event, callback: Function) => {
+    const listener = (_: any, data: any) => callback(data);
+    ipcRenderer.on(channel, listener);
+    return () => {
+      ipcRenderer.off(channel, listener);
+    };
+  },
+};
 
-contextBridge.exposeInMainWorld('Main', api)
+contextBridge.exposeInMainWorld('Main', api);

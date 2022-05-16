@@ -1,0 +1,35 @@
+@import '~antd/dist/antd.less';
+
+html {
+  background: rgba(255, 255, 255, 1);
+}
+
+body {
+  .ant-layout {
+    header {
+      display: none;
+    }
+  }
+}
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.line-input-button {
+  display: grid;
+  grid-template-columns: 5fr 1fr;
+  gap: 20px;
+  width: 50%;
+  .ant-input-group {
+    .ant-input-group-addon:last-child {
+      padding: 0;
+    }
+  }
+}
+
+.error-intl-table-cell {
+  color: red;
+}
