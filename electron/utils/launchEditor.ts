@@ -6,13 +6,13 @@
  */
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 // eslint-disable-next-line camelcase
-const child_process = require('child_process');
-const os = require('os');
-const chalk = require('chalk');
-const shellQuote = require('shell-quote');
+import child_process from 'child_process';
+import os from 'os';
+import chalk from 'chalk';
+import shellQuote from 'shell-quote';
 
 function isTerminalEditor(editor) {
   switch (editor) {
@@ -254,8 +254,9 @@ function printInstructions(fileName, errorMessage) {
 }
 
 let _childProcess = null;
-function launchEditor(fileName, lineNumber?, colNumber?) {
+function launchEditor(fileName: string, lineNumber: string | number, colNumber?: string | number) {
   if (!fs.existsSync(fileName)) {
+    console.log('fileName ', fileName, ' not exist');
     return;
   }
 
@@ -263,6 +264,7 @@ function launchEditor(fileName, lineNumber?, colNumber?) {
   // via: https://github.com/nodejs/node/blob/c3bb4b1aa5e907d489619fb43d233c3336bfc03d/lib/child_process.js#L333
   // and it should be a positive integer
   if (!(Number.isInteger(lineNumber) && lineNumber > 0)) {
+    console.log('lineNumber is incorrect');
     return;
   }
 
