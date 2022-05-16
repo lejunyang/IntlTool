@@ -31,7 +31,6 @@ export type StringObject = { [key: string]: string };
 export type State = {
   vars?: StringObject;
   intlResult?: IntlResult;
-  visitedNodeSet?: WeakSet<object>;
   path?: string;
 };
 

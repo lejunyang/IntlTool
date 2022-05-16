@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-02-11 15:14:21
+ * @LastEditTime: 2022-05-16 23:43:32
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\index.ts
@@ -22,8 +23,6 @@ import { containsCh, getStrOfStringNode } from '../../utils/stringUtils';
 import { IntlCallExpression } from './IntlCallExpression';
 import type { State } from '../../types';
 
-// visitedNodeSet是不是没用啊？比较节点好像被替换掉了
-
 /**
  * 用于将代码中的中文替换为intl的visitor
  * @param prefix intl.get中get里字符串的前缀
@@ -35,14 +34,12 @@ export const getChToIntlVisitor = (prefix: string = '') => {
     VariableDeclarator(path: NodePath<VariableDeclarator>, state: State) {
       const node = path.node.init;
       if (!containsCh(node)) return;
-      state.visitedNodeSet?.add(node);
       path.get('init').replaceWith(generateIntlNode(prefix, node));
     },
     // 将jsx属性中的中文字符串替换为intl表达式
     JSXAttribute(path: NodePath<JSXAttribute>, state: State) {
       const node = path.node.value;
       if (!containsCh(node)) return;
-      state.visitedNodeSet?.add(node);
       path.get('value').replaceWith(jsxExpressionContainer(generateIntlNode(prefix, node)));
     },
     // 将jsx children中的中文字符串替换为intl表达式
@@ -56,7 +53,6 @@ export const getChToIntlVisitor = (prefix: string = '') => {
     ObjectProperty(path: NodePath<ObjectProperty>, state: State) {
       const node = path.node.value;
       if (!containsCh(node)) return;
-      state.visitedNodeSet?.add(node);
       // 忽略permissionList里的{ code: '', type: '', meaning: '' }
       // path.container包含所有同级节点，在这里就是对象里的所有键值对
       if (
@@ -73,7 +69,6 @@ export const getChToIntlVisitor = (prefix: string = '') => {
       const elementPaths = path.get('elements');
       elements.forEach((e, index) => {
         if (!containsCh(e)) return;
-        state.visitedNodeSet?.add(e);
         elementPaths[index].replaceWith(generateIntlNode(prefix, e));
       });
     },
@@ -88,7 +83,6 @@ export const getChToIntlVisitor = (prefix: string = '') => {
     ArrowFunctionExpression(path: NodePath<ArrowFunctionExpression>, state: State) {
       const node = path.node.body;
       if (!containsCh(node)) return;
-      state.visitedNodeSet?.add(node);
       path.get('body').replaceWith(generateIntlNode(prefix, node));
     },
     // 只处理单个函数调用的参数，其他情况的调用者callee不是Identifier，比如intl.get.d的callee就是MemberExpression
@@ -98,7 +92,6 @@ export const getChToIntlVisitor = (prefix: string = '') => {
       const argumentsPaths = path.get('arguments');
       args.forEach((a, index) => {
         if (!containsCh(a)) return;
-        state.visitedNodeSet?.add(a);
         argumentsPaths[index].replaceWith(generateIntlNode(prefix, a));
       });
     },

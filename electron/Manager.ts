@@ -24,8 +24,6 @@ export default class Manager {
     Object.assign(file, {
       vars: [],
       intlResult: [],
-      visitedNodeSet: new WeakSet(),
-      prefixes: this.prefixes,
     });
     if (this.filesUIDSet.has(file.uid)) {
       const index = this.files.findIndex(f => f.uid === file.uid);
@@ -47,7 +45,7 @@ export default class Manager {
     return this.files
       .map(file => {
         file.parseError = file.parseResult?.parseError || undefined;
-        return omit(file, ['vars', 'parseResult', 'visitedNodeSet']);
+        return omit(file, ['vars', 'parseResult']);
       })
       .sort((f1, f2) => {
         // 有parseError的排在前面，intlResult的intlItem里有error的在前面
