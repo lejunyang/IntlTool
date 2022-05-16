@@ -1,4 +1,26 @@
 {
+  "overrides": [
+    {
+      "files": [
+        "**/*.ts",
+        "**/*.tsx"
+      ],
+      "plugins": [
+        "@typescript-eslint"
+      ],
+      "rules": {
+        // eslint自带的no-unused-vars在enum的枚举值上会报错变量未使用，因为它不认识ts的enum，关闭自带的，启用ts的no-unused-vars
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "error",
+        // 自带的这个no-use-before-define会在import React上报错
+        "no-use-before-define": "off",
+        "@typescript-eslint/no-use-before-define": [
+          "error"
+        ],
+        "no-throw-literal": "off"
+      }
+    }
+  ],
   "env": {
     "browser": true,
     "es2021": true,
