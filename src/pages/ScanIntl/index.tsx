@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-16 21:33:13
+ * @LastEditTime: 2022-05-16 22:16:32
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -26,9 +26,19 @@ const generateOnCell = (record: IntlRecord, key: keyof IntlRecord) => {
   };
 };
 
+const filePathRender = (path: string) => {
+  return (
+    <span>
+      <a onClick={() => window.Main.emit(Event.LaunchEditor, path)}>
+        {path}
+      </a>
+    </span>
+  );
+};
+
 const errorRender = (text: string, record: IntlRecord) => {
   return (
-    <Tooltip title={record.error ? `${record.path}: ${record.error}` : null}>
+    <Tooltip title={filePathRender(record.path)}>
       <span className={record.error ? 'error-intl-table-cell' : ''}>{text}</span>
     </Tooltip>
   );
@@ -40,8 +50,13 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({ pageData, pageData: { files } })
   const [form] = Form.useForm();
   const data = files.flatMap(file => {
     const { excludedPrefixes = [], prefix = '', get = '', d = '' } = form.getFieldsValue(true);
-    return file.intlResult.filter(item => (!item.prefix || !excludedPrefixes.includes(item.prefix)) &&
-      (item.prefix || '').includes(prefix) && item.get.includes(get) && item.d.includes(d))
+    return file.intlResult.filter(
+      item =>
+        (!item.prefix || !excludedPrefixes.includes(item.prefix)) &&
+        (item.prefix || '').includes(prefix) &&
+        item.get.includes(get) &&
+        item.d.includes(d)
+    );
   });
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
@@ -90,13 +105,10 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({ pageData, pageData: { files } })
       >
         开始扫描
       </Button>
-      <div className='flex gap-normal'>
-        <Form form={form} name="query-fields" className="flex-1" layout='inline'>
+      <div className="flex gap-normal">
+        <Form form={form} name="query-fields" className="flex-1" layout="inline">
           <Form.Item name="excludedPrefixes" label="排除的前缀" style={{ width: 250 }}>
-            <Select
-              mode="tags"
-              allowClear
-            >
+            <Select mode="tags" allowClear>
               <Select.Option value="hzero.common">hzero.common</Select.Option>
             </Select>
           </Form.Item>
@@ -110,10 +122,14 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({ pageData, pageData: { files } })
             <Input onPressEnter={() => update(new Date().getTime())} />
           </Form.Item>
         </Form>
-        <Button onClick={() => {
-          form.resetFields();
-          update(new Date().getTime());
-        }}>重置</Button>
+        <Button
+          onClick={() => {
+            form.resetFields();
+            update(new Date().getTime());
+          }}
+        >
+          重置
+        </Button>
         <Button onClick={() => update(new Date().getTime())}>筛选</Button>
       </div>
       <Table

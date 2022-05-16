@@ -11,6 +11,7 @@ import fs from 'fs';
 // import path from 'path';
 import { Event, ProcessFile, BasicFile } from './types';
 import { manager } from './Manager';
+import launchEditor from './utils/launchEditor';
 
 let mainWindow: BrowserWindow | null;
 
@@ -128,6 +129,12 @@ async function registerListeners() {
     manager.traverseAllIntl();
     event.returnValue = manager.getFiles();
   });
+
+  ipcMain.on(Event.LaunchEditor, (_, path: string) => {
+    const info = path.split(':');
+    if (info.length === 3) launchEditor(info[0], info[1], info[2]);
+    else launchEditor(path);
+  })
 }
 
 app

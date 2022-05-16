@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-03 17:46:10
- * @LastEditTime: 2022-05-16 19:14:56
+ * @LastEditTime: 2022-05-16 21:56:14
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\IntlCallExpression.ts
@@ -166,9 +166,9 @@ export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
       result.get = result.get.replace(prefix + '.', '');
     }
   });
+  result.path = `${state.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
   // 把有错误的放在前面
   if (result.error) {
-    result.path = state.path; // 当有错误的时候加上path以方便定位
     state.intlResult?.unshift(result);
   } else state.intlResult?.push(result);
 };

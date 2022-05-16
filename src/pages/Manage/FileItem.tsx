@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-28 14:56:29
- * @LastEditTime: 2022-02-11 17:24:04
+ * @LastEditTime: 2022-05-16 22:19:13
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\Manage\FileItem.tsx
@@ -9,7 +9,7 @@
 import { FC } from 'react';
 import { Popconfirm, Spin, Button } from 'antd';
 import { LinkOutlined, DeleteOutlined } from '@ant-design/icons';
-import { TransferFile } from '../../../electron/types';
+import { Event, TransferFile } from '../../../electron/types';
 import { AppState } from '../../@types';
 
 const FileItem: FC<Pick<AppState, 'pageData'> & { file: TransferFile }> = ({
@@ -32,6 +32,7 @@ const FileItem: FC<Pick<AppState, 'pageData'> & { file: TransferFile }> = ({
               title={path}
               // 这个ant-upload-list-item-name里面有overflow省略号，但是它的宽度包含了后面的icon，直接来一个padding right
               style={{ paddingRight: '30px' }}
+              onClick={() => window.Main.emit(Event.LaunchEditor, path)}
             >
               {path}
             </a>
