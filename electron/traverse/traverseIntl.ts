@@ -14,12 +14,12 @@ import parse from '../parse';
 import { getIntlTraverseVisitor } from './visitor';
 import { State, ProcessFile } from '../types';
 
-export default function traverseCode(file: ProcessFile, prefixes?: string[]) {
+export default function traverseCode(file: ProcessFile) {
   if (!file.parseResult) {
     file.parseResult = parse(file.content);
   }
   if (file.parseResult.parseError) return;
-  traverse<State>(file.parseResult, getIntlTraverseVisitor(), undefined, { ...file, prefixes });
+  traverse<State>(file.parseResult, getIntlTraverseVisitor(), undefined, file);
   // const reCheckFunc = (path: NodePath<StringLiteral | TemplateLiteral>, state: State) => {
   //   if (state.visitedNodeSet && !state.visitedNodeSet.has(path.node) && containsCh(path.node)) {
   //     console.warn('检测到未处理的含有中文的节点: ', `'${getStrOfStringNode(path.node)}'`);

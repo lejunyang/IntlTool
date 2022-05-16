@@ -20,6 +20,7 @@ import {
 import type { VisitNodeFunction, NodePath } from '@babel/traverse';
 import { getStrOfStringNode, getTemplatePartsInOrder, isStringNode } from '../../utils/stringUtils';
 import type { State, StringObject, IntlItem } from '../../types';
+import { manager } from '../../Manager';
 
 /**
  * 检查CallExpression的arguments是否为仅包含一个参数，且为字符串字面量或模板字符串
@@ -160,7 +161,7 @@ export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
     if (temp.startsWith('$!')) result.error = temp.substring(2);
     else result.get = temp;
   }
-  state.prefixes?.forEach(prefix => {
+  manager.getPrefixes().forEach(prefix => {
     if (result.get.startsWith(prefix)) {
       result.prefix = prefix;
       result.get = result.get.replace(prefix + '.', '');

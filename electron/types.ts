@@ -32,7 +32,6 @@ export type State = {
   vars?: StringObject;
   intlResult?: IntlResult;
   visitedNodeSet?: WeakSet<object>;
-  prefixes?: string[];
   path?: string;
 };
 

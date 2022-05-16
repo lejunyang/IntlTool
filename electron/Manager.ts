@@ -47,7 +47,7 @@ export default class Manager {
     return this.files
       .map(file => {
         file.parseError = file.parseResult?.parseError || undefined;
-        return omit(file, ['vars', 'parseResult', 'visitedNodeSet', 'prefixes']);
+        return omit(file, ['vars', 'parseResult', 'visitedNodeSet']);
       })
       .sort((f1, f2) => {
         // 有parseError的排在前面，intlResult的intlItem里有error的在前面
@@ -65,6 +65,10 @@ export default class Manager {
       if (result) return [result];
       else return [];
     });
+  }
+
+  getPrefixes() {
+    return this.prefixes;
   }
 
   getRemoteData() {
@@ -133,7 +137,7 @@ export default class Manager {
 
   traverseAllIntl() {
     this.files.forEach(file => {
-      traverseIntl(file, this.prefixes);
+      traverseIntl(file);
     });
   }
 
