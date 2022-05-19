@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-19 16:53:31
+ * @LastEditTime: 2022-05-19 19:37:20
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -41,7 +41,7 @@ const errorRender = (text: string, record: IntlRecord) => {
         </div>
       )}
     >
-      <span className={record.error ? 'error-intl-table-cell' : ''}>{text || record.error}</span>
+      <span className={record.error ? 'text-red' : ''}>{text || record.error}</span>
     </Tooltip>
   );
 };
@@ -168,7 +168,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
               </Tooltip>
             </div>
             <div>
-              总计：{data.length}条; 错误：{errorLength}条
+              总计：{data.length}条； <strong className={errorLength ? "text-red" : ''}>错误：{errorLength}条</strong>
             </div>
           </span>
         )}
