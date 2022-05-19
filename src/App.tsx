@@ -13,7 +13,7 @@ import { useReactive, useDebounceEffect } from 'ahooks';
 import config from './pageSettings';
 import './styles/index.less';
 import { AppState } from './@types/index';
-import { Event } from '../electron/types';
+import { Event, Message } from '../electron/types';
 
 export function App() {
   const state = useReactive<AppState>({
@@ -39,7 +39,7 @@ export function App() {
 
   // 订阅消息提醒的事件
   useEffect(() => {
-    return window.Main.on(Event.Message, data => {
+    return window.Main.on(Event.Message, (data: Message) => {
       if (notification[data?.type]) {
         notification[data.type](data);
       }

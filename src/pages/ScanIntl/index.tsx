@@ -1,12 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-19 11:55:41
+ * @LastEditTime: 2022-05-19 16:53:31
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
  */
-import { Table, Tooltip, Form, Select, Input } from 'antd';
+import { Table, Tooltip, Form, Select, Input, notification } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import type { ColumnType } from 'antd/lib/table';
 import { useState, FC } from 'react';
 import Button from '../../components/Button';
@@ -21,7 +22,7 @@ type IntlRecord = IntlItem & {
 const generateOnCell = (record: IntlRecord, key: keyof IntlRecord) => {
   return {
     onDoubleClick: () => {
-      copy(record[key]);
+      if (copy(record[key])) notification.success({ message: '复制成功' });
     },
   };
 };
@@ -84,7 +85,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     },
     {
       dataIndex: 'd',
-      title: '中文',
+      title: '描述',
       onCell: record => {
         return generateOnCell(record, 'd');
       },
@@ -97,6 +98,14 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     onChange: (selectedRowKeys: any) => {
       setSelectedRowKeys(selectedRowKeys);
     },
+  };
+
+  const getData = () => {
+    let head = `模板代码,代码,语言,描述\n`;
+    for (const item of data) {
+      if (!item.error) head += `${item.prefix},${item.get},zh_CN,${item.d}\n`;
+    }
+    return head;
   };
 
   return (
@@ -127,7 +136,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           <Form.Item name="get" label="编码">
             <Input onPressEnter={() => update(new Date().getTime())} />
           </Form.Item>
-          <Form.Item name="d" label="中文">
+          <Form.Item name="d" label="描述">
             <Input onPressEnter={() => update(new Date().getTime())} />
           </Form.Item>
         </Form>
@@ -144,7 +153,20 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       <Table
         title={() => (
           <span className="flex justify-between">
-            <strong title="单元格双击可以复制">Intl扫描结果</strong>
+            <div>
+              <strong>Intl扫描结果</strong>
+              <Tooltip title="单元格双击可以复制">
+                <QuestionCircleOutlined />
+              </Tooltip>
+              <Tooltip title="导出当前筛选出的数据，并过滤含有错误的条目">
+                <Button
+                  onClick={() => window.Main.emit(Event.DownloadIntlResult, getData())}
+                  style={{ marginLeft: 15 }}
+                >
+                  导出
+                </Button>
+              </Tooltip>
+            </div>
             <div>
               总计：{data.length}条; 错误：{errorLength}条
             </div>

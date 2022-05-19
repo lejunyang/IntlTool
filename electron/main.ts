@@ -1,15 +1,15 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 14:53:56
+ * @LastEditTime: 2022-05-19 17:18:53
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
  */
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import fs from 'fs';
 // import path from 'path';
-import { Event, ProcessFile, BasicFile } from './types';
+import { Event, ProcessFile, BasicFile, Message } from './types';
 import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
 
@@ -46,7 +46,7 @@ function updateRemoteData() {
   mainWindow.webContents.send(Event.UpdateRemoteData, manager.getRemoteData());
 }
 
-function sendMessage(data) {
+function sendMessage(data: Message) {
   mainWindow.webContents.send(Event.Message, data);
 }
 
@@ -143,6 +143,27 @@ async function registerListeners() {
     }
     else launchEditor(path, 1, 1, { editor: 'code' });
   })
+
+  ipcMain.on(Event.DownloadIntlResult, (_, data) => {
+    const path = dialog.showSaveDialogSync(mainWindow, {
+      /**
+       * createDirectory macOS -允许你通过对话框的形式创建新的目录
+       * showOverwriteConfirmation Linux - 设置如果用户输入了已存在的文件名，是否会向用户显示确认对话框。
+       */
+      properties: ['createDirectory', 'showOverwriteConfirmation'],
+      // 过滤条件
+      filters: [{ name: 'CSV', extensions: ['csv'] }],
+    });
+    if (path) {
+      // 这个writeFileSync的utf-8是没有BOM的，encoding选项也不支持带bom的utf-8，而没有bom的utf8用excel打开会乱码。。
+      // 只需在data前面加上这个unicode即可， https://blog.csdn.net/cengjingcanghai123/article/details/78035798
+      fs.writeFileSync(path, `\ufeff${data}`);
+      sendMessage({
+        type: 'success',
+        message: '保存成功',
+      });
+    }
+  });
 }
 
 app

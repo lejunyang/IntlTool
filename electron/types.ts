@@ -70,4 +70,5 @@ export enum Event {
   SetPrefixes = 'set-prefixes',
   Message = 'message', // 后端向前端发送消息
   LaunchEditor = 'launch-editor', // 打开编辑器
+  DownloadIntlResult = 'download-intl-result',
 }
