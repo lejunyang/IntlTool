@@ -67,7 +67,7 @@ export enum Event {
   StartProcessCh = 'start-process-ch',
   ProcessChEnd = 'process-ch-end',
   GetFilesSync = 'get-files-sync',
-  ScanIntlSync = 'scan-intl',
+  ScanIntl = 'scan-intl',
   SetPrefixes = 'set-prefixes',
   SetAllowedFileSuffix = 'set-allowed-suffixes',
   SetExcludedPaths = 'set-excluded-paths',

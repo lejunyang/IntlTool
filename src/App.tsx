@@ -1,14 +1,14 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 19:26:11
+ * @LastEditTime: 2022-05-19 19:46:08
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
  */
 import { useEffect } from 'react';
 import ProLayout, { RouteContext, RouteContextType } from '@ant-design/pro-layout';
-import { notification } from 'antd';
+import { notification, Tooltip } from 'antd';
 import { useReactive, useDebounceEffect } from 'ahooks';
 import config from './pageSettings';
 import './styles/index.less';
@@ -72,13 +72,16 @@ export function App() {
           pathname: state.pathname,
         }}
         menuItemRender={(item, dom) => (
-          <a
-            onClick={() => {
-              state.pathname = item.path || '/manage';
-            }}
-          >
-            {dom}
-          </a>
+          <Tooltip title={item.tooltip} placement="topRight">
+            <a
+              onClick={() => {
+                console.log('item', item);
+                state.pathname = item.path || '/manage/file';
+              }}
+            >
+              {dom}
+            </a>
+          </Tooltip>
         )}
       >
         <RouteContext.Consumer>

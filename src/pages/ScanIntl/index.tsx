@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-19 19:37:20
+ * @LastEditTime: 2022-05-19 19:53:01
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -112,7 +112,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     <div className="page-wrapper">
       <Button
         onClick={async () => {
-          window.Main.emit(Event.ScanIntlSync);
+          window.Main.emit(Event.ScanIntl);
         }}
       >
         开始扫描
@@ -155,7 +155,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           <span className="flex justify-between">
             <div>
               <strong>Intl扫描结果</strong>
-              <Tooltip title="单元格双击可以复制">
+              <Tooltip title="单元格双击可以复制，单击路径可以跳转，需要有vscode且注册了code命令">
                 <QuestionCircleOutlined />
               </Tooltip>
               <Tooltip title="导出当前筛选出的数据，并过滤含有错误的条目">

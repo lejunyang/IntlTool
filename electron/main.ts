@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 19:23:59
+ * @LastEditTime: 2022-05-19 19:59:54
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -139,7 +139,7 @@ async function registerListeners() {
     updateRemoteData();
   });
 
-  ipcMain.on(Event.ScanIntlSync, () => {
+  ipcMain.on(Event.ScanIntl, () => {
     manager.traverseAllIntl();
     updateRemoteData();
   });
