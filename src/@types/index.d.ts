@@ -12,7 +12,7 @@ export type AppState = {
   pathname: string;
   pageData: {
     processing: boolean;
-    downloading: boolean;
+    fileTransfering: boolean;
     // Manage用
     files: TransferFile[];
     // ProcessCh使用
@@ -20,6 +20,8 @@ export type AppState = {
     remoteData: {
       prefixes: string[]; // Intl使用
       intlResult: IntlResult; // Intl使用
+      allowedFileSuffix: string[]; // 文件使用
+      excludedPaths: string[]; // 文件使用
     };
   };
 };

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-02-11 17:38:52
+ * @LastEditTime: 2022-05-19 19:26:11
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -17,15 +17,17 @@ import { Event, Message } from '../electron/types';
 
 export function App() {
   const state = useReactive<AppState>({
-    pathname: '/manage',
+    pathname: '/manage/file',
     pageData: {
       files: [],
       processing: false,
-      downloading: true,
+      fileTransfering: true,
       intlPrefixPattern: '$9{replace}[-, .]$12{toLowerCamel}',
       remoteData: {
         prefixes: [],
-        intlResult: []
+        intlResult: [],
+        allowedFileSuffix: [],
+        excludedPaths: [],
       },
     },
   });
@@ -48,13 +50,13 @@ export function App() {
 
   useDebounceEffect(
     () => {
-      if (state.pageData.downloading) {
+      if (state.pageData.fileTransfering) {
         state.pageData.files = window.Main.getFiles();
-        state.pageData.downloading = false;
+        state.pageData.fileTransfering = false;
         console.log('files', state.pageData.files);
       }
     },
-    [state.pageData.downloading],
+    [state.pageData.fileTransfering],
     { wait: 1000 }
   );
 

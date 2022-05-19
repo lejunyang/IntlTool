@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-19 11:05:33
+ * @LastEditTime: 2022-05-19 19:04:05
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -12,9 +12,86 @@ import { transformCh, traverseIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 
 export default class Manager {
+  private allowedFileSuffix: Set<string> = new Set(['.js', '.ts', '.tsx', '.jsx']);
+
+  setAllowedFileSuffix(suffixes: string[]) {
+    this.allowedFileSuffix = new Set(suffixes.map(i => i.trim()).filter(i => i));
+  }
+
+  getAllowedFileSuffix(): string[] {
+    return [...this.allowedFileSuffix];
+  }
+
+  private excludedPaths: string[] = ['node_modules', 'lib'];
+
+  setExcludedPaths(paths: string[]) {
+    this.excludedPaths = paths.map(i => i.trim()).filter(i => i);
+  }
+
+  getExcludedPaths(): string[] {
+    return this.excludedPaths;
+  }
+
+  isFileAllowed(filePath: string): boolean {
+    const type = filePath.substring(filePath.lastIndexOf('.'));
+    return this.allowedFileSuffix.has(type) && !this.excludedPaths.some(ex => filePath.includes(ex));
+  }
+
   private filesUIDSet: Set<string> = new Set(); // 用于避免文件重复
   private files: ProcessFile[] = [];
+
+  addFile(file: ProcessFile) {
+    if (!this.isFileAllowed(file.path)) return;
+    Object.assign(file, {
+      vars: {},
+      intlResult: [],
+    });
+    if (this.filesUIDSet.has(file.uid)) {
+      const index = this.files.findIndex(f => f.uid === file.uid);
+      this.files[index] = file;
+      return;
+    }
+    this.filesUIDSet.add(file.uid);
+    this.files.push(file);
+  }
+
+  removeFile(file: BasicFile) {
+    const index = this.files.findIndex(f => f.uid === file.uid);
+    if (index >= 0) {
+      this.files.splice(index, 1);
+    }
+  }
+
+  reset() {
+    this.files = [];
+  }
+
+  getFiles(): TransferFile[] {
+    return this.files
+      .map(file => {
+        file.parseError = file.parseResult?.parseError || undefined;
+        return omit(file, ['vars', 'parseResult']);
+      })
+      .sort((f1, f2) => {
+        // 有parseError的排在前面，intlResult的intlItem里有error的在前面
+        if (f1.parseError || f2.parseError) return (f1.parseError ?? '') < (f2.parseError ?? '') ? -1 : 1;
+        else return f1.path < f2.path ? -1 : 1;
+      });
+  }
+
   private prefixes: string[] = ['^hzero.common.', '^o2.2[cb].\\w+.\\w+.', '^o2.\\w+.\\w+.'];
+
+  setPrefixes(prefixString: string) {
+    this.prefixes = prefixString.split(/\r?\n/).flatMap(p => {
+      const result = p.trim();
+      if (result) return [result];
+      else return [];
+    });
+  }
+
+  getPrefixes() {
+    return this.prefixes;
+  }
 
   private intlCodeMap: Map<string, IntlItem> = new Map(); // 用于避免intl code重复
   private intlResult: IntlResult = [];
@@ -38,69 +115,14 @@ export default class Manager {
     }
   }
 
-  reset() {
-    this.files = [];
-  }
-
-  addFile(file: ProcessFile) {
-    Object.assign(file, {
-      vars: {},
-      intlResult: [],
-    });
-    if (this.filesUIDSet.has(file.uid)) {
-      const index = this.files.findIndex(f => f.uid === file.uid);
-      this.files[index] = file;
-      return;
-    }
-    this.filesUIDSet.add(file.uid);
-    this.files.push(file);
-  }
-
-  removeFile(file: BasicFile) {
-    const index = this.files.findIndex(f => f.uid === file.uid);
-    if (index >= 0) {
-      this.files.splice(index, 1);
-    }
-  }
-
-  getFiles(): TransferFile[] {
-    return this.files
-      .map(file => {
-        file.parseError = file.parseResult?.parseError || undefined;
-        return omit(file, ['vars', 'parseResult']);
-      })
-      .sort((f1, f2) => {
-        // 有parseError的排在前面，intlResult的intlItem里有error的在前面
-        if (f1.parseError || f2.parseError) return (f1.parseError ?? '') < (f2.parseError ?? '') ? -1 : 1;
-        else return f1.path < f2.path ? -1 : 1;
-      });
-  }
-
-  setPrefixes(prefixString: string) {
-    this.prefixes = prefixString.split(/\r?\n/).flatMap(p => {
-      const result = p.trim();
-      if (result) return [result];
-      else return [];
-    });
-  }
-
-  getPrefixes() {
-    return this.prefixes;
-  }
-
   getRemoteData() {
     return {
-      prefixes: this.prefixes,
+      prefixes: this.getPrefixes(),
       intlResult: this.intlResult,
+      allowedFileSuffix: this.getAllowedFileSuffix(),
+      excludedPaths: this.getExcludedPaths(),
       // files: this.getFiles(),
     };
-  }
-
-  private allowedFileSuffix: Set<string> = new Set(['.js', '.ts', '.tsx', '.jsx']);
-
-  isFileAllowed(filePath: string): boolean {
-    const type = filePath.substring(filePath.lastIndexOf('.'));
-    return this.allowedFileSuffix.has(type);
   }
 
   /**

@@ -8,10 +8,11 @@
  */
 import type { BasicLayoutProps } from '@ant-design/pro-layout/lib/BasicLayout';
 import { SlidersOutlined, ItalicOutlined } from '@ant-design/icons';
-import Manage from './pages/Manage';
+import ManageFiles from './pages/ManageFiles';
 import ProcessCh from './pages/ProcessCh';
 import ManagePrefixes from './pages/ManagePrefixes';
 import ScanIntl from './pages/ScanIntl';
+import ManageOption from './pages/ManageOption';
 
 export default {
   title: 'Tool',
@@ -23,8 +24,19 @@ export default {
       {
         path: '/manage',
         name: '文件管理',
-        component: Manage,
         icon: <SlidersOutlined />,
+        routes: [
+          {
+            path: '/manage/options',
+            name: '文件排除选项',
+            component: ManageOption,
+          },
+          {
+            path: '/manage/file',
+            name: '文件管理',
+            component: ManageFiles,
+          },
+        ],
       },
       {
         path: '/intl',
@@ -51,6 +63,6 @@ export default {
     ],
   },
   location: {
-    pathname: '/manage',
+    pathname: '/manage/file',
   },
 } as BasicLayoutProps;

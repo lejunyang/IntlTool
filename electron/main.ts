@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 17:18:53
+ * @LastEditTime: 2022-05-19 19:23:59
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -60,7 +60,6 @@ async function registerListeners() {
 
   ipcMain.on(Event.AddFile, (_, file: ProcessFile) => {
     if (!manager.isFileAllowed(file.name)) return;
-    console.log('receive file', JSON.stringify(file));
     const stat = fs.statSync(file.path);
     if (stat.isFile()) {
       Object.assign(file, {
@@ -74,6 +73,10 @@ async function registerListeners() {
   ipcMain.on(Event.RemoveFile, (_, file: BasicFile) => {
     manager.removeFile(file);
   });
+
+  ipcMain.on(Event.ResetFiles, () => {
+    manager.reset();
+  })
 
   ipcMain.on(Event.GetFilesSync, event => {
     event.returnValue = manager.getFiles();
@@ -123,6 +126,16 @@ async function registerListeners() {
 
   ipcMain.on(Event.SetPrefixes, (_, data: string) => {
     manager.setPrefixes(data);
+    updateRemoteData();
+  });
+
+  ipcMain.on(Event.SetAllowedFileSuffix, (_, data: string[]) => {
+    manager.setAllowedFileSuffix(data);
+    updateRemoteData();
+  });
+
+  ipcMain.on(Event.SetExcludedPaths, (_, data: string[]) => {
+    manager.setExcludedPaths(data);
     updateRemoteData();
   });
 

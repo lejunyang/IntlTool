@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-02-11 17:59:10
+ * @LastEditTime: 2022-05-19 17:57:50
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -63,11 +63,14 @@ export enum Event {
   UpdateRemoteData = 'update-remote-data',
   AddFile = 'add-file',
   RemoveFile = 'remove-file',
+  ResetFiles = 'reset-files', // 清空文件
   StartProcessCh = 'start-process-ch',
   ProcessChEnd = 'process-ch-end',
   GetFilesSync = 'get-files-sync',
   ScanIntlSync = 'scan-intl',
   SetPrefixes = 'set-prefixes',
+  SetAllowedFileSuffix = 'set-allowed-suffixes',
+  SetExcludedPaths = 'set-excluded-paths',
   Message = 'message', // 后端向前端发送消息
   LaunchEditor = 'launch-editor', // 打开编辑器
   DownloadIntlResult = 'download-intl-result',
