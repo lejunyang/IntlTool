@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-03 17:46:10
- * @LastEditTime: 2022-05-19 15:36:45
+ * @LastEditTime: 2022-05-19 17:23:09
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\IntlCallExpression.ts
@@ -170,7 +170,6 @@ export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
     if (temp.error) result.error += temp.error;
     result.code = temp.content;
   }
-  result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
   for (const prefix of manager.getPrefixes()) {
     const reg = new RegExp(prefix);
     const matchResult = result.code.match(reg);
@@ -180,6 +179,8 @@ export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
       break;
     } else result.get = result.code;
   }
+  if (!result.prefix) result.error += '没有设定前缀；';
+  result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
   result.path = `${state.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
   manager.addIntlItem(result);
 };
