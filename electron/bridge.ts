@@ -11,11 +11,14 @@ import { Event, BasicFile, ProcessFile } from './types';
 
 export const api = {
   emit: (event: Event, data?: any) => {
-    ipcRenderer.send(event, data);
+    // JSON转换一次，因为如果直接传输Proxy会报错
+    if (data) ipcRenderer.send(event, JSON.parse(JSON.stringify(data)));
+    else ipcRenderer.send(event)
   },
 
   emitSync: (event: Event, data?: any) => {
-    return ipcRenderer.sendSync(event, data);
+    if (data) ipcRenderer.sendSync(event, JSON.parse(JSON.stringify(data)));
+    else ipcRenderer.sendSync(event);
   },
 
   addFile: (file: BasicFile) => {

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 20:49:34
+ * @LastEditTime: 2022-05-19 22:24:15
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -34,6 +34,7 @@ export function App() {
   // 订阅更新数据的事件
   useEffect(() => {
     return window.Main.on(Event.UpdateRemoteData, data => {
+      console.log('UpdateRemoteData', data);
       state.pageData.remoteData = data;
       state.pageData.processing = false;
     });

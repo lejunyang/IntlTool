@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2022-05-19 21:11:25
+ * @LastEditTime: 2022-05-19 22:34:46
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageOption\index.tsx
@@ -17,8 +17,6 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
     remoteData: { allowedFileSuffix = [], excludedPaths = [] },
   },
 }) => {
-  console.log('allowedFileSuffix', allowedFileSuffix);
-  console.log('excludedPaths', excludedPaths);
   const [form] = Form.useForm();
   return (
     <div className="page-wrapper" spellCheck={false}>
