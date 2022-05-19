@@ -18,14 +18,6 @@ export const api = {
     return ipcRenderer.sendSync(event, data);
   },
 
-  sendMessage: (message: string) => {
-    ipcRenderer.send('message', message);
-  },
-
-  // sendSelectedPaths: (paths: string[]) => {
-  //   ipcRenderer.send('selected-paths', paths);
-  // },
-
   addFile: (file: BasicFile) => {
     ipcRenderer.send(Event.AddFile, file);
   },
@@ -36,10 +28,6 @@ export const api = {
 
   getFiles: (): ProcessFile[] => {
     return ipcRenderer.sendSync(Event.GetFilesSync);
-  },
-
-  startProcessCh: () => {
-    ipcRenderer.send('start-process-ch');
   },
 
   /**

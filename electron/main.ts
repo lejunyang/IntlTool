@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 21:15:00
+ * @LastEditTime: 2022-05-19 21:19:12
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -28,7 +28,6 @@ function createWindow() {
     // icon: path.join(assetsPath, 'assets', 'icon.png'),
     width: 1100,
     height: 700,
-    // backgroundColor: '#191622',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -51,12 +50,6 @@ function sendMessage(data: Message) {
 }
 
 async function registerListeners() {
-  /**
-   * This comes from bridge integration, check bridge.ts
-   */
-  ipcMain.on('message', (_, message) => {
-    console.log(message);
-  });
 
   ipcMain.on(Event.AddFile, (_, file: ProcessFile) => {
     if (!manager.isFileAllowed(file.name)) return;
