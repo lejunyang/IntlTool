@@ -14,7 +14,7 @@ import { AppState } from '../../@types';
 
 const FileItem: FC<Pick<AppState, 'pageData'> & { file: TransferFile }> = ({
   file,
-  pageData: { downloading, processing },
+  pageData: { fileTransfering: downloading, processing },
 }) => {
   const { path } = file;
   return (
