@@ -1,13 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-16 19:15:23
+ * @LastEditTime: 2022-05-19 11:05:33
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
  */
 import { omit } from 'lodash';
-import { ProcessFile, TransferFile, IntlItem, BasicFile } from './types';
+import { ProcessFile, TransferFile, IntlItem, BasicFile, IntlResult } from './types';
 import { transformCh, traverseIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 
@@ -16,13 +16,35 @@ export default class Manager {
   private files: ProcessFile[] = [];
   private prefixes: string[] = ['hzero.common'];
 
+  private intlCodeMap: Map<string, IntlItem> = new Map(); // 用于避免intl code重复
+  private intlResult: IntlResult = [];
+
+  addIntlItem(item: IntlItem) {
+    if (this.intlCodeMap.has(item.code)) {
+      if (this.intlCodeMap.get(item.code).d !== item.d) {
+        item.error = 'code重复，但中文不一致';
+        this.intlResult.unshift(item);
+      } else if(!this.intlCodeMap.get(item.code).prefix && item.prefix){
+        // code一致且中文一致的，且原来没有prefix，更新prefix
+        const index = this.intlResult.findIndex(i => i.code === item.code && i.d === item.d);
+        this.intlResult[index] = item;
+        this.intlCodeMap.set(item.code, item);
+      }
+    } else {
+      // 把有错误的放在前面
+      if (item.error) this.intlResult.unshift(item);
+      else this.intlResult.push(item);
+      this.intlCodeMap.set(item.code, item)
+    }
+  }
+
   reset() {
     this.files = [];
   }
 
   addFile(file: ProcessFile) {
     Object.assign(file, {
-      vars: [],
+      vars: {},
       intlResult: [],
     });
     if (this.filesUIDSet.has(file.uid)) {
@@ -50,9 +72,6 @@ export default class Manager {
       .sort((f1, f2) => {
         // 有parseError的排在前面，intlResult的intlItem里有error的在前面
         if (f1.parseError || f2.parseError) return (f1.parseError ?? '') < (f2.parseError ?? '') ? -1 : 1;
-        if (f1.intlResult.length && f1.intlResult.length) {
-          return (f1.intlResult[0]?.error ?? '') < (f2.intlResult[0]?.error ?? '') ? -1 : 1
-        }
         else return f1.path < f2.path ? -1 : 1;
       });
   }
@@ -72,6 +91,7 @@ export default class Manager {
   getRemoteData() {
     return {
       prefixes: this.prefixes,
+      intlResult: this.intlResult,
       // files: this.getFiles(),
     };
   }

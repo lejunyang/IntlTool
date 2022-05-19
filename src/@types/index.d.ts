@@ -6,7 +6,7 @@
  * @Description: your description
  * @FilePath: \tool\src\@types\index.d.ts
  */
-import { TransferFile } from '../../electron/types';
+import { TransferFile, IntlResult } from '../../electron/types';
 
 export type AppState = {
   pathname: string;
@@ -19,6 +19,7 @@ export type AppState = {
     intlPrefixPattern: string;
     remoteData: {
       prefixes: string[]; // Intl使用
+      intlResult: IntlResult; // Intl使用
     };
   };
 };

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-01-29 10:37:24
+ * @LastEditTime: 2022-05-19 11:39:29
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\Manage\index.tsx
@@ -58,7 +58,7 @@ const Manage: FC<Pick<AppState, 'pageData'>> = props => {
         </p>
       </Upload.Dragger>
       {files.map(file => (
-        <FileItem file={file} pageData={pageData} />
+        <FileItem file={file} pageData={pageData} key={file.uid} />
       ))}
     </div>
   );

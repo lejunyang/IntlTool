@@ -17,6 +17,7 @@ export type Message = {
 };
 
 export type IntlItem = {
+  code: string; // 完整的code
   get: string;
   d: string;
   error?: string;

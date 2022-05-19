@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-16 23:30:15
+ * @LastEditTime: 2022-05-19 11:55:41
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -27,37 +27,42 @@ const generateOnCell = (record: IntlRecord, key: keyof IntlRecord) => {
 };
 
 const filePathRender = (path: string) => {
-  return (
-    <span>
-      <a onClick={() => window.Main.emit(Event.LaunchEditor, path)}>
-        {path}
-      </a>
-    </span>
-  );
+  return <a onClick={() => window.Main.emit(Event.LaunchEditor, path)}>{path}</a>;
 };
 
 const errorRender = (text: string, record: IntlRecord) => {
   return (
-    <Tooltip title={filePathRender(record.path)}>
-      <span className={record.error ? 'error-intl-table-cell' : ''}>{text}</span>
+    <Tooltip
+      title={() => (
+        <div>
+          <div>{record.error}</div>
+          {filePathRender(record.path)}
+        </div>
+      )}
+    >
+      <span className={record.error ? 'error-intl-table-cell' : ''}>{text || record.error}</span>
     </Tooltip>
   );
 };
 
-const Intl: FC<Pick<AppState, 'pageData'>> = ({ pageData, pageData: { files } }) => {
+const Intl: FC<Pick<AppState, 'pageData'>> = ({
+  pageData: {
+    remoteData: { intlResult },
+  },
+}) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, update] = useState(1); // 用于刷新页面
   const [form] = Form.useForm();
-  const data = files.flatMap(file => {
-    const { excludedPrefixes = [], prefix = '', get = '', d = '' } = form.getFieldsValue(true);
-    return file.intlResult.filter(
-      item =>
-        (!item.prefix || !excludedPrefixes.includes(item.prefix)) &&
-        (item.prefix || '').includes(prefix) &&
-        item.get.includes(get) &&
-        item.d.includes(d)
-    );
-  });
+  const { excludedPrefixes = ['hzero.common'], prefix = '', get = '', d = '' } = form.getFieldsValue(true);
+  const data = intlResult.filter(
+    item =>
+      (!item.prefix || !excludedPrefixes.includes(item.prefix)) &&
+      (item.prefix || '').includes(prefix) &&
+      item.get.includes(get) &&
+      item.d.includes(d)
+  );
+  console.log('data', data);
+  const errorLength = data.filter(item => item.error).length;
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
   const columns: ColumnType<IntlRecord>[] = [
@@ -98,15 +103,19 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({ pageData, pageData: { files } })
     <div className="page-wrapper">
       <Button
         onClick={async () => {
-          const files = window.Main.emitSync(Event.ScanIntlSync);
-          console.log('ScanIntlSync files', files);
-          pageData.files = files;
+          window.Main.emit(Event.ScanIntlSync);
         }}
       >
         开始扫描
       </Button>
       <div className="flex gap-normal">
-        <Form form={form} name="query-fields" className="flex-1" layout="inline" initialValues={{ excludedPrefixes: ['hzero.common'] }}>
+        <Form
+          form={form}
+          name="query-fields"
+          className="flex-1 row-gap-small"
+          layout="inline"
+          initialValues={{ excludedPrefixes: ['hzero.common'] }}
+        >
           <Form.Item name="excludedPrefixes" label="排除的前缀" style={{ width: 250 }}>
             <Select mode="tags" allowClear>
               <Select.Option value="hzero.common">hzero.common</Select.Option>
@@ -133,7 +142,15 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({ pageData, pageData: { files } })
         <Button onClick={() => update(new Date().getTime())}>筛选</Button>
       </div>
       <Table
-        title={() => <strong title="单元格双击可以复制">Intl扫描结果</strong>}
+        title={() => (
+          <span className="flex justify-between">
+            <strong title="单元格双击可以复制">Intl扫描结果</strong>
+            <div>
+              总计：{data.length}条; 错误：{errorLength}条
+            </div>
+          </span>
+        )}
+        rowKey="code"
         columns={columns}
         dataSource={data}
         rowSelection={rowSelection}

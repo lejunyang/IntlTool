@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-03 17:46:10
- * @LastEditTime: 2022-05-16 21:56:14
+ * @LastEditTime: 2022-05-19 11:40:50
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\IntlCallExpression.ts
@@ -18,6 +18,7 @@ import {
   isTemplateElement,
 } from '@babel/types';
 import type { VisitNodeFunction, NodePath } from '@babel/traverse';
+import generate from '@babel/generator';
 import { getStrOfStringNode, getTemplatePartsInOrder, isStringNode } from '../../utils/stringUtils';
 import type { State, StringObject, IntlItem } from '../../types';
 import { manager } from '../../Manager';
@@ -54,6 +55,11 @@ interface dProcessParams {
   args: ObjectExpression;
 }
 
+interface ProcessContent {
+  content: string;
+  error?: string;
+}
+
 type ProcessParams = getProcessParams | dProcessParams;
 
 /**
@@ -67,16 +73,16 @@ function processTemplateLiteral<T extends ProcessParams['type']>(
   template: TemplateLiteral,
   type: T,
   args?: Extract<ProcessParams, { type: T }>['args']
-): string {
-  let result = '';
+): ProcessContent {
+  const result: ProcessContent = { content: '', error: '' };
   // 表达式为空说明就是一个纯模板字符串字面量，不用再处理
   if (template.expressions.length === 0) {
-    result = getStrOfStringNode(template);
+    result.content = getStrOfStringNode(template);
   } else {
     const parts = getTemplatePartsInOrder(template);
     parts.forEach(i => {
       if (isTemplateElement(i)) {
-        result += i.value.cooked ?? '';
+        result.content += i.value.cooked ?? '';
       } else {
         if (isIdentifier(i)) {
           if (type === 'd') {
@@ -87,28 +93,31 @@ function processTemplateLiteral<T extends ProcessParams['type']>(
                 if (isObjectProperty(objProp)) {
                   // 查找对象中的值和模板字符串中变量名相同的。支持缩写属性，缩写的属性同样有key和value
                   if (isIdentifier(objProp.value, { name: i.name }) && isIdentifier(objProp.key)) {
-                    result += `{${objProp.key.name}}`;
+                    result.content += `{${objProp.key.name}}`;
                     varNameFind = true;
                   }
                 }
               });
-              if (!varNameFind) result += `$!d里面有模板字符串变量'${i.name}'，但get的第二个参数缺少该变量`;
+              if (!varNameFind) result.error += `d里面有模板字符串变量'${i.name}'，但get的第二个参数缺少该变量；`;
             } else {
-              result += `$!d里面有模板字符串变量'${i.name}'，但get未传第二参`;
+              result.error += `d里面有模板字符串变量'${i.name}'，但get未传第二个参数；`;
             }
           } else if (type === 'get') {
+            // 此时args代表文件里的常量组成的对象
             if (args) {
               const value = (args as StringObject)[i.name];
               if (value) {
-                result += value;
+                result.content += value;
               } else {
-                result += `$!global里缺少对应变量'${i.name}'`;
+                result.error += `get模板字符串里的变量只能使用常量，而代码最外层缺少对应常量'${i.name}'；`;
               }
-            } else result += `$!缺少global变量的对象Map`;
+            } else result.error += `缺少代码文件最外层常量的对象Map；`;
           }
         } else {
           // expressions里面如果不是Identifier那就是表达式了
-          result += '$!不允许表达式';
+          const { code } = generate(i);
+          result.error += `模板字符串中出现表达式'${code}'；`;
+          console.log('模板字符串中出现表达式：', code);
         }
       }
     });
@@ -143,33 +152,31 @@ export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
   // 检查intl.get().d()中的intl
   if (!isIdentifier(intlGetCallee.object, { name: 'intl' })) return;
 
-  const result: IntlItem = { get: '', d: '' };
+  const result: IntlItem = { get: '', d: '', code: '', error: '' };
   const dTemplateLiteral = dArgs[0];
   // 普通字符串字面量
   if (isStringLiteral(dTemplateLiteral)) result.d = dTemplateLiteral.value;
   // 模板字符串字面量
   else {
     const temp = processTemplateLiteral(dTemplateLiteral, 'd', getArgs[1]);
-    if (temp.startsWith('$!')) result.error = temp.substring(2);
-    else result.d = temp;
+    if (temp.error) result.error += temp.error;
+    result.d = temp.content;
   }
 
   const getTemplateLiteral = getArgs[0];
-  if (isStringLiteral(getTemplateLiteral)) result.get = getTemplateLiteral.value;
+  if (isStringLiteral(getTemplateLiteral)) result.code = getTemplateLiteral.value;
   else {
     const temp = processTemplateLiteral(getTemplateLiteral, 'get', state.vars);
-    if (temp.startsWith('$!')) result.error = temp.substring(2);
-    else result.get = temp;
+    if (temp.error) result.error += temp.error;
+    result.code = temp.content;
   }
+  result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
   manager.getPrefixes().forEach(prefix => {
-    if (result.get.startsWith(prefix)) {
+    if (result.code.startsWith(prefix)) {
       result.prefix = prefix;
       result.get = result.get.replace(prefix + '.', '');
-    }
+    } else result.get = result.code;
   });
   result.path = `${state.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
-  // 把有错误的放在前面
-  if (result.error) {
-    state.intlResult?.unshift(result);
-  } else state.intlResult?.push(result);
+  manager.addIntlItem(result);
 };

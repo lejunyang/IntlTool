@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-16 23:31:56
+ * @LastEditTime: 2022-05-19 14:53:56
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -65,6 +65,7 @@ async function registerListeners() {
     if (stat.isFile()) {
       Object.assign(file, {
         content: fs.readFileSync(file.path, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'), // 统一替换为crlf，防止后续diff时因为这个而全篇不一样
+        path: file.path.replace(/\\/g, '/'),
       });
       manager.addFile(file);
     }
@@ -125,16 +126,22 @@ async function registerListeners() {
     updateRemoteData();
   });
 
-  ipcMain.on(Event.ScanIntlSync, event => {
+  ipcMain.on(Event.ScanIntlSync, () => {
     manager.traverseAllIntl();
-    event.returnValue = manager.getFiles();
+    updateRemoteData();
   });
 
   ipcMain.on(Event.LaunchEditor, (_, path: string) => {
-    const info = path.split(':'); // 注意，虽然文件夹和文件名不能包含:，但是C:/xxx磁盘是天生自带冒号的。。
-    console.log('LaunchEditor path', path, ' filePath', info.slice(0, info.length - 2).join(''));
-    if (info.length) launchEditor(info.slice(0, info.length - 2).join(''), info[info.length - 2], info[info.length - 1]);
-    else launchEditor(path, 1, 1);
+    const info = path.split(':');
+    console.log('LaunchEditor path', path);
+    if (info.length > 2) {
+      // 注意，虽然文件夹和文件名不能包含:，但是C:/xxx磁盘是天生自带冒号的。。
+      if (path.charAt(1) === ':') path = info[0] + ':' + info.slice(1, info.length - 2).join('');
+      else path = info.slice(0, info.length - 2).join('');
+      console.log("path with line column:", path)
+      launchEditor(path, +info[info.length - 2], +info[info.length - 1], { editor: 'code' });
+    }
+    else launchEditor(path, 1, 1, { editor: 'code' });
   })
 }
 

@@ -25,6 +25,7 @@ export function App() {
       intlPrefixPattern: '$9{replace}[-, .]$12{toLowerCamel}',
       remoteData: {
         prefixes: [],
+        intlResult: []
       },
     },
   });
