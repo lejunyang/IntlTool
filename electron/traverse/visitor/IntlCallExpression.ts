@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-03 17:46:10
- * @LastEditTime: 2022-05-19 11:40:50
+ * @LastEditTime: 2022-05-19 15:36:45
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\IntlCallExpression.ts
@@ -171,12 +171,15 @@ export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
     result.code = temp.content;
   }
   result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
-  manager.getPrefixes().forEach(prefix => {
-    if (result.code.startsWith(prefix)) {
-      result.prefix = prefix;
-      result.get = result.get.replace(prefix + '.', '');
+  for (const prefix of manager.getPrefixes()) {
+    const reg = new RegExp(prefix);
+    const matchResult = result.code.match(reg);
+    if (matchResult) {
+      result.prefix = matchResult[0].substring(0, matchResult[0].length - 1);
+      result.get = result.code.replace(reg, '');
+      break;
     } else result.get = result.code;
-  });
+  }
   result.path = `${state.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
   manager.addIntlItem(result);
 };

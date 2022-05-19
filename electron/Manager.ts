@@ -14,7 +14,7 @@ import * as StringUtils from './utils/stringUtils';
 export default class Manager {
   private filesUIDSet: Set<string> = new Set(); // 用于避免文件重复
   private files: ProcessFile[] = [];
-  private prefixes: string[] = ['hzero.common'];
+  private prefixes: string[] = ['^hzero.common.', '^o2.2[cb].\\w+.\\w+.', '^o2.\\w+.\\w+.'];
 
   private intlCodeMap: Map<string, IntlItem> = new Map(); // 用于避免intl code重复
   private intlResult: IntlResult = [];
@@ -24,7 +24,7 @@ export default class Manager {
       if (this.intlCodeMap.get(item.code).d !== item.d) {
         item.error = 'code重复，但中文不一致';
         this.intlResult.unshift(item);
-      } else if(!this.intlCodeMap.get(item.code).prefix && item.prefix){
+      } else if (!this.intlCodeMap.get(item.code).prefix && item.prefix) {
         // code一致且中文一致的，且原来没有prefix，更新prefix
         const index = this.intlResult.findIndex(i => i.code === item.code && i.d === item.d);
         this.intlResult[index] = item;
@@ -34,7 +34,7 @@ export default class Manager {
       // 把有错误的放在前面
       if (item.error) this.intlResult.unshift(item);
       else this.intlResult.push(item);
-      this.intlCodeMap.set(item.code, item)
+      this.intlCodeMap.set(item.code, item);
     }
   }
 

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2022-02-11 17:04:56
+ * @LastEditTime: 2022-05-19 15:37:10
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManagePrefixes\index.tsx
@@ -20,6 +20,7 @@ const ManagePrefixes: FC<Pick<AppState, 'pageData'>> = ({
   const [input, setInput] = useState(prefixes.join('\n') || '');
   return (
     <div className="page-wrapper" spellCheck={false}>
+      前缀使用正则进行替换
       <TextArea
         autoSize={{ minRows: 5 }}
         value={input}
@@ -36,7 +37,7 @@ const ManagePrefixes: FC<Pick<AppState, 'pageData'>> = ({
       </Button>
       <div>
         {prefixes.map(p => (
-          <div>{p}</div>
+          <div key={p}>{p}</div>
         ))}
       </div>
     </div>
