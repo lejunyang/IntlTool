@@ -1,5 +1,12 @@
+@small-gap: 8px;
+@normal-gap: 20px;
+
 .flex {
   display: flex;
+}
+
+.justify-between {
+  justify-content: space-between;
 }
 
 .flex-1 {
@@ -7,5 +14,13 @@
 }
 
 .gap-normal {
-  gap: 20px
+  gap: @normal-gap;
+}
+
+.gap-small {
+  gap: @small-gap;
+}
+
+.row-gap-small {
+  row-gap: @small-gap;
 }
