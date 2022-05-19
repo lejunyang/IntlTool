@@ -9,7 +9,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import fs from 'fs';
 import path from 'path';
-import { Event, ProcessFile, BasicFile, Message } from './types';
+import { Event, ProcessFile, Message } from './types';
 import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
 
@@ -63,8 +63,8 @@ async function registerListeners() {
     }
   });
 
-  ipcMain.on(Event.RemoveFile, (_, file: BasicFile) => {
-    manager.removeFile(file);
+  ipcMain.on(Event.RemoveFile, (_, uid: string) => {
+    manager.removeFile(uid);
     updateRemoteData();
   });
 

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-02-11 15:16:03
+ * @LastEditTime: 2022-05-19 22:17:46
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\bridge.ts
@@ -20,10 +20,6 @@ export const api = {
 
   addFile: (file: BasicFile) => {
     ipcRenderer.send(Event.AddFile, file);
-  },
-
-  removeFile: (file: BasicFile) => {
-    ipcRenderer.send(Event.RemoveFile, file);
   },
 
   getFiles: (): ProcessFile[] => {

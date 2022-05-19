@@ -1,13 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-19 21:24:18
+ * @LastEditTime: 2022-05-19 22:10:52
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
  */
 import { omit } from 'lodash';
-import { ProcessFile, TransferFile, IntlItem, BasicFile, IntlResult } from './types';
+import { ProcessFile, TransferFile, IntlItem, IntlResult } from './types';
 import { transformCh, traverseIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 
@@ -59,12 +59,12 @@ export default class Manager {
     this.files.push(file);
   }
 
-  removeFile(file: BasicFile) {
-    const index = this.files.findIndex(f => f.uid === file.uid);
+  removeFile(uid: string) {
+    const index = this.files.findIndex(f => f.uid === uid);
     if (index >= 0) {
       this.files.splice(index, 1);
+      this.filesUIDSet.delete(uid);
     }
-    this.filesUIDSet.delete(file.uid);
   }
 
   reset() {

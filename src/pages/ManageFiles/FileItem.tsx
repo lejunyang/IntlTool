@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-28 14:56:29
- * @LastEditTime: 2022-05-19 21:00:34
+ * @LastEditTime: 2022-05-19 22:15:00
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageFiles\FileItem.tsx
@@ -36,8 +36,8 @@ const FileItem: FC<Pick<AppState, 'pageData'> & { file: TransferFile }> = ({ fil
             <Popconfirm
               title="确定删除？"
               onConfirm={() => {
-                window.Main.removeFile(file);
                 pageData.processing = true;
+                window.Main.emit(Event.RemoveFile, file.uid);
               }}
             >
               <Button title="删除文件" type="text" size="small">
