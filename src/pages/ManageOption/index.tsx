@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2022-05-19 22:34:46
+ * @LastEditTime: 2022-05-19 22:52:18
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageOption\index.tsx
@@ -31,8 +31,12 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
       <Button
         onClick={() => {
           pageData.processing = true;
-          window.Main.emit(Event.SetAllowedFileSuffix, form.getFieldValue('allowedFileSuffix'));
-          window.Main.emit(Event.SetExcludedPaths, form.getFieldValue('excludedPaths'));
+          // JSON转换一次，因为如果直接传输Proxy会报错
+          window.Main.emit(
+            Event.SetAllowedFileSuffix,
+            JSON.parse(JSON.stringify(form.getFieldValue('allowedFileSuffix')))
+          );
+          window.Main.emit(Event.SetExcludedPaths, JSON.parse(JSON.stringify(form.getFieldValue('excludedPaths'))));
         }}
       >
         设置

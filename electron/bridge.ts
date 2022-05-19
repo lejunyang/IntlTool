@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 22:17:46
+ * @LastEditTime: 2022-05-19 22:45:41
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\bridge.ts
@@ -11,14 +11,11 @@ import { Event, BasicFile, ProcessFile } from './types';
 
 export const api = {
   emit: (event: Event, data?: any) => {
-    // JSON转换一次，因为如果直接传输Proxy会报错
-    if (data) ipcRenderer.send(event, JSON.parse(JSON.stringify(data)));
-    else ipcRenderer.send(event)
+    ipcRenderer.send(event, data);
   },
 
   emitSync: (event: Event, data?: any) => {
-    if (data) ipcRenderer.sendSync(event, JSON.parse(JSON.stringify(data)));
-    else ipcRenderer.sendSync(event);
+    ipcRenderer.sendSync(event, data);
   },
 
   addFile: (file: BasicFile) => {
