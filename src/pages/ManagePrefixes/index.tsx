@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2022-05-19 15:37:10
+ * @LastEditTime: 2022-05-19 21:10:58
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManagePrefixes\index.tsx
@@ -13,6 +13,7 @@ import { AppState } from '../../@types';
 
 const TextArea = Input.TextArea;
 const ManagePrefixes: FC<Pick<AppState, 'pageData'>> = ({
+  pageData,
   pageData: {
     remoteData: { prefixes },
   },
@@ -31,6 +32,7 @@ const ManagePrefixes: FC<Pick<AppState, 'pageData'>> = ({
       <Button
         onClick={() => {
           window.Main.emit(Event.SetPrefixes, input);
+          pageData.processing = true;
         }}
       >
         设置前缀

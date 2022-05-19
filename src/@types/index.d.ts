@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-27 09:41:34
- * @LastEditTime: 2022-01-29 15:18:00
+ * @LastEditTime: 2022-05-19 21:15:25
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\@types\index.d.ts
@@ -12,9 +12,6 @@ export type AppState = {
   pathname: string;
   pageData: {
     processing: boolean;
-    fileTransfering: boolean;
-    // Manage用
-    files: TransferFile[];
     // ProcessCh使用
     intlPrefixPattern: string;
     remoteData: {
@@ -22,6 +19,7 @@ export type AppState = {
       intlResult: IntlResult; // Intl使用
       allowedFileSuffix: string[]; // 文件使用
       excludedPaths: string[]; // 文件使用
+      files: TransferFile[]; // Manage用
     };
   };
 };

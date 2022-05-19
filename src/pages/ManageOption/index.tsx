@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2022-05-19 19:19:16
+ * @LastEditTime: 2022-05-19 21:11:25
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageOption\index.tsx
@@ -12,11 +12,9 @@ import { Event } from '../../../electron/types';
 import { AppState } from '../../@types';
 
 const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
+  pageData,
   pageData: {
-    remoteData: {
-      allowedFileSuffix = [],
-      excludedPaths = [],
-    },
+    remoteData: { allowedFileSuffix = [], excludedPaths = [] },
   },
 }) => {
   console.log('allowedFileSuffix', allowedFileSuffix);
@@ -34,6 +32,7 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
       </Form>
       <Button
         onClick={() => {
+          pageData.processing = true;
           window.Main.emit(Event.SetAllowedFileSuffix, form.getFieldValue('allowedFileSuffix'));
           window.Main.emit(Event.SetExcludedPaths, form.getFieldValue('excludedPaths'));
         }}

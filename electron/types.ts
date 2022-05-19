@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-05-19 17:57:50
+ * @LastEditTime: 2022-05-19 20:20:48
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -40,7 +40,7 @@ export type ParseResult = BabelParseResult<BabelFile> & {
 };
 
 export type BasicFile = {
-  name: string;
+  name?: string;
   path: string;
   uid: string;
 };
@@ -74,4 +74,5 @@ export enum Event {
   Message = 'message', // 后端向前端发送消息
   LaunchEditor = 'launch-editor', // 打开编辑器
   DownloadIntlResult = 'download-intl-result',
+  SelectFile = 'select-file',
 }

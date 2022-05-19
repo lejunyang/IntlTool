@@ -1,15 +1,15 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 19:46:08
+ * @LastEditTime: 2022-05-19 20:49:34
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
  */
 import { useEffect } from 'react';
 import ProLayout, { RouteContext, RouteContextType } from '@ant-design/pro-layout';
-import { notification, Tooltip } from 'antd';
-import { useReactive, useDebounceEffect } from 'ahooks';
+import { notification, Tooltip, Spin } from 'antd';
+import { useReactive } from 'ahooks';
 import config from './pageSettings';
 import './styles/index.less';
 import { AppState } from './@types/index';
@@ -19,11 +19,10 @@ export function App() {
   const state = useReactive<AppState>({
     pathname: '/manage/file',
     pageData: {
-      files: [],
-      processing: false,
-      fileTransfering: true,
+      processing: true,
       intlPrefixPattern: '$9{replace}[-, .]$12{toLowerCamel}',
       remoteData: {
+        files: [],
         prefixes: [],
         intlResult: [],
         allowedFileSuffix: [],
@@ -36,6 +35,7 @@ export function App() {
   useEffect(() => {
     return window.Main.on(Event.UpdateRemoteData, data => {
       state.pageData.remoteData = data;
+      state.pageData.processing = false;
     });
   }, []);
 
@@ -47,18 +47,6 @@ export function App() {
       }
     });
   }, []);
-
-  useDebounceEffect(
-    () => {
-      if (state.pageData.fileTransfering) {
-        state.pageData.files = window.Main.getFiles();
-        state.pageData.fileTransfering = false;
-        console.log('files', state.pageData.files);
-      }
-    },
-    [state.pageData.fileTransfering],
-    { wait: 1000 }
-  );
 
   useEffect(() => {
     window.Main.emit(Event.GetRemoteData);
@@ -88,7 +76,11 @@ export function App() {
           {(value: RouteContextType) => {
             const Component = value.currentMenu?.component;
             if (Component) {
-              return <Component pageData={state.pageData} />;
+              return (
+                <Spin spinning={state.pageData.processing}>
+                  <Component pageData={state.pageData} />
+                </Spin>
+              );
             }
           }}
         </RouteContext.Consumer>

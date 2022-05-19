@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-19 19:04:05
+ * @LastEditTime: 2022-05-19 20:45:28
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -32,9 +32,13 @@ export default class Manager {
     return this.excludedPaths;
   }
 
+  isPathAllowed(path: string): boolean {
+    return !this.excludedPaths.some(ex => path.includes(ex));
+  }
+
   isFileAllowed(filePath: string): boolean {
     const type = filePath.substring(filePath.lastIndexOf('.'));
-    return this.allowedFileSuffix.has(type) && !this.excludedPaths.some(ex => filePath.includes(ex));
+    return this.allowedFileSuffix.has(type) && this.isPathAllowed(filePath);
   }
 
   private filesUIDSet: Set<string> = new Set(); // 用于避免文件重复
@@ -121,7 +125,7 @@ export default class Manager {
       intlResult: this.intlResult,
       allowedFileSuffix: this.getAllowedFileSuffix(),
       excludedPaths: this.getExcludedPaths(),
-      // files: this.getFiles(),
+      files: this.getFiles(),
     };
   }
 

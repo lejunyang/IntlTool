@@ -7,9 +7,9 @@
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
  */
 import { Button, Input, Radio, Modal } from 'antd';
-import { useEffect, useState, FC } from 'react';
+import { useState, FC } from 'react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Event, TransferFile } from '../../../electron/types';
+import { Event } from '../../../electron/types';
 import CodeDiff from '../../components/CodeDiff';
 import { AppState } from '../../@types';
 
@@ -20,21 +20,12 @@ const options = [
 
 const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
-  pageData: { intlPrefixPattern, processing, files },
+  pageData: { intlPrefixPattern, remoteData: { files } },
 }) => {
   const [outputFormat, setOutputFormat] = useState<'side-by-side' | 'line-by-line'>('side-by-side');
 
   const patch = files.reduce((result, file) => result + (file.diffPatchOfChTransform || ''), '');
 
-  console.log('patch', patch);
-
-  useEffect(() => {
-    return window.Main.on(Event.ProcessChEnd, (_files: TransferFile[]) => {
-      console.log('_files', _files);
-      pageData.files = _files;
-      pageData.processing = false;
-    });
-  }, []);
   return (
     <div className="page-wrapper">
       <div className="line-input-button">
@@ -62,14 +53,12 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
               <QuestionCircleOutlined />
             </Button>
           }
-          disabled={processing}
           value={intlPrefixPattern}
           onChange={e => {
             pageData.intlPrefixPattern = e.target.value;
           }}
         />
         <Button
-          disabled={processing}
           onClick={() => {
             pageData.processing = true;
             window.Main.emit(Event.StartProcessCh, intlPrefixPattern);
@@ -89,23 +78,6 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
         />
       </div>
       <CodeDiff patch={patch} />
-      {/* {files.map(file => {
-        if (file.parseError) {
-          return (
-            <div>
-              {file.path}:{file.parseError}
-            </div>
-          );
-        } else if (!file.chTransformedContent) return null;
-        return (
-          <CodeDiff
-            filename={file.path}
-            oldStr={file.content}
-            newStr={file.chTransformedContent}
-            outputFormat={outputFormat}
-          />
-        );
-      })} */}
     </div>
   );
 };

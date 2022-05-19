@@ -1,14 +1,14 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 19:59:54
+ * @LastEditTime: 2022-05-19 21:15:00
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
  */
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import fs from 'fs';
-// import path from 'path';
+import path from 'path';
 import { Event, ProcessFile, BasicFile, Message } from './types';
 import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
@@ -72,46 +72,58 @@ async function registerListeners() {
 
   ipcMain.on(Event.RemoveFile, (_, file: BasicFile) => {
     manager.removeFile(file);
+    updateRemoteData();
   });
 
   ipcMain.on(Event.ResetFiles, () => {
     manager.reset();
+    updateRemoteData();
   })
 
   ipcMain.on(Event.GetFilesSync, event => {
     event.returnValue = manager.getFiles();
   });
 
-  // ipcMain.on('selected-paths', (_, paths: string[]) => {
-  //   function traverseDir(dir: string) {
-  //     const files = fs.readdirSync(dir);
-  //     console.log('接收到的目录', dir);
-  //     files.forEach(fileOrDir => {
-  //       console.log('目录下的子目录或文件', fileOrDir);
-  //       const p = path.join(dir, fileOrDir);
-  //       console.log('join', p);
-  //       const stat = fs.statSync(p);
-  //       if (stat.isDirectory()) {
-  //         traverseDir(p);
-  //       }
-  //       if (stat.isFile() && manager.isFileAllowed(fileOrDir)) {
-  //         // 不指定编码读出来的是Buffer类型
-  //         manager.pushFile(fs.readFileSync(p, 'utf-8'));
-  //       }
-  //     });
-  //   }
-
-  //   paths.forEach(p => {
-  //     const stat = fs.statSync(p);
-  //     if (stat.isDirectory()) {
-  //       traverseDir(p);
-  //     }
-  //     if (stat.isFile() && manager.isFileAllowed(p)) {
-  //       manager.pushFile(fs.readFileSync(p, 'utf-8'), stat.uid);
-  //     }
-  //   });
-
-  // });
+  ipcMain.on(Event.SelectFile, (_, isDir?: boolean) => {
+    function traverseDir(dir: string) {
+      const files = fs.readdirSync(dir);
+      files.forEach(fileOrDir => {
+        const p = path.join(dir, fileOrDir);
+        const stat = fs.statSync(p);
+        if (stat.isDirectory() && manager.isPathAllowed(p)) {
+          traverseDir(p);
+        }
+        if (stat.isFile()) {
+          // 不指定编码读出来的是Buffer类型
+          manager.addFile({
+            uid: String(stat.ino), // stat.uid是userId， ino才能代表文件
+            content: fs.readFileSync(p, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'),
+            path: p.replace(/\\/g, '/'),
+          });
+        }
+      });
+    }
+    const paths = dialog.showOpenDialogSync(mainWindow, {
+      properties: [isDir ? 'openDirectory' : 'openFile', 'multiSelections'],
+      filters: !isDir ? [{ name: '代码文件', extensions: manager.getAllowedFileSuffix().map(i => i.replace('.', '')) }] : [],
+    });
+    if (paths) {
+      paths.forEach(p => {
+        const stat = fs.statSync(p);
+        if (stat.isDirectory() && manager.isPathAllowed(p)) {
+          traverseDir(p);
+        }
+        if (stat.isFile()) {
+          manager.addFile({
+            uid: String(stat.uid),
+            content: fs.readFileSync(p, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'),
+            path: p.replace(/\\/g, '/'),
+          });
+        }
+      });
+    }
+    updateRemoteData();
+  });
 
   ipcMain.on(Event.GetRemoteData, updateRemoteData);
 
@@ -122,6 +134,7 @@ async function registerListeners() {
       sendMessage(e);
     }
     mainWindow.webContents.send(Event.ProcessChEnd, manager.getFiles());
+    updateRemoteData();
   });
 
   ipcMain.on(Event.SetPrefixes, (_, data: string) => {

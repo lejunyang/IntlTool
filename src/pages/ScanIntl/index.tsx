@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-19 19:53:01
+ * @LastEditTime: 2022-05-19 21:09:53
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -47,6 +47,7 @@ const errorRender = (text: string, record: IntlRecord) => {
 };
 
 const Intl: FC<Pick<AppState, 'pageData'>> = ({
+  pageData,
   pageData: {
     remoteData: { intlResult },
   },
@@ -113,6 +114,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       <Button
         onClick={async () => {
           window.Main.emit(Event.ScanIntl);
+          pageData.processing = true;
         }}
       >
         开始扫描
@@ -168,7 +170,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
               </Tooltip>
             </div>
             <div>
-              总计：{data.length}条； <strong className={errorLength ? "text-red" : ''}>错误：{errorLength}条</strong>
+              总计：{data.length}条； <strong className={errorLength ? 'text-red' : ''}>错误：{errorLength}条</strong>
             </div>
           </span>
         )}
