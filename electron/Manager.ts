@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-19 20:45:28
+ * @LastEditTime: 2022-05-19 21:24:18
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -64,10 +64,12 @@ export default class Manager {
     if (index >= 0) {
       this.files.splice(index, 1);
     }
+    this.filesUIDSet.delete(file.uid);
   }
 
   reset() {
     this.files = [];
+    this.filesUIDSet.clear();
   }
 
   getFiles(): TransferFile[] {
@@ -77,7 +79,7 @@ export default class Manager {
         return omit(file, ['vars', 'parseResult']);
       })
       .sort((f1, f2) => {
-        // 有parseError的排在前面，intlResult的intlItem里有error的在前面
+        // 有parseError的排在前面
         if (f1.parseError || f2.parseError) return (f1.parseError ?? '') < (f2.parseError ?? '') ? -1 : 1;
         else return f1.path < f2.path ? -1 : 1;
       });
@@ -182,28 +184,6 @@ export default class Manager {
   traverseAllIntl() {
     this.files.forEach(file => {
       traverseIntl(file);
-    });
-  }
-
-  checkDupIntls() {
-    const map = new Map<
-      string,
-      {
-        d: string;
-        originalIntl: IntlItem;
-      }
-    >();
-    this.files.forEach(file => {
-      file.intlResult?.forEach(item => {
-        const temp = map.get(item.get);
-        // 本来有error的不统计
-        if (!item.error && temp?.d !== item.d) {
-          temp.originalIntl.error = 'duplicate';
-          item.error = 'duplicate';
-        } else {
-          map.set(item.get, { d: item.d, originalIntl: item });
-        }
-      });
     });
   }
 }
