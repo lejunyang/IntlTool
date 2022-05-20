@@ -74,6 +74,16 @@ const Manage: FC<Pick<AppState, 'pageData'>> = props => {
           全部清空
         </Button>
       )}
+      {!!files.length && (
+        <Button
+          onClick={() => {
+            window.Main.emit(Event.RefreshFiles);
+            pageData.processing = true;
+          }}
+        >
+          刷新文件内容
+        </Button>
+      )}
       {files.map(file => (
         <FileItem file={file} pageData={pageData} key={file.uid} />
       ))}

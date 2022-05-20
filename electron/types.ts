@@ -64,10 +64,12 @@ export enum Event {
   AddFile = 'add-file',
   RemoveFile = 'remove-file',
   ResetFiles = 'reset-files', // 清空文件
+  RefreshFiles = 'refresh-files', // 刷新文件内容
   StartProcessCh = 'start-process-ch',
   ProcessChEnd = 'process-ch-end',
   GetFilesSync = 'get-files-sync',
   ScanIntl = 'scan-intl',
+  ReScanItnl = 're-scan-intl', // 刷新文件并重新扫描intl
   SetPrefixes = 'set-prefixes',
   SetAllowedFileSuffix = 'set-allowed-suffixes',
   SetExcludedPaths = 'set-excluded-paths',

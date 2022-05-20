@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 21:19:12
+ * @LastEditTime: 2022-05-20 18:12:20
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -41,12 +41,22 @@ function createWindow() {
   });
 }
 
+function readFile(path: string) {
+  return fs.readFileSync(path, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'); // 统一替换为crlf，防止后续diff时因为这个而全篇不一样
+}
+
 function updateRemoteData() {
   mainWindow.webContents.send(Event.UpdateRemoteData, manager.getRemoteData());
 }
 
 function sendMessage(data: Message) {
   mainWindow.webContents.send(Event.Message, data);
+}
+
+function refreshFiles() {
+  manager.getFiles().forEach(file => {
+    file.content = readFile(file.path);
+  });
 }
 
 async function registerListeners() {
@@ -56,7 +66,7 @@ async function registerListeners() {
     const stat = fs.statSync(file.path);
     if (stat.isFile()) {
       Object.assign(file, {
-        content: fs.readFileSync(file.path, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'), // 统一替换为crlf，防止后续diff时因为这个而全篇不一样
+        content: readFile(file.path),
         path: file.path.replace(/\\/g, '/'),
       });
       manager.addFile(file);
@@ -70,6 +80,11 @@ async function registerListeners() {
 
   ipcMain.on(Event.ResetFiles, () => {
     manager.reset();
+    updateRemoteData();
+  })
+
+  ipcMain.on(Event.RefreshFiles, () => {
+    refreshFiles();
     updateRemoteData();
   })
 
@@ -90,7 +105,7 @@ async function registerListeners() {
           // 不指定编码读出来的是Buffer类型
           manager.addFile({
             uid: String(stat.ino), // stat.uid是userId， ino才能代表文件
-            content: fs.readFileSync(p, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'),
+            content: readFile(p),
             path: p.replace(/\\/g, '/'),
           });
         }
@@ -109,7 +124,7 @@ async function registerListeners() {
         if (stat.isFile()) {
           manager.addFile({
             uid: String(stat.uid),
-            content: fs.readFileSync(p, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'),
+            content: readFile(p),
             path: p.replace(/\\/g, '/'),
           });
         }
@@ -149,6 +164,12 @@ async function registerListeners() {
     manager.traverseAllIntl();
     updateRemoteData();
   });
+
+  ipcMain.on(Event.ReScanItnl, () => {
+    refreshFiles();
+    manager.traverseAllIntl();
+    updateRemoteData();
+  })
 
   ipcMain.on(Event.LaunchEditor, (_, path: string) => {
     const info = path.split(':');

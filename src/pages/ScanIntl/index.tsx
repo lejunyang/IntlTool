@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-20 17:57:46
+ * @LastEditTime: 2022-05-20 18:17:11
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -138,6 +138,16 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       >
         开始扫描
       </Button>
+      {!!data.length && (
+        <Button
+          onClick={async () => {
+            window.Main.emit(Event.RefreshFiles);
+            pageData.processing = true;
+          }}
+        >
+          更新现有文件并重新扫描
+        </Button>
+      )}
       <div className="flex gap-normal">
         <Form
           form={form}
