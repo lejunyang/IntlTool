@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-20 18:04:56
+ * @LastEditTime: 2022-05-20 18:20:17
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -193,6 +193,8 @@ export default class Manager {
   }
 
   traverseAllIntl() {
+    this.intlCodeMap.clear();
+    this.intlResult = [];
     this.files.forEach(file => {
       traverseIntl(file);
     });
