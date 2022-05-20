@@ -69,7 +69,7 @@ export enum Event {
   ProcessChEnd = 'process-ch-end',
   GetFilesSync = 'get-files-sync',
   ScanIntl = 'scan-intl',
-  ReScanItnl = 're-scan-intl', // 刷新文件并重新扫描intl
+  ReScanIntl = 're-scan-intl', // 刷新文件并重新扫描intl
   SetPrefixes = 'set-prefixes',
   SetAllowedFileSuffix = 'set-allowed-suffixes',
   SetExcludedPaths = 'set-excluded-paths',

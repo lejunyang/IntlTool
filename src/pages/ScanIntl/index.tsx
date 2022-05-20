@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-20 18:17:11
+ * @LastEditTime: 2022-05-20 21:40:46
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -141,7 +141,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       {!!data.length && (
         <Button
           onClick={async () => {
-            window.Main.emit(Event.RefreshFiles);
+            window.Main.emit(Event.ReScanIntl);
             pageData.processing = true;
           }}
         >

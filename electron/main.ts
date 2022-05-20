@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-20 18:12:20
+ * @LastEditTime: 2022-05-20 21:40:37
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -60,7 +60,6 @@ function refreshFiles() {
 }
 
 async function registerListeners() {
-
   ipcMain.on(Event.AddFile, (_, file: ProcessFile) => {
     if (!manager.isFileAllowed(file.name)) return;
     const stat = fs.statSync(file.path);
@@ -81,12 +80,12 @@ async function registerListeners() {
   ipcMain.on(Event.ResetFiles, () => {
     manager.reset();
     updateRemoteData();
-  })
+  });
 
   ipcMain.on(Event.RefreshFiles, () => {
     refreshFiles();
     updateRemoteData();
-  })
+  });
 
   ipcMain.on(Event.GetFilesSync, event => {
     event.returnValue = manager.getFiles();
@@ -113,7 +112,9 @@ async function registerListeners() {
     }
     const paths = dialog.showOpenDialogSync(mainWindow, {
       properties: [isDir ? 'openDirectory' : 'openFile', 'multiSelections'],
-      filters: !isDir ? [{ name: '代码文件', extensions: manager.getAllowedFileSuffix().map(i => i.replace('.', '')) }] : [],
+      filters: !isDir
+        ? [{ name: '代码文件', extensions: manager.getAllowedFileSuffix().map(i => i.replace('.', '')) }]
+        : [],
     });
     if (paths) {
       paths.forEach(p => {
@@ -165,11 +166,11 @@ async function registerListeners() {
     updateRemoteData();
   });
 
-  ipcMain.on(Event.ReScanItnl, () => {
+  ipcMain.on(Event.ReScanIntl, () => {
     refreshFiles();
     manager.traverseAllIntl();
     updateRemoteData();
-  })
+  });
 
   ipcMain.on(Event.LaunchEditor, (_, path: string) => {
     const info = path.split(':');
@@ -178,11 +179,10 @@ async function registerListeners() {
       // 注意，虽然文件夹和文件名不能包含:，但是C:/xxx磁盘是天生自带冒号的。。
       if (path.charAt(1) === ':') path = info[0] + ':' + info.slice(1, info.length - 2).join('');
       else path = info.slice(0, info.length - 2).join('');
-      console.log("path with line column:", path)
+      console.log('path with line column:', path);
       launchEditor(path, +info[info.length - 2], +info[info.length - 1], { editor: 'code' });
-    }
-    else launchEditor(path, 1, 1, { editor: 'code' });
-  })
+    } else launchEditor(path, 1, 1, { editor: 'code' });
+  });
 
   ipcMain.on(Event.DownloadIntlResult, (_, data) => {
     const path = dialog.showSaveDialogSync(mainWindow, {
