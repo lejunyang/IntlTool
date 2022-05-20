@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-20 18:20:17
+ * @LastEditTime: 2022-05-20 21:54:26
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -72,6 +72,7 @@ export default class Manager {
     this.filesUIDSet.clear();
     this.intlResult = [];
     this.intlCodeMap.clear();
+    this.intlDupSet.clear();
   }
 
   getFiles(): TransferFile[] {
@@ -111,13 +112,15 @@ export default class Manager {
   }
 
   private intlCodeMap: Map<string, IntlItem> = new Map(); // 用于避免intl code重复
+  private intlDupSet: Set<string> = new Set(); // 用于防止'code重复，但中文不一致'错误项重复
   private intlResult: IntlResult = [];
 
   addIntlItem(item: IntlItem) {
     if (this.intlCodeMap.has(item.code)) {
-      if (this.intlCodeMap.get(item.code).d !== item.d) {
+      if (this.intlCodeMap.get(item.code).d !== item.d && !this.intlDupSet.has(item.code + item.d)) {
         item.error = 'code重复，但中文不一致';
         this.intlResult.unshift(item);
+        this.intlDupSet.add(item.code + item.error);
       } else if (!this.intlCodeMap.get(item.code).prefix && item.prefix) {
         // code一致且中文一致的，且原来没有prefix，更新prefix
         const index = this.intlResult.findIndex(i => i.code === item.code && i.d === item.d);
@@ -194,6 +197,7 @@ export default class Manager {
 
   traverseAllIntl() {
     this.intlCodeMap.clear();
+    this.intlDupSet.clear();
     this.intlResult = [];
     this.files.forEach(file => {
       traverseIntl(file);
