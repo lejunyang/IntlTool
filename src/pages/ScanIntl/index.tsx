@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-19 21:09:53
+ * @LastEditTime: 2022-05-20 17:57:46
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -27,8 +27,18 @@ const generateOnCell = (record: IntlRecord, key: keyof IntlRecord) => {
   };
 };
 
-const filePathRender = (path: string) => {
-  return <a onClick={() => window.Main.emit(Event.LaunchEditor, path)}>{path}</a>;
+const filePathRender = (record: IntlRecord) => {
+  const { path, code } = record;
+  return (
+    <a
+      onClick={() => {
+        if(copy(code)) notification.success({ message: `已复制 ${code}` });
+        window.Main.emit(Event.LaunchEditor, path);
+      }}
+    >
+      {path}
+    </a>
+  );
 };
 
 const errorRender = (text: string, record: IntlRecord) => {
@@ -37,7 +47,7 @@ const errorRender = (text: string, record: IntlRecord) => {
       title={() => (
         <div>
           <div>{record.error}</div>
-          {filePathRender(record.path)}
+          {filePathRender(record)}
         </div>
       )}
     >
@@ -45,6 +55,15 @@ const errorRender = (text: string, record: IntlRecord) => {
     </Tooltip>
   );
 };
+
+const excludedPrefixesDefault = [
+  'hzero.common',
+  'hzero.c7nProUI',
+  'hzero.c7nUI',
+  'hzero.hzeroUI',
+  'hpfm.tenantSelect',
+  'hadm.marketclient',
+];
 
 const Intl: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
@@ -55,7 +74,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, update] = useState(1); // 用于刷新页面
   const [form] = Form.useForm();
-  const { excludedPrefixes = ['hzero.common'], prefix = '', get = '', d = '' } = form.getFieldsValue(true);
+  const { excludedPrefixes = excludedPrefixesDefault, prefix = '', get = '', d = '' } = form.getFieldsValue(true);
   const data = intlResult.filter(
     item =>
       (!item.prefix || !excludedPrefixes.includes(item.prefix)) &&
@@ -125,10 +144,10 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           name="query-fields"
           className="flex-1 row-gap-small"
           layout="inline"
-          initialValues={{ excludedPrefixes: ['hzero.common'] }}
+          initialValues={{ excludedPrefixes: excludedPrefixesDefault }}
         >
-          <Form.Item name="excludedPrefixes" label="排除的前缀" style={{ width: 250 }}>
-            <Select mode="tags" allowClear>
+          <Form.Item name="excludedPrefixes" label="排除的前缀" style={{ width: 250 }} className="flex-1">
+            <Select mode="tags" allowClear maxTagCount="responsive">
               <Select.Option value="hzero.common">hzero.common</Select.Option>
             </Select>
           </Form.Item>
@@ -157,7 +176,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           <span className="flex justify-between">
             <div>
               <strong>Intl扫描结果</strong>
-              <Tooltip title="单元格双击可以复制，单击路径可以跳转，需要有vscode且注册了code命令">
+              <Tooltip title="单元格双击可以复制，单击路径可以跳转并复制完整code，跳转需要有vscode且注册了code命令">
                 <QuestionCircleOutlined />
               </Tooltip>
               <Tooltip title="导出当前筛选出的数据，并过滤含有错误的条目">

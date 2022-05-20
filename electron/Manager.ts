@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-20 17:23:47
+ * @LastEditTime: 2022-05-20 18:04:56
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -87,7 +87,16 @@ export default class Manager {
       });
   }
 
-  private prefixes: string[] = ['^hzero.common.', '^o2.2[cb].\\w+.\\w+.', '^o2.\\w+.\\w+.'];
+  private prefixes: string[] = [
+    '^hzero.common.',
+    '^o2.2[cb].\\w+.\\w+.',
+    '^o2.\\w+.\\w+.',
+    '^hzero.c7nProUI.',
+    '^hzero.c7nUI.',
+    '^hzero.hzeroUI.',
+    '^hpfm.tenantSelect.',
+    '^hadm.marketclient.',
+  ];
 
   setPrefixes(prefixString: string) {
     this.prefixes = prefixString.split(/\r?\n/).flatMap(p => {
