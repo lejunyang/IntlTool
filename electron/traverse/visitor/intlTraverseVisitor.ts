@@ -1,12 +1,14 @@
 /*
  * @Author: junyang.le@hand-china.com
- * @Date: 2021-12-03 17:46:10
- * @LastEditTime: 2022-05-19 17:23:09
+ * @Date: 2021-12-24 17:16:51
+ * @LastEditTime: 2022-05-16 23:43:32
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\electron\traverse\visitor\IntlCallExpression.ts
+ * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
  */
+import type { Visitor, NodePath, VisitNodeFunction } from '@babel/traverse';
 import type { CallExpression, StringLiteral, ObjectExpression } from '@babel/types';
+import { getStrOfStringNode, getTemplatePartsInOrder, isStringNode } from '../../utils/stringUtils';
 import {
   TemplateLiteral,
   isIdentifier,
@@ -16,10 +18,9 @@ import {
   isObjectExpression,
   isObjectProperty,
   isTemplateElement,
+  isVariableDeclaration,
 } from '@babel/types';
-import type { VisitNodeFunction, NodePath } from '@babel/traverse';
 import generate from '@babel/generator';
-import { getStrOfStringNode, getTemplatePartsInOrder, isStringNode } from '../../utils/stringUtils';
 import type { State, StringObject, IntlItem } from '../../types';
 import { manager } from '../../Manager';
 
@@ -183,4 +184,24 @@ export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
   result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
   result.path = `${state.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
   manager.addIntlItem(result);
+};
+
+/**
+ * 用于统计代码中的intl的visitor
+ */
+export const getIntlTraverseVisitor = () => {
+  return {
+    Program(path, state) {
+      path.node.body.forEach(statement => {
+        if (isVariableDeclaration(statement)) {
+          statement.declarations.forEach(v => {
+            if (!isIdentifier(v.id)) return;
+            const str = getStrOfStringNode(v.init);
+            if (str && state.vars) state.vars[v.id.name] = str;
+          });
+        }
+      });
+    },
+    CallExpression: IntlCallExpression,
+  } as Visitor<State>;
 };
