@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-20 09:47:23
+ * @LastEditTime: 2022-05-20 17:23:47
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -70,6 +70,8 @@ export default class Manager {
   reset() {
     this.files = [];
     this.filesUIDSet.clear();
+    this.intlResult = [];
+    this.intlCodeMap.clear();
   }
 
   getFiles(): TransferFile[] {
