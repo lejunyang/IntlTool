@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-19 22:10:52
+ * @LastEditTime: 2022-05-20 09:47:23
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -164,7 +164,7 @@ export default class Manager {
                 }
               } else {
                 const args = params.split(',').map(param => param.trim());
-                if (args.length === StringUtils[funcName].length - 1) return StringUtils[funcName](p);
+                if (args.length === StringUtils[funcName].length - 1) return StringUtils[funcName](p, ...args);
                 else
                   throw {
                     type: 'error',
