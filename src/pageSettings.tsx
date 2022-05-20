@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 10:52:47
- * @LastEditTime: 2022-05-19 19:51:08
+ * @LastEditTime: 2022-05-20 10:10:40
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pageSettings.tsx
@@ -15,7 +15,7 @@ import ScanIntl from './pages/ScanIntl';
 import ManageOption from './pages/ManageOption';
 
 export default {
-  title: 'Tool',
+  title: 'Intl Tool',
   navTheme: 'light',
   menu: { defaultOpenAll: true, ignoreFlatMenu: true },
   route: {
@@ -58,7 +58,7 @@ export default {
           },
           {
             path: '/intl/process-ch',
-            name: '处理中文',
+            name: '中文转Intl',
             component: ProcessCh,
             tooltip: '扫描代码中的中文，将其替换为intl格式',
           },

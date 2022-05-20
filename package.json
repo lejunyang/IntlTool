@@ -1,8 +1,8 @@
 {
-  "name": "tool",
+  "name": "intl-tool",
   "author": "LJY <1329327499@qq.com>",
   "version": "0.0.1",
-  "description": "An tool including Electron, React, TypeScript, Jest and ESLint.",
+  "description": "A tool for scanning, processing Intl",
   "main": "./.webpack/main/index.js",
   "scripts": {
     "start": "electron-forge start",
