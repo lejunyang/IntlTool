@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-20 21:40:46
+ * @LastEditTime: 2022-05-20 21:58:45
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -82,7 +82,6 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       item.get.includes(get) &&
       item.d.includes(d)
   );
-  console.log('data', data);
   const errorLength = data.filter(item => item.error).length;
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
@@ -203,7 +202,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
             </div>
           </span>
         )}
-        rowKey="code"
+        rowKey="path"
         columns={columns}
         dataSource={data}
         rowSelection={rowSelection}
