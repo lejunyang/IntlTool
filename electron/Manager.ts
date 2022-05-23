@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-23 10:04:32
+ * @LastEditTime: 2022-05-23 11:51:41
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -73,7 +73,7 @@ export default class Manager {
     this.resetIntl();
   }
 
-  getOriginalFiles(): TransferFile[] {
+  getOriginalFiles(): ProcessFile[] {
     return this.files;
   }
 

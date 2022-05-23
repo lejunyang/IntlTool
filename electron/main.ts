@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-20 21:40:37
+ * @LastEditTime: 2022-05-23 11:51:16
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -12,6 +12,7 @@ import path from 'path';
 import { Event, ProcessFile, Message } from './types';
 import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
+import parse from './parse';
 
 let mainWindow: BrowserWindow | null;
 
@@ -56,6 +57,7 @@ function sendMessage(data: Message) {
 function refreshFiles() {
   manager.getOriginalFiles().forEach(file => {
     file.content = readFile(file.path);
+    file.parseResult = parse(file.content);
   });
 }
 
