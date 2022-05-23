@@ -8,7 +8,7 @@
  */
 import type { ParseResult as BabelParseResult } from '@babel/parser';
 import type { File as BabelFile } from '@babel/types';
-// import { RcFile } from 'antd/lib/upload';
+import { AST } from 'vue-eslint-parser';
 
 export type Message = {
   type: 'error' | 'warning' | 'success' | 'info';
@@ -36,6 +36,10 @@ export type State = {
 };
 
 export type ParseResult = BabelParseResult<BabelFile> & {
+  parseError?: string;
+};
+
+export type VueParseResult = AST.ESLintProgram & {
   parseError?: string;
 };
 
