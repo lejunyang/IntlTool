@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-02-11 17:07:19
+ * @LastEditTime: 2022-05-23 23:17:07
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
@@ -77,7 +77,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
           optionType="button"
         />
       </div>
-      <CodeDiff patch={patch} />
+      <CodeDiff patch={patch} outputFormat={outputFormat} />
     </div>
   );
 };
