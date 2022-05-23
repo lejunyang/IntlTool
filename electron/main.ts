@@ -54,7 +54,7 @@ function sendMessage(data: Message) {
 }
 
 function refreshFiles() {
-  manager.getFiles().forEach(file => {
+  manager.getOriginalFiles().forEach(file => {
     file.content = readFile(file.path);
   });
 }
@@ -78,7 +78,7 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.ResetFiles, () => {
-    manager.reset();
+    manager.resetAll();
     updateRemoteData();
   });
 

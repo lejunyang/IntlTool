@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-20 21:54:26
+ * @LastEditTime: 2022-05-23 09:49:39
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -67,12 +67,14 @@ export default class Manager {
     }
   }
 
-  reset() {
+  resetAll() {
     this.files = [];
     this.filesUIDSet.clear();
-    this.intlResult = [];
-    this.intlCodeMap.clear();
-    this.intlDupSet.clear();
+    this.resetIntl();
+  }
+
+  getOriginalFiles(): TransferFile[] {
+    return this.files;
   }
 
   getFiles(): TransferFile[] {
@@ -114,6 +116,12 @@ export default class Manager {
   private intlCodeMap: Map<string, IntlItem> = new Map(); // 用于避免intl code重复
   private intlDupSet: Set<string> = new Set(); // 用于防止'code重复，但中文不一致'错误项重复
   private intlResult: IntlResult = [];
+
+  resetIntl() {
+    this.intlCodeMap.clear();
+    this.intlDupSet.clear();
+    this.intlResult = [];
+  }
 
   addIntlItem(item: IntlItem) {
     if (this.intlCodeMap.has(item.code)) {
@@ -196,9 +204,7 @@ export default class Manager {
   }
 
   traverseAllIntl() {
-    this.intlCodeMap.clear();
-    this.intlDupSet.clear();
-    this.intlResult = [];
+    this.resetIntl();
     this.files.forEach(file => {
       traverseIntl(file);
     });
