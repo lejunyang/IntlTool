@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-05-23 23:17:07
+ * @LastEditTime: 2022-05-23 23:19:21
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
@@ -64,7 +64,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
             window.Main.emit(Event.StartProcessCh, intlPrefixPattern);
           }}
         >
-          开始处理
+          开始扫描
         </Button>
       </div>
       <div>
