@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-23 09:49:39
+ * @LastEditTime: 2022-05-23 10:04:32
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -125,7 +125,7 @@ export default class Manager {
 
   addIntlItem(item: IntlItem) {
     if (this.intlCodeMap.has(item.code)) {
-      if (this.intlCodeMap.get(item.code).d !== item.d && !this.intlDupSet.has(item.code + item.d)) {
+      if (this.intlCodeMap.get(item.code).d !== item.d && !this.intlDupSet.has(item.code + item.error)) {
         item.error = 'code重复，但中文不一致';
         this.intlResult.unshift(item);
         this.intlDupSet.add(item.code + item.error);
