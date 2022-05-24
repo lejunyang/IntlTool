@@ -11,7 +11,7 @@ import parse from '../parse';
 import { getIntlTraverseVisitor } from './visitor';
 import { State, ProcessFile } from '../types';
 
-export default function traverseCode(file: ProcessFile) {
+export function traverseIntl(file: ProcessFile) {
   if (!file.parseResult) {
     file.parseResult = parse(file.content);
   }

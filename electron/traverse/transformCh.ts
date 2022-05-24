@@ -19,7 +19,7 @@ import { getChToIntlVisitor } from './visitor';
  * @param file
  * @param prefix intl.get中编码使用的前缀
  */
-export default function traverseFile(file: ProcessFile, prefix: string = '') {
+export function transformCh(file: ProcessFile, prefix: string = '') {
   if (!file.parseResult) {
     file.parseResult = parse(file.content);
   }
