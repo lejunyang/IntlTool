@@ -10,6 +10,8 @@ import { omit } from 'lodash';
 import { ProcessFile, TransferFile, IntlItem, IntlResult } from './types';
 import { transformCh, traverseIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
+import { readFile } from './utils/fileUtils';
+import parse from './parse';
 
 export default class Manager {
   private allowedFileSuffix: Set<string> = new Set(['.js', '.ts', '.tsx', '.jsx']);
@@ -65,6 +67,13 @@ export default class Manager {
       this.files.splice(index, 1);
       this.filesUIDSet.delete(uid);
     }
+  }
+
+  refreshFiles() {
+    this.files.forEach(file => {
+      file.content = readFile(file.path);
+      file.parseResult = parse(file.content);
+    });
   }
 
   resetAll() {

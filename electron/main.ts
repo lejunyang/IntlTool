@@ -1,18 +1,17 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-23 11:51:16
+ * @LastEditTime: 2022-05-24 11:21:34
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
  */
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import fs from 'fs';
-import path from 'path';
 import { Event, ProcessFile, Message } from './types';
 import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
-import parse from './parse';
+import { readFile, traversePaths } from './utils/fileUtils';
 
 let mainWindow: BrowserWindow | null;
 
@@ -42,23 +41,12 @@ function createWindow() {
   });
 }
 
-function readFile(path: string) {
-  return fs.readFileSync(path, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'); // 统一替换为crlf，防止后续diff时因为这个而全篇不一样
-}
-
 function updateRemoteData() {
   mainWindow.webContents.send(Event.UpdateRemoteData, manager.getRemoteData());
 }
 
 function sendMessage(data: Message) {
   mainWindow.webContents.send(Event.Message, data);
-}
-
-function refreshFiles() {
-  manager.getOriginalFiles().forEach(file => {
-    file.content = readFile(file.path);
-    file.parseResult = parse(file.content);
-  });
 }
 
 async function registerListeners() {
@@ -85,7 +73,7 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.RefreshFiles, () => {
-    refreshFiles();
+    manager.refreshFiles();
     updateRemoteData();
   });
 
@@ -94,24 +82,6 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.SelectFile, (_, isDir?: boolean) => {
-    function traverseDir(dir: string) {
-      const files = fs.readdirSync(dir);
-      files.forEach(fileOrDir => {
-        const p = path.join(dir, fileOrDir);
-        const stat = fs.statSync(p);
-        if (stat.isDirectory() && manager.isPathAllowed(p)) {
-          traverseDir(p);
-        }
-        if (stat.isFile()) {
-          // 不指定编码读出来的是Buffer类型
-          manager.addFile({
-            uid: String(stat.ino), // stat.uid是userId， ino才能代表文件
-            content: readFile(p),
-            path: p.replace(/\\/g, '/'),
-          });
-        }
-      });
-    }
     const paths = dialog.showOpenDialogSync(mainWindow, {
       properties: [isDir ? 'openDirectory' : 'openFile', 'multiSelections'],
       filters: !isDir
@@ -119,21 +89,14 @@ async function registerListeners() {
         : [],
     });
     if (paths) {
-      paths.forEach(p => {
-        const stat = fs.statSync(p);
-        if (stat.isDirectory() && manager.isPathAllowed(p)) {
-          traverseDir(p);
-        }
-        if (stat.isFile()) {
-          manager.addFile({
-            uid: String(stat.uid),
-            content: readFile(p),
-            path: p.replace(/\\/g, '/'),
-          });
-        }
+      traversePaths(paths, {
+        fileCallback: file => {
+          manager.addFile(file);
+        },
+        isPathAllowed: manager.isPathAllowed,
       });
+      updateRemoteData();
     }
-    updateRemoteData();
   });
 
   ipcMain.on(Event.GetRemoteData, updateRemoteData);
@@ -169,7 +132,7 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.ReScanIntl, () => {
-    refreshFiles();
+    manager.refreshFiles();
     manager.traverseAllIntl();
     updateRemoteData();
   });
