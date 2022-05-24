@@ -8,3 +8,4 @@
  */
 export * from './traverseIntl';
 export * from './transformCh';
+export * from './vueTraverseIntl';

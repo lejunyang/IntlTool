@@ -1,20 +1,20 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-23 11:51:41
+ * @LastEditTime: 2022-05-24 21:18:24
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
  */
 import { omit } from 'lodash';
 import { ProcessFile, TransferFile, IntlItem, IntlResult } from './types';
-import { transformCh, traverseIntl } from './traverse';
+import { transformCh, traverseIntl, traverseVueIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 import { readFile } from './utils/fileUtils';
-import { parseJSCode } from './parse';
+import { parseJSCode, parseVueCode } from './parse';
 
 export default class Manager {
-  private allowedFileSuffix: Set<string> = new Set(['.js', '.ts', '.tsx', '.jsx']);
+  private allowedFileSuffix: Set<string> = new Set(['.js', '.ts', '.tsx', '.jsx', '.vue']);
 
   setAllowedFileSuffix(suffixes: string[]) {
     this.allowedFileSuffix = new Set(suffixes.map(i => i.trim()).filter(i => i));
@@ -72,7 +72,8 @@ export default class Manager {
   refreshFiles() {
     this.files.forEach(file => {
       file.content = readFile(file.path);
-      file.parseResult = parseJSCode(file.content);
+      if(file.path.endsWith('vue')) file.vueParseResult = parseVueCode(file.content);
+      else file.parseResult = parseJSCode(file.content);
     });
   }
 
@@ -215,7 +216,8 @@ export default class Manager {
   traverseAllIntl() {
     this.resetIntl();
     this.files.forEach(file => {
-      traverseIntl(file);
+      if(file.path.endsWith('vue')) traverseVueIntl(file);
+      else traverseIntl(file);
     });
   }
 }
