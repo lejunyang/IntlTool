@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-24 11:21:34
+ * @LastEditTime: 2022-05-24 22:58:13
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -95,8 +95,8 @@ async function registerListeners() {
         },
         isPathAllowed: manager.isPathAllowed,
       });
-      updateRemoteData();
     }
+    updateRemoteData(); // 没选文件也要更新，否则一直在loading
   });
 
   ipcMain.on(Event.GetRemoteData, updateRemoteData);

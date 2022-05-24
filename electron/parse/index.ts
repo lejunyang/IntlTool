@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-02 16:05:03
- * @LastEditTime: 2022-05-23 23:38:37
+ * @LastEditTime: 2022-05-24 23:12:30
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\parse\index.ts
@@ -26,7 +26,15 @@ export function parseJSCode(code: string): ParseResult {
 }
 
 export function parseVueCode(code: string) {
-  const ast: VueParseResult = vueParse(code, { sourceType: 'module' });
+  let ast: VueParseResult;
+  try {
+    // 这个的js使用的是espree进行解析，其ecmaVersion默认用2017，2017居然连对象的展开运算符都不支持，2018才开始支持，无语了，es6(2015)支持的是数组展开
+    ast = vueParse(code, { sourceType: 'module', ecmaVersion: 'latest' });
+  } catch (error) {
+    // 有些报错它是直接抛出来，不是放到errors里。。
+    console.error(JSON.stringify(error));
+    return JSON.stringify(error);
+  }
   if (ast.errors?.length > 0) {
     ast.parseError = ast.errors.map(error => `${error.code}: ${error.message}`).join(', ');
     console.error(ast.parseError);
