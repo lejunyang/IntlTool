@@ -1836,6 +1836,11 @@
   resolved "https://registry.npmmirror.com/@types/electron-devtools-installer/download/@types/electron-devtools-installer-2.2.0.tgz#32ee4ebbe99b3daf9847a6d2097dc00b5de94f10"
   integrity sha1-Mu5Ou+mbPa+YR6bSCX3AC13pTxA=
 
+"@types/escodegen@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.npmmirror.com/@types/escodegen/-/escodegen-0.0.7.tgz#a1c3e3dfd76da89f01d7d196eebe227ebe4b6eec"
+  integrity sha512-46oENdSRNEJXCNrPJoC3vRolZJpfeEm7yvATkd2bCncKFG0PUEyfBCaoacfpcXH4Y5RRuqdVj3J7TI+wwn2SbQ==
+
 "@types/eslint-scope@^3.7.0":
   version "3.7.3"
   resolved "https://registry.npmmirror.com/@types/eslint-scope/download/@types/eslint-scope-3.7.3.tgz#125b88504b61e3c8bc6f870882003253005c3224"
@@ -4242,8 +4247,8 @@ escape-string-regexp@^4.0.0:
 
 escodegen@^2.0.0:
   version "2.0.0"
-  resolved "https://registry.nlark.com/escodegen/download/escodegen-2.0.0.tgz#5e32b12833e8aa8fa35e1bf0befa89380484c7dd"
-  integrity sha1-XjKxKDPoqo+jXhvwvvqJOASEx90=
+  resolved "https://registry.npmmirror.com/escodegen/-/escodegen-2.0.0.tgz#5e32b12833e8aa8fa35e1bf0befa89380484c7dd"
+  integrity sha512-mmHKys/C8BFUGI+MAWNcSYoORYLMdPzjrknd2Vc+bUsjN5bXcr8EhrNB+UTqfL1y3I9c4fw2ihgtMPQLBRiQxw==
   dependencies:
     esprima "^4.0.1"
     estraverse "^5.2.0"
