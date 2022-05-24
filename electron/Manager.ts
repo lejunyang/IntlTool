@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-24 21:18:24
+ * @LastEditTime: 2022-05-24 23:23:35
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -72,8 +72,12 @@ export default class Manager {
   refreshFiles() {
     this.files.forEach(file => {
       file.content = readFile(file.path);
-      if(file.path.endsWith('vue')) file.vueParseResult = parseVueCode(file.content);
-      else file.parseResult = parseJSCode(file.content);
+      if (file.path.endsWith('vue')) {
+        const result = parseVueCode(file.content);
+        if (typeof result === 'string') {
+          file.parseError = result;
+        } else file.vueParseResult = result;
+      } else file.parseResult = parseJSCode(file.content);
     });
   }
 
@@ -216,7 +220,7 @@ export default class Manager {
   traverseAllIntl() {
     this.resetIntl();
     this.files.forEach(file => {
-      if(file.path.endsWith('vue')) traverseVueIntl(file);
+      if (file.path.endsWith('vue')) traverseVueIntl(file);
       else traverseIntl(file);
     });
   }
