@@ -11,7 +11,7 @@ import generate from '@babel/generator';
 import { format } from 'prettier';
 import { createPatch } from 'diff';
 import type { State, ProcessFile } from '../types';
-import parse from '../parse';
+import { parseJSCode } from '../parse';
 import { getChToIntlVisitor } from './visitor';
 
 /**
@@ -21,7 +21,7 @@ import { getChToIntlVisitor } from './visitor';
  */
 export function transformCh(file: ProcessFile, prefix: string = '') {
   if (!file.parseResult) {
-    file.parseResult = parse(file.content);
+    file.parseResult = parseJSCode(file.content);
   }
   if (file.parseResult.parseError) return;
   traverse<State>(file.parseResult, getChToIntlVisitor(prefix), undefined, file);

@@ -7,13 +7,13 @@
  * @FilePath: \tool\electron\traverse\traverseIntl.ts
  */
 import traverse from '@babel/traverse';
-import parse from '../parse';
+import { parseJSCode } from '../parse';
 import { getIntlTraverseVisitor } from './visitor';
 import { State, ProcessFile } from '../types';
 
 export function traverseIntl(file: ProcessFile) {
   if (!file.parseResult) {
-    file.parseResult = parse(file.content);
+    file.parseResult = parseJSCode(file.content);
   }
   if (file.parseResult.parseError) return;
   traverse<State>(file.parseResult, getIntlTraverseVisitor(), undefined, file);

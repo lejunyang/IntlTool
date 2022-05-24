@@ -1,14 +1,17 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-01-29 14:10:34
+ * @LastEditTime: 2022-05-24 20:26:31
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
  */
 import template from '@babel/template';
-import type { StringLiteral, TemplateLiteral, Expression } from '@babel/types';
-import { stringLiteral, isStringLiteral, isTemplateLiteral } from '@babel/types';
+import babelGenerate from '@babel/generator';
+import { generate } from 'escodegen';
+import type { Node, StringLiteral, TemplateLiteral, Expression } from '@babel/types';
+import type { Node as ESNode } from 'vue-eslint-parser/ast/nodes';
+import { stringLiteral, isStringLiteral, isTemplateLiteral, isNode } from '@babel/types';
 
 /**
  * 生成intl.get('').d('')的AST节点
@@ -49,4 +52,14 @@ export function generateIntlNode(
     getString: stringLiteral(getString),
     dValue,
   });
+}
+
+/**
+ * 根据节点的不同，调用不同的函数将节点变为代码
+ * @param node babel的Node节点或estree节点
+ */
+export function generateCode(node: Node | ESNode): string {
+  if (!node) return '';
+  else if (isNode(node)) return babelGenerate(node).code;
+  else return generate(node);
 }

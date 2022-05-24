@@ -1,18 +1,25 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-05-16 23:43:32
+ * @LastEditTime: 2022-05-24 21:10:20
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
  */
 import type { Visitor, NodePath, VisitNodeFunction } from '@babel/traverse';
-import type { CallExpression, StringLiteral, ObjectExpression } from '@babel/types';
-import { getStrOfStringNode, getTemplatePartsInOrder, isStringNode } from '../../utils/stringUtils';
+import type { ESLintObjectExpression, ESLintTemplateLiteral } from 'vue-eslint-parser/ast/nodes';
+import type { TemplateLiteral, CallExpression, StringLiteral, ObjectExpression } from '@babel/types';
 import {
-  TemplateLiteral,
+  getStrOfStringNode,
+  getTemplatePartsInOrder,
+  isStringNode,
+  isSingleStrArg,
+  isESLintProperty,
+} from '../../utils/astUtils';
+import {
   isIdentifier,
   isStringLiteral,
+  isTemplateLiteral,
   isMemberExpression,
   isCallExpression,
   isObjectExpression,
@@ -20,18 +27,9 @@ import {
   isTemplateElement,
   isVariableDeclaration,
 } from '@babel/types';
-import generate from '@babel/generator';
+import { generateCode } from '../../generate';
 import type { State, StringObject, IntlItem } from '../../types';
 import { manager } from '../../Manager';
-
-/**
- * 检查CallExpression的arguments是否为仅包含一个参数，且为字符串字面量或模板字符串
- * @param args CallExpression.arguments
- * @returns
- */
-function isSingleStrArg(args: CallExpression['arguments']): args is [StringLiteral | TemplateLiteral] {
-  return args.length === 1 && isStringNode(args[0]);
-}
 
 /**
  * 检查get里面是否仅有一个参数且为字符串，或者有两个参数，第二个为对象表达式
@@ -53,7 +51,7 @@ interface getProcessParams {
 
 interface dProcessParams {
   type: 'd';
-  args: ObjectExpression;
+  args: ObjectExpression | ESLintObjectExpression;
 }
 
 interface ProcessContent {
@@ -70,8 +68,8 @@ type ProcessParams = getProcessParams | dProcessParams;
  * @param args 若为get，传入程序一开始定义的变量对象Map，若为d，传入get第二个参数的节点
  * @returns
  */
-function processTemplateLiteral<T extends ProcessParams['type']>(
-  template: TemplateLiteral,
+export function processTemplateLiteral<T extends ProcessParams['type']>(
+  template: TemplateLiteral | ESLintTemplateLiteral,
   type: T,
   args?: Extract<ProcessParams, { type: T }>['args']
 ): ProcessContent {
@@ -89,9 +87,13 @@ function processTemplateLiteral<T extends ProcessParams['type']>(
           if (type === 'd') {
             if (args) {
               let varNameFind = false;
-              (args as ObjectExpression).properties.forEach(objProp => {
-                // ObjectExpression的properties有三种可能，ObjectProperty对象属性，SpreadElement展开表达式，ObjectMethod对象方法
-                if (isObjectProperty(objProp)) {
+              (args as ObjectExpression | ESLintObjectExpression).properties.forEach(objProp => {
+                // ObjectExpression的properties有三种可能，ObjectProperty对象属性，SpreadElement展开表达式，ObjectMethod对象方法，我们需要的是ObjectProperty
+                // 如果是ES的Property，它不能是对象方法
+                if (
+                  isObjectProperty(objProp, { computed: false }) ||
+                  isESLintProperty(objProp, { computed: false, method: false })
+                ) {
                   // 查找对象中的值和模板字符串中变量名相同的。支持缩写属性，缩写的属性同样有key和value
                   if (isIdentifier(objProp.value, { name: i.name }) && isIdentifier(objProp.key)) {
                     result.content += `{${objProp.key.name}}`;
@@ -116,7 +118,7 @@ function processTemplateLiteral<T extends ProcessParams['type']>(
           }
         } else {
           // expressions里面如果不是Identifier那就是表达式了
-          const { code } = generate(i);
+          const code = generateCode(i);
           result.error += `模板字符串中出现表达式'${code}'；`;
           console.log('模板字符串中出现表达式：', code);
         }
@@ -158,7 +160,7 @@ export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
   // 普通字符串字面量
   if (isStringLiteral(dTemplateLiteral)) result.d = dTemplateLiteral.value;
   // 模板字符串字面量
-  else {
+  else if (isTemplateLiteral(dTemplateLiteral)) {
     const temp = processTemplateLiteral(dTemplateLiteral, 'd', getArgs[1]);
     if (temp.error) result.error += temp.error;
     result.d = temp.content;

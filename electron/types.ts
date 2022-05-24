@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-05-19 20:20:48
+ * @LastEditTime: 2022-05-24 20:55:02
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -60,6 +60,7 @@ export type TransferFile = BasicFile & {
 export type ProcessFile = TransferFile &
   State & {
     parseResult?: ParseResult;
+    vueParseResult?: VueParseResult;
   };
 
 export enum Event {

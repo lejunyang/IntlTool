@@ -10,7 +10,7 @@ import { parse } from '@babel/parser';
 import { ParseResult, VueParseResult } from '../types';
 import { parse as vueParse } from 'vue-eslint-parser';
 
-export default function parseCode(code: string): ParseResult {
+export function parseJSCode(code: string): ParseResult {
   const ast: ParseResult = parse(code, {
     errorRecovery: true, // 默认转换错误直接报错，加上此选项则不会，而是返回错误
     sourceType: 'module', // 不指定的话，有import等语句会报错
