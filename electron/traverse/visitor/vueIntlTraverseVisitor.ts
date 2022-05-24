@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 14:33:35
- * @LastEditTime: 2022-05-24 20:53:35
+ * @LastEditTime: 2022-05-24 23:36:55
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueIntlTraverseVisitor.ts
@@ -74,13 +74,17 @@ export const getVueIntlTraverseVisitor = (
       // 检查intl里面是否仅有一个参数且为字符串，或者有两个参数，第二个为对象表达式
       if (!isIntlArgs(intlArgs)) return;
       const intlCallee = intlCallExpression.callee;
-      // 检查是否为成员表达式，且调用方式为xx.yy().d()，而不是xx['yy']().d()
-      if (!isMemberExpression(intlCallee, { computed: false })) return;
-      // 检查xx.intl().d()中的intl
-      if (!isIdentifier(intlCallee.property, { name: options.l2 })) return;
-      // 检查this.intl().d()中的this
-      if (options.l1 && !isIdentifier(intlCallee.object, { name: options.l1 })) return;
-
+      // 如果没有设置l1，那么检查到此为止，这里只需再检查第二个调用者的名字，即yy().d()中的yy
+      if (!options.l1 && !isIdentifier(intlCallee, { name: options.l2 })) return;
+      else if (options.l1) {
+        // 检查是否为成员表达式，且调用方式为xx.yy().d()，而不是xx['yy']().d()
+        if (!isMemberExpression(intlCallee, { computed: false })) return;
+        // 检查xx.intl().d()中的intl
+        if (!isIdentifier(intlCallee.property, { name: options.l2 })) return;
+        // 检查this.intl().d()中的this
+        if (!isIdentifier(intlCallee.object, { name: options.l1 })) return;
+      }
+      
       const result: IntlItem = { get: '', d: '', code: '', error: '' };
       const dTemplateLiteral = dArgs[0];
       // 普通字符串字面量
@@ -101,6 +105,7 @@ export const getVueIntlTraverseVisitor = (
         if (temp.error) result.error += temp.error;
         result.code = temp.content;
       }
+      result.get = result.code;
       result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
       result.path = `${file.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
       manager.addIntlItem(result);
