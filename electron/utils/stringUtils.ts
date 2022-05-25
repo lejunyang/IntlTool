@@ -1,12 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-17 13:41:26
- * @LastEditTime: 2022-05-16 17:52:36
+ * @LastEditTime: 2022-05-25 10:21:15
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\stringUtils.ts
  */
 import type { StringLiteral, TemplateLiteral } from '@babel/types';
+import type { ESLintStringLiteral } from 'vue-eslint-parser/ast/nodes';
 import { isStringLiteral, isTemplateLiteral } from '@babel/types';
 import { isESLintStringLiteral } from './astUtils';
 
@@ -14,7 +15,7 @@ import { isESLintStringLiteral } from './astUtils';
  * @param input 字符串或AST字符串字面量节点或模板字符字面量节点，其他类型会直接返回false
  * @returns 是否包含中文
  */
-export function containsCh(input?: any): input is string | StringLiteral | TemplateLiteral {
+export function containsCh(input?: any): input is string | StringLiteral | ESLintStringLiteral | TemplateLiteral {
   const reg = /[\u4e00-\u9fa5]/;
   if (typeof input === 'string') {
     return reg.test(input);
