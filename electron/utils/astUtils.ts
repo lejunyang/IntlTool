@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 16:40:17
- * @LastEditTime: 2022-05-24 17:17:00
+ * @LastEditTime: 2022-05-25 11:52:12
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\astUtils.ts
@@ -26,6 +26,7 @@ import { shallowEqual } from './objectUtils';
  * vue-eslint-parser的ast就是基于estree，所以针对不同的node写函数进行判断，其他的用babel的就行
  */
 
+
 export function isESLintStringLiteral(node: any, value?: string): node is ESLintStringLiteral {
   return node?.type === 'Literal' && typeof node?.value === 'string' && (!value || value === node.value);
 }
@@ -38,7 +39,6 @@ export function isESLintProperty(node: any, opt?: object): node is ESLintPropert
  * 检查node是否为字符串字面量或模板字符串节点
  */
 export function isStringNode(node: any): node is ESLintStringLiteral | StringLiteral | TemplateLiteral {
-  if (!node?.type) return false;
   if (isESLintStringLiteral(node)) return true;
   else return isStringLiteral(node) || isTemplateLiteral(node);
 }

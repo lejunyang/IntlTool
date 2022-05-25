@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 14:33:35
- * @LastEditTime: 2022-05-24 23:36:55
+ * @LastEditTime: 2022-05-25 11:51:51
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueIntlTraverseVisitor.ts
@@ -38,7 +38,7 @@ function isIntlArgs(
   | [ESLintStringLiteral | ESLintTemplateLiteral]
   | [ESLintStringLiteral | ESLintTemplateLiteral, ESLintObjectExpression] {
   if (args.length === 1) return isStringNode(args[0]);
-  else if (args.length === 2) return isStringNode([args[0]]) && isObjectExpression(args[1]);
+  else if (args.length === 2) return isStringNode(args[0]) && isObjectExpression(args[1]);
   return false;
 }
 
@@ -81,8 +81,9 @@ export const getVueIntlTraverseVisitor = (
         if (!isMemberExpression(intlCallee, { computed: false })) return;
         // 检查xx.intl().d()中的intl
         if (!isIdentifier(intlCallee.property, { name: options.l2 })) return;
-        // 检查this.intl().d()中的this
-        if (!isIdentifier(intlCallee.object, { name: options.l1 })) return;
+        // 检查this.intl().d()中的this，this是特殊的ThisExpression，不是Identifier
+        if (options.l1 === 'this' && intlCallee.object.type !== 'ThisExpression') return;
+        else if (options.l1 !== 'this' && !isIdentifier(intlCallee.object, { name: options.l1 })) return;
       }
       
       const result: IntlItem = { get: '', d: '', code: '', error: '' };
