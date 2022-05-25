@@ -7,25 +7,15 @@
  * @FilePath: \tool\electron\traverse\vueTraverseIntl.ts
  */
 import { AST } from 'vue-eslint-parser';
-import { parseVueCode } from '../parse';
+import { parseVueFile } from '../parse';
 import { getVueIntlTraverseVisitor } from './visitor';
 import { ProcessFile } from '../types';
 
 const { traverseNodes } = AST;
 
 export function traverseVueIntl(file: ProcessFile) {
-  if (!file.vueParseResult) {
-    const result = parseVueCode(file.content);
-    if (typeof result === 'string') {
-      file.parseError = result;
-      return;
-    }
-    else file.vueParseResult = result;
-  }
-  if (file.vueParseResult.parseError) {
-    file.parseError = file.vueParseResult.parseError;
-    return;
-  }
+  if (!file.vueParseResult) parseVueFile(file);
+  if (file.parseError) return;
   // 遍历vue的template
   traverseNodes(file.vueParseResult.templateBody, getVueIntlTraverseVisitor(file, { l2: 'intl', l3: 'd' }));
   // 遍历vue的script

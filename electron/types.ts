@@ -64,6 +64,7 @@ export type ProcessFile = TransferFile &
   };
 
 export enum Event {
+  SwitchMode = 'switch-mode', // 切换模式
   GetRemoteData = 'get-remote-data',
   UpdateRemoteData = 'update-remote-data',
   AddFile = 'add-file',

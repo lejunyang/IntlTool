@@ -11,7 +11,7 @@ import generate from '@babel/generator';
 import { format } from 'prettier';
 import { createPatch } from 'diff';
 import type { State, ProcessFile } from '../types';
-import { parseJSCode } from '../parse';
+import { parseJSFile } from '../parse';
 import { getChToIntlVisitor } from './visitor';
 
 /**
@@ -20,10 +20,8 @@ import { getChToIntlVisitor } from './visitor';
  * @param prefix intl.get中编码使用的前缀
  */
 export function transformCh(file: ProcessFile, prefix: string = '') {
-  if (!file.parseResult) {
-    file.parseResult = parseJSCode(file.content);
-  }
-  if (file.parseResult.parseError) return;
+  if (!file.parseResult) parseJSFile(file);
+  if (file.parseError) return;
   traverse<State>(file.parseResult, getChToIntlVisitor(prefix), undefined, file);
   const { code } = generate(file.parseResult, {
     // 默认babel/generator使用jsesc来将非ascii字符转换，会把中文字符转成了unicode，关掉

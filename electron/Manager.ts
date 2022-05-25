@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-24 23:23:35
+ * @LastEditTime: 2022-05-25 20:13:28
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -11,10 +11,29 @@ import { ProcessFile, TransferFile, IntlItem, IntlResult } from './types';
 import { transformCh, traverseIntl, traverseVueIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 import { readFile } from './utils/fileUtils';
-import { parseJSCode, parseVueCode } from './parse';
+import { parseJSFile, parseVueFile } from './parse';
 
 export default class Manager {
-  private allowedFileSuffix: Set<string> = new Set(['.js', '.ts', '.tsx', '.jsx', '.vue']);
+  private modeMap = {
+    React: {
+      allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
+    },
+    Vue: {
+      allowedFileSuffix: new Set(['.vue']),
+    },
+  };
+
+  private mode = 'React';
+
+  switchMode(mode: string) {
+    if (this.modeMap[mode]) {
+      this.mode = mode;
+      this.allowedFileSuffix = this.modeMap[mode].allowedFileSuffix;
+      this.resetAll();
+    }
+  }
+
+  private allowedFileSuffix: Set<string> = this.modeMap[this.mode].allowedFileSuffix;
 
   setAllowedFileSuffix(suffixes: string[]) {
     this.allowedFileSuffix = new Set(suffixes.map(i => i.trim()).filter(i => i));
@@ -50,7 +69,6 @@ export default class Manager {
     if (!this.isFileAllowed(file.path)) return;
     Object.assign(file, {
       vars: {},
-      intlResult: [],
     });
     if (this.filesUIDSet.has(file.uid)) {
       const index = this.files.findIndex(f => f.uid === file.uid);
@@ -72,12 +90,8 @@ export default class Manager {
   refreshFiles() {
     this.files.forEach(file => {
       file.content = readFile(file.path);
-      if (file.path.endsWith('vue')) {
-        const result = parseVueCode(file.content);
-        if (typeof result === 'string') {
-          file.parseError = result;
-        } else file.vueParseResult = result;
-      } else file.parseResult = parseJSCode(file.content);
+      if (file.path.endsWith('vue')) parseVueFile(file);
+      else parseJSFile(file);
     });
   }
 
@@ -95,7 +109,7 @@ export default class Manager {
     return this.files
       .map(file => {
         file.parseError = file.parseResult?.parseError || undefined;
-        return omit(file, ['vars', 'parseResult']);
+        return omit(file, ['vars', 'parseResult', 'vueParseResult']);
       })
       .sort((f1, f2) => {
         // 有parseError的排在前面
@@ -159,6 +173,7 @@ export default class Manager {
 
   getRemoteData() {
     return {
+      mode: this.mode,
       prefixes: this.getPrefixes(),
       intlResult: this.intlResult,
       allowedFileSuffix: this.getAllowedFileSuffix(),

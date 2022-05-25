@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-05-20 21:58:45
+ * @LastEditTime: 2022-05-25 20:25:52
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -32,7 +32,7 @@ const filePathRender = (record: IntlRecord) => {
   return (
     <a
       onClick={() => {
-        if(copy(code)) notification.success({ message: `已复制 ${code}` });
+        if (copy(code)) notification.success({ message: `已复制 ${code}` });
         window.Main.emit(Event.LaunchEditor, path);
       }}
     >
@@ -68,7 +68,7 @@ const excludedPrefixesDefault = [
 const Intl: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
   pageData: {
-    remoteData: { intlResult },
+    remoteData: { intlResult, mode },
   },
 }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -85,8 +85,8 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   const errorLength = data.filter(item => item.error).length;
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
-  const columns: ColumnType<IntlRecord>[] = [
-    {
+  let columns: ColumnType<IntlRecord>[] = [
+    mode === 'React' && {
       dataIndex: 'prefix',
       title: '前缀',
       onCell: record => {
@@ -111,6 +111,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       render: errorRender,
     },
   ];
+  columns = columns.filter(i => i);
 
   const rowSelection = {
     selectedRowKeys,
@@ -155,11 +156,13 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           layout="inline"
           initialValues={{ excludedPrefixes: excludedPrefixesDefault }}
         >
-          <Form.Item name="excludedPrefixes" label="排除的前缀" style={{ width: 250 }} className="flex-1">
-            <Select mode="tags" allowClear maxTagCount="responsive">
-              <Select.Option value="hzero.common">hzero.common</Select.Option>
-            </Select>
-          </Form.Item>
+          {mode === 'React' && (
+            <Form.Item name="excludedPrefixes" label="排除的前缀" style={{ width: 250 }} className="flex-1">
+              <Select mode="tags" allowClear maxTagCount="responsive">
+                <Select.Option value="hzero.common">hzero.common</Select.Option>
+              </Select>
+            </Form.Item>
+          )}
           <Form.Item name="prefix" label="前缀">
             <Input onPressEnter={() => update(new Date().getTime())} />
           </Form.Item>

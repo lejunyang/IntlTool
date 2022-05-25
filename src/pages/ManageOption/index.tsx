@@ -1,12 +1,12 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2022-05-19 22:52:18
+ * @LastEditTime: 2022-05-25 20:22:22
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageOption\index.tsx
  */
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { Button, Select, Form } from 'antd';
 import { Event } from '../../../electron/types';
 import { AppState } from '../../@types';
@@ -18,6 +18,9 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
   },
 }) => {
   const [form] = Form.useForm();
+  useEffect(() => {
+    form.setFieldsValue({ allowedFileSuffix, excludedPaths });
+  }, [allowedFileSuffix, excludedPaths]);
   return (
     <div className="page-wrapper" spellCheck={false}>
       <Form form={form}>

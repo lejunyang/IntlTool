@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-27 09:41:34
- * @LastEditTime: 2022-05-19 21:15:25
+ * @LastEditTime: 2022-05-25 19:27:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\@types\index.d.ts
@@ -12,9 +12,9 @@ export type AppState = {
   pathname: string;
   pageData: {
     processing: boolean;
-    // ProcessCh使用
-    intlPrefixPattern: string;
+    intlPrefixPattern: string; // ProcessCh使用
     remoteData: {
+      mode: 'React' | 'Vue';
       prefixes: string[]; // Intl使用
       intlResult: IntlResult; // Intl使用
       allowedFileSuffix: string[]; // 文件使用

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-24 22:58:13
+ * @LastEditTime: 2022-05-25 20:12:16
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -48,6 +48,12 @@ function updateRemoteData() {
 function sendMessage(data: Message) {
   mainWindow.webContents.send(Event.Message, data);
 }
+
+const originalConsoleError = console.error.bind(console);
+console.error = (...args: any[]) => {
+  sendMessage({ type: 'error', message: JSON.stringify(args) })
+  originalConsoleError(...args);
+};
 
 async function registerListeners() {
   ipcMain.on(Event.AddFile, (_, file: ProcessFile) => {
@@ -100,6 +106,11 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.GetRemoteData, updateRemoteData);
+
+  ipcMain.on(Event.SwitchMode, (_, mode: string) => {
+    manager.switchMode(mode);
+    updateRemoteData();
+  })
 
   ipcMain.on(Event.StartProcessCh, (_, prefixPattern?: string) => {
     try {
