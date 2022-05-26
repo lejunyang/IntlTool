@@ -1,12 +1,12 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-24 16:42:38
- * @LastEditTime: 2022-01-28 17:30:33
+ * @LastEditTime: 2022-05-26 17:00:37
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\components\CodeDiff\index.tsx
  */
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import { createPatch } from 'diff';
 // import Diff2Html from 'diff2html';
 import {
@@ -27,11 +27,11 @@ export type CodeDiffProps = Partial<{
 }>;
 
 // 如果直接提供patch那就展示这个，否则就需要提供filename、oldStr、newStr
-class CodeDiff extends PureComponent<CodeDiffProps, {}> {
+class CodeDiff extends Component<CodeDiffProps, {}> {
   diff2htmlUi: Diff2HtmlUI;
   divRef: HTMLDivElement;
 
-  show() {
+  show(nextProps?: CodeDiffProps) {
     const {
       filename = '',
       oldStr = '',
@@ -40,14 +40,14 @@ class CodeDiff extends PureComponent<CodeDiffProps, {}> {
       outputFormat = 'side-by-side',
       matching = 'lines',
       patch,
-    } = this.props;
+    } = nextProps || this.props;
     if (!(patch || oldStr || newStr)) return;
     const _patch =
       patch ||
       createPatch(filename, oldStr, newStr, '', '', {
         context,
       });
-
+    
     if (this.divRef) {
       this.diff2htmlUi = new Diff2HtmlUI(this.divRef, _patch, {
         outputFormat,
@@ -57,8 +57,8 @@ class CodeDiff extends PureComponent<CodeDiffProps, {}> {
     }
   }
 
-  componentWillReceiveProps() {
-    this.show();
+  componentWillReceiveProps(nextProps: CodeDiffProps) {
+    this.show(nextProps); // 如果不主动传进去，show里面拿到的props还是老的。。
   }
 
   componentDidMount() {
