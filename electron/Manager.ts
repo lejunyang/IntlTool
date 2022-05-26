@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-26 15:22:18
+ * @LastEditTime: 2022-05-26 16:03:17
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -107,10 +107,7 @@ export default class Manager {
 
   getFiles(): TransferFile[] {
     return this.files
-      .map(file => {
-        file.parseError = file.parseResult?.parseError || undefined;
-        return omit(file, ['vars', 'parseResult', 'vueParseResult']);
-      })
+      .map(file => omit(file, ['vars', 'parseResult', 'vueParseResult']))
       .sort((f1, f2) => {
         // 有parseError的排在前面
         if (f1.parseError || f2.parseError) return (f1.parseError ?? '') < (f2.parseError ?? '') ? -1 : 1;
