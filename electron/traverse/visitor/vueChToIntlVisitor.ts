@@ -1,24 +1,24 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-05-26 11:24:42
+ * @LastEditTime: 2022-05-26 18:03:13
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
  */
 import type { Visitor } from 'vue-eslint-parser/ast/traverse';
-import {
-  isVLiteral,
-  isVText,
-  isVExpressionContainer,
-  isVElement,
-} from '../../utils/astUtils';
+import { isVLiteral, isVText, isVExpressionContainer, isVElement } from '../../utils/astUtils';
 import type { ProcessFile } from '../../types';
 import { containsCh } from '../../utils/stringUtils';
 import { generateCode } from '../../generate';
 
 export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') => {
-  if (!file.chTransformedContent) file.chTransformedContent = file.content;
+  file.chTransformedContent = file.content;
+  // 由于是直接使用字符串进行替换，原AST上的range代表的index在进行一次替换后就有偏差了。。后面的节点index位置全是错的，直接爆炸
+  // 用leftStartIndex标明最左边的进行过替换的节点开始位置，其后面的节点全部都要重算index，其前面的不用。indexAcc表示增加的长度
+  let indexAcc = 0,
+    leftStartIndex = Number.MAX_SAFE_INTEGER;
+  const getCorrectIndex = (index: number) => (index > leftStartIndex ? index + indexAcc : index);
   return {
     enterNode(node) {
       let replaceStr: string;
@@ -48,22 +48,25 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
               if (isVText(child) && (containsCh(child.value) || rangeStart)) {
                 if (!rangeStart) rangeStart = child.range[0];
                 dStr += child.value;
-              } else if (isVExpressionContainer(child)) {
+              } else if (rangeStart && isVExpressionContainer(child)) {
                 const exprCode = generateCode(child.expression);
                 dStr += `\${${exprCode}}`;
                 intlArg[`nameMe${index}`] = exprCode;
-              } else if (index === node.children.length - 1 || isVElement(child)) {
+              }
+              if (rangeStart && (index === node.children.length - 1 || isVElement(child))) {
                 // 到达结尾或者遇到VElement，进行替换，并重新计算intl
                 const intlArgStr = JSON.stringify(intlArg).replaceAll('"', '');
-                replaceStr = `{{ intl("${prefix}${
-                  intlArgStr === '{}' ? '' : `, ${intlArgStr}`
-                }").d(\`${dStr}\`) }}`;
+                replaceStr = `{{ intl("${prefix}"${intlArgStr === '{}' ? '' : `, ${intlArgStr}`}").d(\`${dStr}\`) }}`;
+                const rangeEnd =
+                  index === node.children.length - 1
+                    ? child.range[1]
+                    : child.range[0];
                 file.chTransformedContent =
-                  file.chTransformedContent.slice(0, rangeStart) +
+                  file.chTransformedContent.slice(0, getCorrectIndex(rangeStart)) +
                   replaceStr +
-                  file.chTransformedContent.slice(
-                    index === node.children.length - 1 ? child.range[1] : child.range[0]
-                  );
+                  file.chTransformedContent.slice(getCorrectIndex(rangeEnd));
+                leftStartIndex = Math.min(rangeStart, leftStartIndex);
+                indexAcc += replaceStr.length - rangeEnd + rangeStart;
                 replaceStr = '';
                 rangeStart = null;
                 intlArg = {};
@@ -75,9 +78,11 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
       }
       if (replaceStr) {
         file.chTransformedContent =
-          file.chTransformedContent.slice(0, node.range[0]) +
+          file.chTransformedContent.slice(0, getCorrectIndex(node.range[0])) +
           replaceStr +
-          file.chTransformedContent.slice(node.range[1]);
+          file.chTransformedContent.slice(getCorrectIndex(node.range[1]));
+        leftStartIndex = Math.min(node.range[0], leftStartIndex);
+        indexAcc += replaceStr.length - node.range[1] + node.range[0];
       }
     },
     leaveNode() {},
