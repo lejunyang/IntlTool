@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-26 20:24:20
+ * @LastEditTime: 2022-05-26 21:52:38
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -96,10 +96,8 @@ async function registerListeners() {
     });
     if (paths) {
       traversePaths(paths, {
-        fileCallback: file => {
-          manager.addFile(file);
-        },
-        isPathAllowed: manager.isPathAllowed,
+        fileCallback: file => manager.addFile(file),
+        isPathAllowed: path => manager.isPathAllowed(path),
       });
     }
     updateRemoteData(); // 没选文件也要更新，否则一直在loading
@@ -113,11 +111,7 @@ async function registerListeners() {
   })
 
   ipcMain.on(Event.StartProcessCh, (_, prefixPattern?: string) => {
-    try {
-      manager.processAllCh(prefixPattern);
-    } catch (e) {
-      sendMessage(e);
-    }
+    manager.processAllCh(prefixPattern);
     updateRemoteData();
   });
 

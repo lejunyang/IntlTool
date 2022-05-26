@@ -211,21 +211,21 @@ export default class Manager {
                 // 没有写额外参数，检查这个需要调用的函数的参数数量是否为1
                 if (StringUtils[funcName].length === 1) return StringUtils[funcName](p);
                 else {
-                  throw {
+                  console.error({
                     type: 'error',
                     message: `错误: ${funcName}需要${StringUtils[funcName].length - 1}个额外参数，但并没有传递参数`,
-                  };
+                  });
                 }
               } else {
                 const args = params.split(',').map(param => param.trim());
                 if (args.length === StringUtils[funcName].length - 1) return StringUtils[funcName](p, ...args);
                 else
-                  throw {
+                  console.error({
                     type: 'error',
                     message: `错误: 传给${funcName}的额外参数数量为${args.length}，应为${
                       StringUtils[funcName].length - 1
                     }个`,
-                  };
+                  });
               }
             } else return p;
           } else return str;

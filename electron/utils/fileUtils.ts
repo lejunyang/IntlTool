@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 10:48:17
- * @LastEditTime: 2022-05-24 10:51:22
+ * @LastEditTime: 2022-05-26 21:44:51
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\fileUtils.ts
@@ -10,8 +10,12 @@ import fs from 'fs';
 import path from 'path';
 
 export function readFile(path: string) {
-  // 不指定编码读出来的是Buffer类型
-  return fs.readFileSync(path, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'); // 统一替换为crlf，防止后续diff时因为这个而全篇不一样
+  try {
+    // 不指定编码读出来的是Buffer类型
+    return fs.readFileSync(path, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'); // 统一替换为crlf，防止后续diff时因为这个而全篇不一样
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 /**
@@ -29,16 +33,16 @@ export function traversePath(
   const pStat = fs.statSync(_path);
   const fileCallback =
     options?.fileCallback instanceof Function
-      ? () => {
+      ? (ino, p) => {
           options.fileCallback({
-            uid: String(pStat.ino), // stat.uid是userId， ino才能代表文件
-            content: readFile(_path),
-            path: _path.replace(/\\/g, '/'),
+            uid: String(ino), // stat.uid是userId， ino才能代表文件
+            content: readFile(p),
+            path: p.replace(/\\/g, '/'),
           });
         }
       : () => {};
   if (pStat.isFile()) {
-    fileCallback();
+    fileCallback(pStat.ino, _path);
     return;
   }
   if (!pStat.isDirectory()) return;
@@ -46,10 +50,10 @@ export function traversePath(
   files.forEach(fileOrDir => {
     const p = path.join(_path, fileOrDir);
     const stat = fs.statSync(p);
-    if (stat.isDirectory() && (!(options.isPathAllowed instanceof Function) || options.isPathAllowed(p))) {
-      traversePath(p);
+    if (stat.isDirectory() && (!(options?.isPathAllowed instanceof Function) || options.isPathAllowed(p))) {
+      traversePath(p, options);
     }
-    if (stat.isFile()) fileCallback();
+    if (stat.isFile()) fileCallback(stat.ino, p);
   });
 }
 
