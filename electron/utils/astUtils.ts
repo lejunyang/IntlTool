@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 16:40:17
- * @LastEditTime: 2022-05-26 11:23:12
+ * @LastEditTime: 2022-05-26 12:12:24
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\astUtils.ts
@@ -20,7 +20,7 @@ import type {
   VElement,
 } from 'vue-eslint-parser/ast/nodes';
 import type { StringLiteral, TemplateLiteral, TemplateElement, Expression, TSType, CallExpression } from '@babel/types';
-import { isStringLiteral, isTemplateLiteral } from '@babel/types';
+import { isStringLiteral, isTemplateLiteral, numericLiteral, stringLiteral, booleanLiteral } from '@babel/types';
 import { shallowEqual } from './objectUtils';
 
 /**
@@ -122,3 +122,19 @@ export function isSingleStrArg(
   return args.length === 1 && isStringNode(args[0]);
 }
 
+/**
+ * 将number string boolean类型转为Babel Literal节点
+ * @param literal 
+ */
+export function toBabelLiteral(literal: TSType) {
+  switch (typeof literal) {
+    case 'number':
+      return numericLiteral(literal);
+    case 'string':
+      return stringLiteral(literal);
+    case 'boolean':
+      return booleanLiteral(literal);
+    default:
+      return null;
+  }
+}
