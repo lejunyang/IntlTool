@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-26 15:25:27
+ * @LastEditTime: 2022-05-26 22:07:22
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -45,6 +45,7 @@ export function App() {
   useEffect(() => {
     return window.Main.on(Event.Message, (data: Message) => {
       if (notification[data?.type]) {
+        console.log(data.type, data.message)
         notification[data.type](data);
       }
     });
