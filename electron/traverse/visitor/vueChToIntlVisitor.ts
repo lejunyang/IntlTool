@@ -17,8 +17,8 @@ import type { ProcessFile } from '../../types';
 import { containsCh } from '../../utils/stringUtils';
 import { generateCode } from '../../generate';
 
-export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix: '') => {
-  if (!file.vueChTransformedContent) file.vueChTransformedContent = file.content;
+export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') => {
+  if (!file.chTransformedContent) file.chTransformedContent = file.content;
   return {
     enterNode(node) {
       let replaceStr: string;
@@ -58,10 +58,10 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix: '') => 
                 replaceStr = `{{ intl("${prefix}${
                   intlArgStr === '{}' ? '' : `, ${intlArgStr}`
                 }").d(\`${dStr}\`) }}`;
-                file.vueChTransformedContent =
-                  file.vueChTransformedContent.slice(0, rangeStart) +
+                file.chTransformedContent =
+                  file.chTransformedContent.slice(0, rangeStart) +
                   replaceStr +
-                  file.vueChTransformedContent.slice(
+                  file.chTransformedContent.slice(
                     index === node.children.length - 1 ? child.range[1] : child.range[0]
                   );
                 replaceStr = '';
@@ -74,10 +74,10 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix: '') => 
           break;
       }
       if (replaceStr) {
-        file.vueChTransformedContent =
-          file.vueChTransformedContent.slice(0, node.range[0]) +
+        file.chTransformedContent =
+          file.chTransformedContent.slice(0, node.range[0]) +
           replaceStr +
-          file.vueChTransformedContent.slice(node.range[1]);
+          file.chTransformedContent.slice(node.range[1]);
       }
     },
     leaveNode() {},

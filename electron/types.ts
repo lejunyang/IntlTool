@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-05-25 21:51:48
+ * @LastEditTime: 2022-05-26 15:15:48
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -52,7 +52,6 @@ export type BasicFile = {
 export type TransferFile = BasicFile & {
   content: string;
   chTransformedContent?: string;
-  vueChTransformedContent?: string;
   diffPatchOfChTransform?: string;
   parseError?: string;
   intlResult?: IntlResult;

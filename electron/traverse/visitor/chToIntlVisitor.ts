@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-05-16 23:43:32
+ * @LastEditTime: 2022-05-26 14:22:04
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\chToIntlVisitor.ts
@@ -27,29 +27,29 @@ import type { State } from '../../types';
  * @param prefix intl.get中get里字符串的前缀
  * @returns
  */
-export const getChToIntlVisitor = (prefix: string = '') => {
-  const visitor: Visitor<State> = {
+export const getChToIntlVisitor = (prefix: string = '', nameMap?: Parameters<typeof generateIntlNode>[2]) => {
+  const visitor: Visitor = {
     // 为什么不用StringLiteral嵌套在VariableDeclarator里呢，因为除了const a = 'bbb'，还有const b = intl.get('dfs').d('dfas')，其中同样也有StringLiteral
-    VariableDeclarator(path: NodePath<VariableDeclarator>, state: State) {
+    VariableDeclarator(path: NodePath<VariableDeclarator>) {
       const node = path.node.init;
       if (!containsCh(node)) return;
-      path.get('init').replaceWith(generateIntlNode(prefix, node));
+      path.get('init').replaceWith(generateIntlNode(prefix, node, nameMap));
     },
     // 将jsx属性中的中文字符串替换为intl表达式
-    JSXAttribute(path: NodePath<JSXAttribute>, state: State) {
+    JSXAttribute(path: NodePath<JSXAttribute>) {
       const node = path.node.value;
       if (!containsCh(node)) return;
-      path.get('value').replaceWith(jsxExpressionContainer(generateIntlNode(prefix, node)));
+      path.get('value').replaceWith(jsxExpressionContainer(generateIntlNode(prefix, node, nameMap)));
     },
     // 将jsx children中的中文字符串替换为intl表达式
     JSXText(path: NodePath<JSXText>) {
       const value = path.node.value;
       if (!containsCh(value)) return;
       // JSXText是直接将它自己这个path替换，那个value已经没有path了
-      path.replaceWith(jsxExpressionContainer(generateIntlNode(prefix, value)));
+      path.replaceWith(jsxExpressionContainer(generateIntlNode(prefix, value, nameMap)));
     },
     // 对象键值
-    ObjectProperty(path: NodePath<ObjectProperty>, state: State) {
+    ObjectProperty(path: NodePath<ObjectProperty>) {
       const node = path.node.value;
       if (!containsCh(node)) return;
       // 忽略permissionList里的{ code: '', type: '', meaning: '' }
@@ -60,15 +60,15 @@ export const getChToIntlVisitor = (prefix: string = '') => {
         path.container.find(i => isObjectProperty(i) && isIdentifier(i.key, { name: 'code' }))
       )
         return;
-      path.get('value').replaceWith(generateIntlNode(prefix, node));
+      path.get('value').replaceWith(generateIntlNode(prefix, node, nameMap));
     },
     // 数组
-    ArrayExpression(path: NodePath<ArrayExpression>, state: State) {
+    ArrayExpression(path: NodePath<ArrayExpression>) {
       const elements = path.node.elements;
       const elementPaths = path.get('elements');
       elements.forEach((e, index) => {
         if (!containsCh(e)) return;
-        elementPaths[index].replaceWith(generateIntlNode(prefix, e));
+        elementPaths[index].replaceWith(generateIntlNode(prefix, e, nameMap));
       });
     },
     /*
@@ -79,19 +79,19 @@ export const getChToIntlVisitor = (prefix: string = '') => {
 		}
 		因为写出了函数体一般都不会直接返回字面量
 	*/
-    ArrowFunctionExpression(path: NodePath<ArrowFunctionExpression>, state: State) {
+    ArrowFunctionExpression(path: NodePath<ArrowFunctionExpression>) {
       const node = path.node.body;
       if (!containsCh(node)) return;
-      path.get('body').replaceWith(generateIntlNode(prefix, node));
+      path.get('body').replaceWith(generateIntlNode(prefix, node, nameMap));
     },
     // 只处理单个函数调用的参数，其他情况的调用者callee不是Identifier，比如intl.get.d的callee就是MemberExpression
-    CallExpression(path: NodePath<CallExpression>, state: State) {
+    CallExpression(path: NodePath<CallExpression>) {
       if (!isIdentifier(path.node.callee)) return;
       const args = path.node.arguments;
       const argumentsPaths = path.get('arguments');
       args.forEach((a, index) => {
         if (!containsCh(a)) return;
-        argumentsPaths[index].replaceWith(generateIntlNode(prefix, a));
+        argumentsPaths[index].replaceWith(generateIntlNode(prefix, a, nameMap));
       });
     },
   };

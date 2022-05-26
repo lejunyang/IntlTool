@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-25 21:42:19
+ * @LastEditTime: 2022-05-26 15:25:27
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -20,7 +20,7 @@ export function App() {
     pathname: '/manage/file',
     pageData: {
       processing: true,
-      intlPrefixPattern: '$9{replace}[-, .]$12{toLowerCamel}',
+      intlPrefixPattern: '',
       remoteData: {
         mode: 'React',
         files: [],

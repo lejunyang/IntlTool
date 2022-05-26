@@ -1,14 +1,14 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-25 20:13:28
+ * @LastEditTime: 2022-05-26 15:22:18
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
  */
 import { omit } from 'lodash';
 import { ProcessFile, TransferFile, IntlItem, IntlResult } from './types';
-import { transformCh, traverseIntl, traverseVueIntl } from './traverse';
+import { transformCh, transformVueCh, traverseIntl, traverseVueIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 import { readFile } from './utils/fileUtils';
 import { parseJSFile, parseVueFile } from './parse';
@@ -228,7 +228,8 @@ export default class Manager {
           } else return str;
         }
       );
-      transformCh(file, prefix);
+      if (file.path.endsWith('vue')) transformVueCh(file, prefix);
+      else transformCh(file, prefix);
     });
   }
 
