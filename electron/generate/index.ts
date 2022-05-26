@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-05-26 15:05:30
+ * @LastEditTime: 2022-05-26 16:24:23
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -26,9 +26,6 @@ export function generateIntlNode(
   dValue: string | StringLiteral | TemplateLiteral | ESLintStringLiteral,
   nameMap = { l1: 'intl', l2: 'get', l3: 'd' }
 ): Expression {
-  const build = template.expression(`
-    ${nameMap.l1}.${nameMap.l2}(%%getString%%%%getParam%%).${nameMap.l3}(%%dValue%%)
-  `);
   let getParam: ObjectExpression;
   if (typeof dValue === 'string') {
     dValue = stringLiteral(dValue.trim());
@@ -57,6 +54,9 @@ export function generateIntlNode(
     //   qLast.value.raw = qLast.value.raw.trimEnd();
     // }
   }
+  const build = template.expression(`
+    ${nameMap.l1}.${nameMap.l2}(%%getString%%${getParam ? ', %%getParam%%' : ''}).${nameMap.l3}(%%dValue%%)
+  `);
   return build({
     getString: stringLiteral(getString),
     getParam,
