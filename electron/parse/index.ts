@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-02 16:05:03
- * @LastEditTime: 2022-05-25 12:04:15
+ * @LastEditTime: 2022-05-26 23:26:07
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\parse\index.ts
@@ -31,7 +31,8 @@ export function parseJSFile(file: ProcessFile) {
     }
     file.parseResult = ast;
   } catch (e) {
-    file.parseError = JSON.stringify(e);
+    const error = { ...e, message: e.message, path: file.path };
+    file.parseError = JSON.stringify(error);
     console.error(file.parseError);
   }
 }
@@ -55,7 +56,8 @@ export function parseVueFile(file: ProcessFile) {
     }
     file.vueParseResult = ast;
   } catch (e) {
-    file.parseError = JSON.stringify(e);
+    const error = { ...e, message: e.message, path: file.path };
+    file.parseError = JSON.stringify(error);
     console.error(file.parseError);
   }
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-05-26 21:01:16
+ * @LastEditTime: 2022-05-26 23:06:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
@@ -11,6 +11,7 @@ import { isVLiteral, isVText, isVExpressionContainer, isVElement } from '../../u
 import type { ProcessFile } from '../../types';
 import { containsCh } from '../../utils/stringUtils';
 import { generateCode } from '../../generate';
+// import { VLiteral } from 'vue-eslint-parser/ast/nodes';
 
 export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') => {
   file.chTransformedContent = file.content;
@@ -57,10 +58,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
                 // 到达结尾或者遇到VElement，进行替换，并重新计算intl
                 const intlArgStr = JSON.stringify(intlArg).replaceAll('"', '');
                 replaceStr = `{{ intl("${prefix}"${intlArgStr === '{}' ? '' : `, ${intlArgStr}`}").d(\`${dStr}\`) }}`;
-                const rangeEnd =
-                  index === node.children.length - 1
-                    ? child.range[1]
-                    : child.range[0];
+                const rangeEnd = index === node.children.length - 1 ? child.range[1] : child.range[0];
                 file.chTransformedContent =
                   file.chTransformedContent.slice(0, getCorrectIndex(rangeStart)) +
                   replaceStr +

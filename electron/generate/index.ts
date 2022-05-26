@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-05-26 16:38:55
+ * @LastEditTime: 2022-05-26 23:16:52
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -78,8 +78,16 @@ export function generateIntlNode(
  */
 export function generateCode(node: Node | ESNode): string {
   if (!node) return '';
-  else if (isNode(node)) return babelGenerate(node).code;
-  else return generate(node);
+  else if (isNode(node)) {
+    // vue template里解析的node即使是babel Node，它的子结点也可能有各种Literal，真是吐了，比如LogicalExpression MemberExpression TemplateLiteral ConditionalExpression BinaryExpression
+    // 所以曲线救国，直接catch转换方式
+    try {
+      const { code } = babelGenerate(node);
+      return code;
+    } catch (e) {
+      return generate(node);
+    }
+  } else return generate(node);
 }
 
 /**
