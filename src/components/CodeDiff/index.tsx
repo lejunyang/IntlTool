@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-24 16:42:38
- * @LastEditTime: 2022-05-26 17:00:37
+ * @LastEditTime: 2022-05-26 19:55:56
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\components\CodeDiff\index.tsx
@@ -41,7 +41,10 @@ class CodeDiff extends Component<CodeDiffProps, {}> {
       matching = 'lines',
       patch,
     } = nextProps || this.props;
-    if (!(patch || oldStr || newStr)) return;
+    if (!(patch || oldStr || newStr)) {
+      this.divRef.innerHTML = '';
+      return;
+    }
     const _patch =
       patch ||
       createPatch(filename, oldStr, newStr, '', '', {
