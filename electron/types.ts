@@ -72,6 +72,8 @@ export enum Event {
   ResetFiles = 'reset-files', // 清空文件
   RefreshFiles = 'refresh-files', // 刷新文件内容
   StartProcessCh = 'start-process-ch',
+  ReplaceProcessedFile = 'replace-processed-file', // 确认更改转换过的文件内容
+  ReplaceAllProcessedFile = 'replace-all-processed-file',
   GetFilesSync = 'get-files-sync',
   ScanIntl = 'scan-intl',
   ReScanIntl = 're-scan-intl', // 刷新文件并重新扫描intl

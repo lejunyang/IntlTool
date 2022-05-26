@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-05-23 23:19:21
+ * @LastEditTime: 2022-05-26 20:28:11
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
@@ -20,11 +20,15 @@ const options = [
 
 const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
-  pageData: { intlPrefixPattern, remoteData: { files } },
+  pageData: {
+    intlPrefixPattern,
+    remoteData: { files },
+  },
 }) => {
   const [outputFormat, setOutputFormat] = useState<'side-by-side' | 'line-by-line'>('side-by-side');
 
   const patch = files.reduce((result, file) => result + (file.diffPatchOfChTransform || ''), '');
+  const transformedFiles = files.filter(file => file.chTransformedContent);
 
   return (
     <div className="page-wrapper">
@@ -66,6 +70,21 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
         >
           开始扫描
         </Button>
+        {patch && (
+          <Button
+            onClick={() => {
+              Modal.confirm({
+                content: '确定全部替换？',
+                onOk: () => {
+                  pageData.processing = true;
+                  window.Main.emit(Event.ReplaceAllProcessedFile);
+                },
+              });
+            }}
+          >
+            全部替换
+          </Button>
+        )}
       </div>
       <div>
         <Radio.Group
@@ -77,7 +96,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
           optionType="button"
         />
       </div>
-      <CodeDiff patch={patch} outputFormat={outputFormat} />
+      <CodeDiff patch={patch} outputFormat={outputFormat} transformedFiles={transformedFiles} />
     </div>
   );
 };

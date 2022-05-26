@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-26 15:34:34
+ * @LastEditTime: 2022-05-26 20:24:20
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -120,6 +120,34 @@ async function registerListeners() {
     }
     updateRemoteData();
   });
+
+  ipcMain.on(Event.ReplaceProcessedFile, (_, uid: string) => {
+    const file = manager.getFileByUid(uid);
+    if (!file || !file.chTransformedContent) return;
+    try {
+      fs.writeFileSync(file.path, file.chTransformedContent);
+      file.content = file.chTransformedContent;
+      file.chTransformedContent = '';
+      file.diffPatchOfChTransform = '';
+      file.parseResult = null;
+      file.vueParseResult = null;
+      updateRemoteData();
+    } catch (e) {
+      console.error(e);
+    }
+  })
+
+  ipcMain.on(Event.ReplaceAllProcessedFile, () => {
+    try {
+      manager.getOriginalFiles().forEach(file => {
+        if (!file.chTransformedContent) return;
+        fs.writeFileSync(file.path, file.chTransformedContent);
+      });
+      manager.refreshFiles();
+    } catch (e) {
+      console.error(e);
+    }
+  })
 
   ipcMain.on(Event.SetPrefixes, (_, data: string) => {
     manager.setPrefixes(data);

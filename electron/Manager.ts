@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-26 16:03:17
+ * @LastEditTime: 2022-05-26 20:11:28
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -92,6 +92,8 @@ export default class Manager {
       file.content = readFile(file.path);
       if (file.path.endsWith('vue')) parseVueFile(file);
       else parseJSFile(file);
+      file.chTransformedContent = '';
+      file.diffPatchOfChTransform = '';
     });
   }
 
@@ -99,6 +101,10 @@ export default class Manager {
     this.files = [];
     this.filesUIDSet.clear();
     this.resetIntl();
+  }
+
+  getFileByUid(uid: string): ProcessFile {
+    return this.files.find(f => f.uid === uid);
   }
 
   getOriginalFiles(): ProcessFile[] {
