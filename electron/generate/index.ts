@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-05-26 16:24:23
+ * @LastEditTime: 2022-05-26 16:38:55
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -11,7 +11,15 @@ import babelGenerate from '@babel/generator';
 import { generate } from 'escodegen';
 import type { Node, StringLiteral, TemplateLiteral, Expression, ObjectExpression } from '@babel/types';
 import type { ESLintStringLiteral, Node as ESNode } from 'vue-eslint-parser/ast/nodes';
-import { stringLiteral, objectProperty, objectExpression, isStringLiteral, isTemplateLiteral, isNode, isExpression } from '@babel/types';
+import {
+  stringLiteral,
+  objectProperty,
+  objectExpression,
+  isStringLiteral,
+  isTemplateLiteral,
+  isNode,
+  isExpression,
+} from '@babel/types';
 import { format, Options } from 'prettier';
 import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
 
@@ -59,7 +67,7 @@ export function generateIntlNode(
   `);
   return build({
     getString: stringLiteral(getString),
-    getParam,
+    ...(getParam ? { getParam } : {}), // 如果build里面没写还传的话会报错
     dValue,
   });
 }
