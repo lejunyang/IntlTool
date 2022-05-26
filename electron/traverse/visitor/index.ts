@@ -9,3 +9,4 @@
 export * from './intlTraverseVisitor';
 export * from './chToIntlVisitor';
 export * from './vueIntlTraverseVisitor';
+export * from './vueChToIntlVisitor';

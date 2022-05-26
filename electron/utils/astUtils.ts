@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 16:40:17
- * @LastEditTime: 2022-05-25 11:52:12
+ * @LastEditTime: 2022-05-26 11:23:12
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\astUtils.ts
@@ -12,7 +12,12 @@ import type {
   ESLintTemplateLiteral,
   ESLintTemplateElement,
   ESLintExpression,
-  ESLintProperty
+  ESLintProperty,
+  VLiteral,
+  VAttribute,
+  VText,
+  VExpressionContainer,
+  VElement,
 } from 'vue-eslint-parser/ast/nodes';
 import type { StringLiteral, TemplateLiteral, TemplateElement, Expression, TSType, CallExpression } from '@babel/types';
 import { isStringLiteral, isTemplateLiteral } from '@babel/types';
@@ -33,6 +38,26 @@ export function isESLintStringLiteral(node: any, value?: string): node is ESLint
 
 export function isESLintProperty(node: any, opt?: object): node is ESLintProperty {
   return node?.type === 'Property' && (!opt || shallowEqual(node, opt));
+}
+
+export function isVLiteral(node: any): node is VLiteral {
+  return node?.type === 'VLiteral';
+}
+
+export function isVElement(node: any): node is VElement {
+  return node?.type === 'VElement';
+}
+
+export function isVAttribute(node: any, opt?: object): node is VAttribute {
+  return node?.type === 'VAttribute' && (!opt || shallowEqual(node, opt));
+}
+
+export function isVText(node: any): node is VText {
+  return node?.type === 'VText';
+}
+
+export function isVExpressionContainer(node: any): node is VExpressionContainer {
+  return node?.type === 'VExpressionContainer';
 }
 
 /**

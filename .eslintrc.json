@@ -17,7 +17,8 @@
         "@typescript-eslint/no-use-before-define": [
           "error"
         ],
-        "no-throw-literal": "off"
+        "no-throw-literal": "off",
+        "one-var": "off"
       }
     }
   ],
