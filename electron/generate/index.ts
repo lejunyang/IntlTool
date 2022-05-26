@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-05-26 12:09:39
+ * @LastEditTime: 2022-05-26 15:05:30
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -12,6 +12,7 @@ import { generate } from 'escodegen';
 import type { Node, StringLiteral, TemplateLiteral, Expression, ObjectExpression } from '@babel/types';
 import type { ESLintStringLiteral, Node as ESNode } from 'vue-eslint-parser/ast/nodes';
 import { stringLiteral, objectProperty, objectExpression, isStringLiteral, isTemplateLiteral, isNode, isExpression } from '@babel/types';
+import { format, Options } from 'prettier';
 import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
 
 /**
@@ -71,4 +72,27 @@ export function generateCode(node: Node | ESNode): string {
   if (!node) return '';
   else if (isNode(node)) return babelGenerate(node).code;
   else return generate(node);
+}
+
+/**
+ * 将babel节点转换为代码，并用prettier格式化
+ * @param node babel节点
+ * @param formatOptions prettier format选项
+ */
+export function generateAndFormat(node: Node, formatOptions?: Options): string {
+  const { code } = babelGenerate(node, {
+    // 默认babel/generator使用jsesc来将非ascii字符转换，会把中文字符转成了unicode，关掉
+    jsescOption: {
+      minimal: true,
+    },
+  });
+  return format(code, {
+    parser: 'typescript', // parser根据语言必传
+    semi: true,
+    singleQuote: true,
+    arrowParens: 'avoid',
+    printWidth: 120,
+    endOfLine: 'crlf',
+    ...(formatOptions || {}),
+  });
 }
