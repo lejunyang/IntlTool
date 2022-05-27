@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-05-24 21:10:20
+ * @LastEditTime: 2022-05-27 17:13:08
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
@@ -26,6 +26,7 @@ import {
   isObjectProperty,
   isTemplateElement,
   isVariableDeclaration,
+  isExpression,
 } from '@babel/types';
 import { generateCode } from '../../generate';
 import type { State, StringObject, IntlItem } from '../../types';
@@ -83,29 +84,36 @@ export function processTemplateLiteral<T extends ProcessParams['type']>(
       if (isTemplateElement(i)) {
         result.content += i.value.cooked ?? '';
       } else {
-        if (isIdentifier(i)) {
-          if (type === 'd') {
-            if (args) {
-              let varNameFind = false;
-              (args as ObjectExpression | ESLintObjectExpression).properties.forEach(objProp => {
-                // ObjectExpression的properties有三种可能，ObjectProperty对象属性，SpreadElement展开表达式，ObjectMethod对象方法，我们需要的是ObjectProperty
-                // 如果是ES的Property，它不能是对象方法
-                if (
-                  isObjectProperty(objProp, { computed: false }) ||
-                  isESLintProperty(objProp, { computed: false, method: false })
-                ) {
-                  // 查找对象中的值和模板字符串中变量名相同的。支持缩写属性，缩写的属性同样有key和value
-                  if (isIdentifier(objProp.value, { name: i.name }) && isIdentifier(objProp.key)) {
-                    result.content += `{${objProp.key.name}}`;
-                    varNameFind = true;
-                  }
+        // d里面的模板字符串允许变量和表达式，其在get第二个参数必须传对应的值
+        if (type === 'd') {
+          const exprCode = generateCode(i);
+          if (args) {
+            let varNameFind = false;
+            (args as ObjectExpression | ESLintObjectExpression).properties.forEach(objProp => {
+              // ObjectExpression的properties有三种可能，ObjectProperty对象属性，SpreadElement展开表达式，ObjectMethod对象方法，我们需要的是ObjectProperty
+              // 如果是ES的Property，它不能是对象方法
+              if (
+                !isObjectProperty(objProp, { computed: false }) &&
+                !isESLintProperty(objProp, { computed: false, method: false })
+              )
+                return;
+              if (isIdentifier(i)) {
+                // 查找对象中的值和模板字符串中变量名相同的。支持缩写属性，缩写的属性同样有key和value
+                if (isIdentifier(objProp.value, { name: i.name }) && isIdentifier(objProp.key)) {
+                  result.content += `{${objProp.key.name}}`;
+                  varNameFind = true;
                 }
-              });
-              if (!varNameFind) result.error += `d里面有模板字符串变量'${i.name}'，但get的第二个参数缺少该变量；`;
-            } else {
-              result.error += `d里面有模板字符串变量'${i.name}'，但get未传第二个参数；`;
-            }
-          } else if (type === 'get') {
+              } else if (isExpression(i)) {
+                if (!varNameFind) varNameFind = exprCode === generateCode(objProp.value);
+              }
+            });
+            if (!varNameFind) result.error += `d里面有模板字符串变量或表达式'${exprCode}'，但get的第二个参数缺少该值；`;
+          } else {
+            result.error += `d里面有模板字符串变量或表达式'${exprCode}'，但get未传第二个参数；`;
+          }
+        }
+        if (type === 'get') {
+          if (isIdentifier(i)) {
             // 此时args代表文件里的常量组成的对象
             if (args) {
               const value = (args as StringObject)[i.name];
@@ -115,12 +123,11 @@ export function processTemplateLiteral<T extends ProcessParams['type']>(
                 result.error += `get模板字符串里的变量只能使用常量，而代码最外层缺少对应常量'${i.name}'；`;
               }
             } else result.error += `缺少代码文件最外层常量的对象Map；`;
+          } else {
+            const code = generateCode(i);
+            result.error += `intl编码中出现表达式'${code}'；`;
+            console.log('intl编码中中出现表达式：', code);
           }
-        } else {
-          // expressions里面如果不是Identifier那就是表达式了
-          const code = generateCode(i);
-          result.error += `模板字符串中出现表达式'${code}'；`;
-          console.log('模板字符串中出现表达式：', code);
         }
       }
     });
