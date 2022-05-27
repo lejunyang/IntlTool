@@ -1,6 +1,18 @@
 @small-gap: 8px;
 @normal-gap: 20px;
 
+.show {
+  opacity: 1;
+  pointer-events: unset;
+  height: unset;
+}
+
+.hide {
+  opacity: 0;
+  pointer-events: none;
+  height: 0px;
+}
+
 .flex {
   display: flex;
 }
@@ -31,4 +43,8 @@
 
 .text-red {
   color: red;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }

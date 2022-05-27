@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-05-26 20:28:11
+ * @LastEditTime: 2022-05-27 16:48:37
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
@@ -10,7 +10,7 @@ import { Button, Input, Radio, Modal } from 'antd';
 import { useState, FC } from 'react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Event } from '../../../electron/types';
-import CodeDiff from '../../components/CodeDiff';
+import FileDiff from '../../components/FileDiff';
 import { AppState } from '../../@types';
 
 const options = [
@@ -27,8 +27,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
 }) => {
   const [outputFormat, setOutputFormat] = useState<'side-by-side' | 'line-by-line'>('side-by-side');
 
-  const patch = files.reduce((result, file) => result + (file.diffPatchOfChTransform || ''), '');
-  const transformedFiles = files.filter(file => file.chTransformedContent);
+  const transformedFiles = files.filter(file => file.isChTransformed);
 
   return (
     <div className="page-wrapper">
@@ -70,7 +69,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
         >
           开始扫描
         </Button>
-        {patch && (
+        {!!transformedFiles.length && (
           <Button
             onClick={() => {
               Modal.confirm({
@@ -96,7 +95,9 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
           optionType="button"
         />
       </div>
-      <CodeDiff patch={patch} outputFormat={outputFormat} transformedFiles={transformedFiles} />
+      {transformedFiles.map((file, index) => (
+        <FileDiff file={file} showContent={index < 10} key={file.path} />
+      ))}
     </div>
   );
 };

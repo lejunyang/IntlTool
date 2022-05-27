@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-05-26 23:06:36
+ * @LastEditTime: 2022-05-27 14:31:25
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
@@ -31,6 +31,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
             // 不是v指令的情况（缩写也算指令），检查其值是否包含中文
             if (!isVLiteral(node.value) || !containsCh(node.value.value)) return;
             replaceStr = `:${node.key.name}="intl('${prefix}').d('${node.value.value}')"`;
+            file.isChTransformed = true;
           }
           break;
         case 'VElement':
@@ -63,6 +64,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
                   file.chTransformedContent.slice(0, getCorrectIndex(rangeStart)) +
                   replaceStr +
                   file.chTransformedContent.slice(getCorrectIndex(rangeEnd));
+                file.isChTransformed = true;
                 leftStartIndex = Math.min(rangeStart, leftStartIndex);
                 indexAcc += replaceStr.length - rangeEnd + rangeStart;
                 replaceStr = '';

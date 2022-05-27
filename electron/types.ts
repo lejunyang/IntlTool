@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-05-26 15:15:48
+ * @LastEditTime: 2022-05-27 14:33:11
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -31,7 +31,6 @@ export type StringObject = { [key: string]: string };
 
 export type State = {
   vars?: StringObject;
-  intlResult?: IntlResult;
   path?: string;
 };
 
@@ -53,6 +52,7 @@ export type TransferFile = BasicFile & {
   content: string;
   chTransformedContent?: string;
   diffPatchOfChTransform?: string;
+  isChTransformed?: boolean; // 因为prettier会对代码格式化，没法判断是否是改了intl，故加一个变量
   parseError?: string;
   intlResult?: IntlResult;
 };

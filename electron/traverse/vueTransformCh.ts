@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-26 14:24:46
- * @LastEditTime: 2022-05-26 23:45:14
+ * @LastEditTime: 2022-05-27 15:31:29
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\vueTransformCh.ts
@@ -11,11 +11,12 @@ import { parseVueFile, parseJSCode } from '../parse';
 import { getVueTemplateChToIntlVisitor, getChToIntlVisitor } from './visitor';
 import { generateAndFormat } from '../generate';
 import traverse from '@babel/traverse';
-import { createPatch } from 'diff';
+import { createTwoFilesPatch } from 'diff';
 import { ProcessFile } from '../types';
 
 const { traverseNodes } = AST;
 
+// 目前遇到的问题还有，在不同的uniapp预编译块中定义相同的变量导致js报错。。。想到的解决方法是提取出这些东西，单独处理
 export function transformVueCh(file: ProcessFile, prefix = '') {
   if (!file.vueParseResult) parseVueFile(file);
   if (file.parseError) return;
@@ -34,7 +35,12 @@ export function transformVueCh(file: ProcessFile, prefix = '') {
         scriptCode = scriptCode.replace(/(<!--.+-->)/g, '//TEMP$1');
         const scriptParseResult = parseJSCode(scriptCode);
         if (!scriptParseResult.parseError) {
-          traverse(scriptParseResult, getChToIntlVisitor(prefix, { l1: 'this', l2: 'intl', l3: 'd' }));
+          traverse<ProcessFile>(
+            scriptParseResult,
+            getChToIntlVisitor(prefix, { l1: 'this', l2: 'intl', l3: 'd' }),
+            null,
+            file
+          );
           const scriptStartTag = script.replace(/(<script.*?>)[\s\S]*?<\/script>/, '$1');
           file.chTransformedContent = file.chTransformedContent
             .replace(script, `${scriptStartTag}\r\n${generateAndFormat(scriptParseResult)}\r\n</script>`)
@@ -52,5 +58,15 @@ export function transformVueCh(file: ProcessFile, prefix = '') {
       }
     }
   });
-  file.diffPatchOfChTransform = createPatch(file.path, file.content, file.chTransformedContent, '', '');
+  // 这个createTwoFilesPatch，如果传的文件名是一样的，开头会多一句Index: 文件名。。。我不理解，手动把它去掉
+  // 另外，分割线那一行也不要
+  file.diffPatchOfChTransform = createTwoFilesPatch(
+    file.path,
+    file.path,
+    file.content,
+    file.chTransformedContent,
+    '',
+    ''
+  );
+  file.diffPatchOfChTransform = file.diffPatchOfChTransform.split('\n').slice(2).join('\n');
 }
