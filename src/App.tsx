@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-26 22:07:22
+ * @LastEditTime: 2022-05-27 19:12:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -14,6 +14,25 @@ import getSettings from './pageSettings';
 import './styles/index.less';
 import { AppState } from './@types/index';
 import { Event, Message } from '../electron/types';
+
+const cacheMenus = (() => {
+  const menus = [],
+    map = {};
+  return (currentMenu, pageData) => {
+    if (!map[currentMenu.path]) {
+      map[currentMenu.path] = true;
+      menus.push(currentMenu);
+    }
+    return menus.map(menu => {
+      const Com = menu.component;
+      return (
+        <div className={currentMenu.path === menu.path ? '' : 'hide'} key={menu.path}>
+          {Com && <Com pageData={pageData} />}
+        </div>
+      );
+    });
+  };
+})();
 
 export function App() {
   const state = useReactive<AppState>({
@@ -45,7 +64,7 @@ export function App() {
   useEffect(() => {
     return window.Main.on(Event.Message, (data: Message) => {
       if (notification[data?.type]) {
-        console.log(data.type, data.message)
+        console.log(data.type, data.message);
         notification[data.type](data);
       }
     });
@@ -90,7 +109,7 @@ export function App() {
           pathname: state.pathname,
         }}
         menuItemRender={(item, dom) => (
-          <Tooltip title={item.tooltip} placement="topRight">
+          <Tooltip title={item.tooltip} placement="topRight" mouseEnterDelay={0.2}>
             <a
               onClick={() => {
                 state.pathname = item.path || '/manage/file';
@@ -103,14 +122,11 @@ export function App() {
       >
         <RouteContext.Consumer>
           {(value: RouteContextType) => {
-            const Component = value.currentMenu?.component;
-            if (Component) {
-              return (
-                <Spin spinning={state.pageData.processing}>
-                  <Component pageData={state.pageData} />
-                </Spin>
-              );
-            }
+            return (
+              <Spin spinning={state.pageData.processing}>
+                {cacheMenus(value.currentMenu, state.pageData)}
+              </Spin>
+            );
           }}
         </RouteContext.Consumer>
       </ProLayout>

@@ -1,13 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-27 15:41:11
- * @LastEditTime: 2022-05-27 18:04:13
+ * @LastEditTime: 2022-05-27 19:14:34
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\components\FileDiff\index.tsx
  */
 import { Button, Modal } from 'antd';
-import { useState, FC } from 'react';
+import { useState, FC, memo } from 'react';
 import { parseDiff, Diff } from 'react-diff-view';
 import { Event, ProcessFile } from '../../../electron/types';
 import { FileTextOutlined } from '@ant-design/icons';
@@ -65,4 +65,4 @@ const FileDiff: FC<{ file: ProcessFile; showContent: boolean }> = ({ file, showC
     </div>
   );
 };
-export default FileDiff;
+export default memo(FileDiff);
