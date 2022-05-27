@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-27 15:41:11
- * @LastEditTime: 2022-05-27 16:32:16
+ * @LastEditTime: 2022-05-27 18:04:13
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\components\FileDiff\index.tsx
@@ -14,8 +14,8 @@ import { FileTextOutlined } from '@ant-design/icons';
 import 'react-diff-view/style/index.css';
 
 const FileDiff: FC<{ file: ProcessFile; showContent: boolean }> = ({ file, showContent }) => {
-  const diffFiles = parseDiff(file.diffPatchOfChTransform, { nearbySequences: 'zip' });
   const [show, setShow] = useState(showContent);
+  const diffFiles = show && parseDiff(file.diffPatchOfChTransform, { nearbySequences: 'zip' });
   const renderFile = ({ newPath, type, hunks }) => (
     <Diff key={newPath} viewType="split" diffType={type} hunks={hunks}></Diff>
   );
@@ -26,11 +26,14 @@ const FileDiff: FC<{ file: ProcessFile; showContent: boolean }> = ({ file, showC
         onClick={() => {
           setShow(!show);
         }}
-        title={show ? '点击折叠' : '点击展开'}
       >
-        <div className="flex gap-small item-center">
+        <div
+          className="flex gap-small item-center"
+          title={show ? '点击折叠' : '点击展开'}
+          style={{ maxWidth: 'calc(100% - 160px)' }}
+        >
           <FileTextOutlined />
-          {file.path}
+          <div className="text-ellipsis">{file.path}</div>
         </div>
         <div className="file-diff-buttons">
           <Button
@@ -47,9 +50,18 @@ const FileDiff: FC<{ file: ProcessFile; showContent: boolean }> = ({ file, showC
           >
             替换
           </Button>
+          <Button
+            size="small"
+            onClick={e => {
+              e.stopPropagation();
+              window.Main.emit(Event.LaunchEditor, file.path);
+            }}
+          >
+            打开该文件
+          </Button>
         </div>
       </div>
-      <div className={show ? 'show' : 'hide'}>{diffFiles.map(renderFile)}</div>
+      <div>{show && diffFiles.map(renderFile)}</div>
     </div>
   );
 };

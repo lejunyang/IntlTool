@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-05-27 16:48:37
+ * @LastEditTime: 2022-05-27 17:44:24
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
@@ -96,7 +96,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
         />
       </div>
       {transformedFiles.map((file, index) => (
-        <FileDiff file={file} showContent={index < 10} key={file.path} />
+        <FileDiff file={file} showContent={index < 5} key={file.path} />
       ))}
     </div>
   );

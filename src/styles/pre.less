@@ -1,16 +1,18 @@
 @small-gap: 8px;
 @normal-gap: 20px;
 
-.show {
-  opacity: 1;
-  pointer-events: unset;
-  height: unset;
-}
-
 .hide {
   opacity: 0;
   pointer-events: none;
-  height: 0px;
+  position: absolute;
+  top: -100px;
+  left: -100px;
+}
+
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .flex {
