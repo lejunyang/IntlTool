@@ -79,15 +79,22 @@ export const getChToIntlVisitor = (prefix: string = '', nameMap?: Parameters<typ
     /*
 		ArrowFunctionExpression处理这样的，usePageTitle(() => 'aa')
 		不考虑下面这样的以及一般的function
-		() => {
-			return 'bbb';
-		}
-		因为写出了函数体一般都不会直接返回字面量
-	*/
+	  */
     ArrowFunctionExpression(path: NodePath<ArrowFunctionExpression>, state) {
       const node = path.node.body;
       if (!containsCh(node)) return;
       path.get('body').replaceWith(generateIntlNode(prefix, node, nameMap));
+      state.isChTransformed = true;
+    },
+    /**
+     * () => {
+		 *  return 'bbb';
+     * }
+     */
+    ReturnStatement(path, state) {
+      const node = path.node.argument;
+      if (!containsCh(node)) return;
+      path.get('argument').replaceWith(generateIntlNode(prefix, node, nameMap));
       state.isChTransformed = true;
     },
     // 只处理单个函数调用的参数，其他情况的调用者callee不是Identifier，比如intl.get.d的callee就是MemberExpression

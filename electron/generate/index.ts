@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-05-26 23:16:52
+ * @LastEditTime: 2022-05-27 17:37:12
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -9,7 +9,7 @@
 import template from '@babel/template';
 import babelGenerate from '@babel/generator';
 import { generate } from 'escodegen';
-import type { Node, StringLiteral, TemplateLiteral, Expression, ObjectExpression } from '@babel/types';
+import type { Node, StringLiteral, TemplateLiteral, Expression, ObjectExpression, ConditionalExpression, BinaryExpression } from '@babel/types';
 import type { ESLintStringLiteral, Node as ESNode } from 'vue-eslint-parser/ast/nodes';
 import {
   stringLiteral,
@@ -19,6 +19,8 @@ import {
   isTemplateLiteral,
   isNode,
   isExpression,
+  templateElement,
+  templateLiteral
 } from '@babel/types';
 import { format, Options } from 'prettier';
 import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
@@ -31,7 +33,7 @@ import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
  */
 export function generateIntlNode(
   getString: string,
-  dValue: string | StringLiteral | TemplateLiteral | ESLintStringLiteral,
+  dValue: string | StringLiteral | TemplateLiteral | ESLintStringLiteral | ConditionalExpression | BinaryExpression,
   nameMap = { l1: 'intl', l2: 'get', l3: 'd' }
 ): Expression {
   let getParam: ObjectExpression;
@@ -61,6 +63,10 @@ export function generateIntlNode(
     //   qLast.value.cooked = qLast.value.cooked?.trimEnd();
     //   qLast.value.raw = qLast.value.raw.trimEnd();
     // }
+  } else {
+    // 其他情况则构造为一个模板字符串
+    getParam = objectExpression([objectProperty(stringLiteral('nameMe'), dValue)]);
+    dValue = templateLiteral([templateElement({ raw: '', cooked: '' }, true)], [dValue])
   }
   const build = template.expression(`
     ${nameMap.l1}.${nameMap.l2}(%%getString%%${getParam ? ', %%getParam%%' : ''}).${nameMap.l3}(%%dValue%%)
