@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-26 14:24:46
- * @LastEditTime: 2022-05-29 13:03:51
+ * @LastEditTime: 2022-05-29 17:11:02
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\vueTransformCh.ts
@@ -52,8 +52,8 @@ export function transformVueCh(file: ProcessFile, prefix = '') {
           const scriptStartTag = script.replace(/(<script.*?>)[\s\S]*?<\/script>/, '$1');
           file.chTransformedContent = file.chTransformedContent
             .replace(script, `${scriptStartTag}\r\n${generateAndFormat(scriptParseResult)}\r\n</script>`)
-            .replace(/\r\n{\/\/TEMP/g, '')
-            .replace(/}\/\/TEMP\r\n/g, '');
+            .replace(/\r\n{\s*\/\/TEMP/g, '')
+            .replace(/}\s*\/\/TEMP\r\n/g, '');
         } else {
           file.parseError = scriptParseResult.parseError;
           console.error(file.parseError);

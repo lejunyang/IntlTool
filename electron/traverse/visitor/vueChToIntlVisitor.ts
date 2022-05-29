@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-05-29 15:46:25
+ * @LastEditTime: 2022-05-29 19:39:13
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
@@ -50,8 +50,12 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
               if (isVText(child) && (containsCh(child.value) || rangeStart)) {
                 if (!rangeStart) rangeStart = child.range[0];
                 dStr += child.value.trim();
-              } else if (rangeStart && isVExpressionContainer(child) && index !== node.children.length - 1) {
-                // 如果它是children里的最后一个且为表达式，那就不计入了，毕竟前面的就已经可以组成intl，没必要带上后面的表达式
+              } else if (
+                rangeStart &&
+                isVExpressionContainer(child) &&
+                (node.children.length === 1 || index !== node.children.length - 1)
+              ) {
+                // 如果它是children里的最后一个且为表达式，那就不计入了（除非只有一个节点），毕竟前面的就已经可以组成intl，没必要带上后面的表达式
                 const exprCode = generateCode(child.expression);
                 dStr += `\${${exprCode}}`;
                 intlArg[`nameMe${index}`] = exprCode;
