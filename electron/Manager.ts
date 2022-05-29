@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-29 15:55:09
+ * @LastEditTime: 2022-05-29 16:04:55
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -116,7 +116,7 @@ export default class Manager {
       .map(file => omit(file, ['vars', 'parseResult', 'vueParseResult']))
       .sort((f1, f2) => {
         // 有parseError的排在前面
-        if (f1.parseError || f2.parseError) return (f1.parseError ?? '') < (f2.parseError ?? '') ? -1 : 1;
+        if (f1.parseError || f2.parseError) return (f1.parseError ?? '') > (f2.parseError ?? '') ? -1 : 1;
         else return f1.path < f2.path ? -1 : 1;
       });
   }
