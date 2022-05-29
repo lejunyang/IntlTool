@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-17 13:41:26
- * @LastEditTime: 2022-05-27 17:27:02
+ * @LastEditTime: 2022-05-29 20:00:32
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\stringUtils.ts
@@ -10,10 +10,9 @@ import type { StringLiteral, TemplateLiteral, ConditionalExpression, BinaryExpre
 import type { ESLintStringLiteral } from 'vue-eslint-parser/ast/nodes';
 import { isStringLiteral, isTemplateLiteral, isConditionalExpression, isBinaryExpression } from '@babel/types';
 import { isESLintStringLiteral } from './astUtils';
-import { generateCode } from '../generate';
 
 /**
- * @param input 字符串或AST字符串字面量节点或模板字符字面量节点，如果是三元表达式或二元表达式，会转换为代码并判断其中是否有中文，其他情况直接返回false
+ * @param input 字符串或AST字符串字面量节点、模板字符字面量节点、二元（仅限加号）、三元表达式，判断其中是否有中文，其他情况直接返回false
  * @returns 是否包含中文
  */
 export function containsCh(
@@ -26,10 +25,11 @@ export function containsCh(
     return reg.test(input.value);
   } else if (isTemplateLiteral(input)) {
     return !!input.quasis.find(t => reg.test(t.value.cooked ?? ''));
-  } else if (isConditionalExpression(input) || isBinaryExpression(input)) {
-    return containsCh(generateCode(input));
-  }
-  return false;
+  } else if (isConditionalExpression(input)) {
+    return containsCh(input.consequent) || containsCh(input.alternate);
+  } else if (isBinaryExpression(input, { operator: '+' })) {
+    return containsCh(input.left) || containsCh(input.right);
+  } return false;
 }
 
 export function replace(input: string, searchValue: string | RegExp, replaceValue: string): string {
