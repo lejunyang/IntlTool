@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-05-27 19:28:33
+ * @LastEditTime: 2022-05-29 15:46:25
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
@@ -30,7 +30,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
           } else {
             // 不是v指令的情况（缩写也算指令），检查其值是否包含中文
             if (!isVLiteral(node.value) || !containsCh(node.value.value)) return;
-            replaceStr = `:${node.key.name}="intl('${prefix}').d('${node.value.value}')"`;
+            replaceStr = `:${node.key.name}="intl('${prefix}').d('${node.value.value.trim()}')"`;
             file.isChTransformed = true;
           }
           break;
@@ -49,7 +49,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
               // 如果rangeStart有值了那就不用考虑它是否含有中文，因为有这种情况<div>中文{{a}}5555</div>
               if (isVText(child) && (containsCh(child.value) || rangeStart)) {
                 if (!rangeStart) rangeStart = child.range[0];
-                dStr += child.value;
+                dStr += child.value.trim();
               } else if (rangeStart && isVExpressionContainer(child) && index !== node.children.length - 1) {
                 // 如果它是children里的最后一个且为表达式，那就不计入了，毕竟前面的就已经可以组成intl，没必要带上后面的表达式
                 const exprCode = generateCode(child.expression);

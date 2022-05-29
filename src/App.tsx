@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-27 19:12:36
+ * @LastEditTime: 2022-05-27 20:11:00
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -26,6 +26,7 @@ const cacheMenus = (() => {
     return menus.map(menu => {
       const Com = menu.component;
       return (
+        // 这些页面不能包裹memo，因为只传了pageData过去，修改子项无法引起更新
         <div className={currentMenu.path === menu.path ? '' : 'hide'} key={menu.path}>
           {Com && <Com pageData={pageData} />}
         </div>

@@ -1,13 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-05-27 19:16:22
+ * @LastEditTime: 2022-05-28 10:40:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
  */
 import { Button, Input, Radio, Modal } from 'antd';
-import { useState, FC, memo } from 'react';
+import { useState, FC } from 'react';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Event } from '../../../electron/types';
 import FileDiff from '../../components/FileDiff';
@@ -101,4 +101,5 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
     </div>
   );
 };
-export default memo(ProcessCh);
+
+export default ProcessCh;

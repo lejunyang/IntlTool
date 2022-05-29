@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-28 14:56:29
- * @LastEditTime: 2022-05-19 22:15:00
+ * @LastEditTime: 2022-05-29 13:17:38
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageFiles\FileItem.tsx
@@ -24,7 +24,7 @@ const FileItem: FC<Pick<AppState, 'pageData'> & { file: TransferFile }> = ({ fil
           <a
             target="_blank"
             rel="noopener noreferrer"
-            className="ant-upload-list-item-name"
+            className={file.parseError ? 'ant-upload-list-item-name text-red' : 'ant-upload-list-item-name'}
             title={path}
             // 这个ant-upload-list-item-name里面有overflow省略号，但是它的宽度包含了后面的icon，直接来一个padding right
             style={{ paddingRight: '30px' }}

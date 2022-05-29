@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-05-29 10:47:38
+ * @LastEditTime: 2022-05-29 15:46:42
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -108,7 +108,7 @@ export function generateAndFormat(node: Node, formatOptions?: Options): string {
   return format(code, {
     parser: 'typescript', // parser根据语言必传
     semi: true,
-    singleQuote: true,
+    // singleQuote: true,
     arrowParens: 'avoid',
     printWidth: 120,
     endOfLine: 'crlf',
