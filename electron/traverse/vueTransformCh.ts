@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-26 14:24:46
- * @LastEditTime: 2022-05-27 15:31:29
+ * @LastEditTime: 2022-05-29 13:03:51
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\vueTransformCh.ts
@@ -25,14 +25,22 @@ export function transformVueCh(file: ProcessFile, prefix = '') {
   file.chTransformedContent = file.content;
   if (file.vueParseResult.templateBody)
     traverseNodes(file.vueParseResult.templateBody, getVueTemplateChToIntlVisitor(file, prefix));
-  // 遍历vue的script，这部分用babel处理  有多标签的情况。。。。
+  // 遍历vue的script，这部分用babel处理，有多个script标签的情况。。。。
   const scripts = file.chTransformedContent.match(/<script.*?>([\s\S]*?)<\/script>/g) || [];
   scripts.forEach(script => {
     let scriptCode = (script.match(/<script>([\s\S]+?)<\/script>/) || [])[1];
     if (scriptCode) {
       try {
-        // 去掉uniapp预编译注释，防止babel编译报错，后面再把//TEMP去掉
-        scriptCode = scriptCode.replace(/(<!--.+-->)/g, '//TEMP$1');
+        // 去掉uniappt条件编译注释，为这段代码套上一个{}，防止babel编译报错（有写了几个条件编译，然后定义了相同的变量的情况。。），后面再把//TEMP以及花括号去掉
+        // 。。。有例外情况，因为条件编译可以在任何位置，不是所有地方都能直接塞一个代码块的，比如methods里面，本身不是代码块的地方不能塞代码块
+        // 如果匹配的内容里面最后一个非空字符串是逗号，那就不替换了
+        scriptCode = scriptCode.replace(
+          /(\/\/.*?#ifn?def.*)([\s\S]*?)(\/\/.*?#endif)/g,
+          (_match, p1, p2, p3) => {
+            if (p2.trim().endsWith(',')) return p1 + p2 + p3;
+            else return `${p1}\r\n{//TEMP${p2}\r\n}//TEMP\r\n${p3}`;
+          }
+        );
         const scriptParseResult = parseJSCode(scriptCode);
         if (!scriptParseResult.parseError) {
           traverse<ProcessFile>(
@@ -44,17 +52,16 @@ export function transformVueCh(file: ProcessFile, prefix = '') {
           const scriptStartTag = script.replace(/(<script.*?>)[\s\S]*?<\/script>/, '$1');
           file.chTransformedContent = file.chTransformedContent
             .replace(script, `${scriptStartTag}\r\n${generateAndFormat(scriptParseResult)}\r\n</script>`)
-            .replace(/\/\/TEMP/g, '');
+            .replace(/\r\n{\/\/TEMP/g, '')
+            .replace(/}\/\/TEMP\r\n/g, '');
         } else {
           file.parseError = scriptParseResult.parseError;
           console.error(file.parseError);
           return;
         }
       } catch (e) {
-        const error = { ...e, message: e.message, path: file.path };
-        console.log('scriptCode', scriptCode);
-        file.parseError = JSON.stringify(error);
-        console.error(file.parseError);
+        const error = { ...e, message: e.message, path: file.path, stack: e.stack, scriptCode };
+        console.error('transformVueCh script error: ', error);
       }
     }
   });

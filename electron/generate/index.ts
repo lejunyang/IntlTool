@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-05-27 17:37:12
+ * @LastEditTime: 2022-05-29 10:47:38
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -9,7 +9,15 @@
 import template from '@babel/template';
 import babelGenerate from '@babel/generator';
 import { generate } from 'escodegen';
-import type { Node, StringLiteral, TemplateLiteral, Expression, ObjectExpression, ConditionalExpression, BinaryExpression } from '@babel/types';
+import type {
+  Node,
+  StringLiteral,
+  TemplateLiteral,
+  Expression,
+  ObjectExpression,
+  ConditionalExpression,
+  BinaryExpression,
+} from '@babel/types';
 import type { ESLintStringLiteral, Node as ESNode } from 'vue-eslint-parser/ast/nodes';
 import {
   stringLiteral,
@@ -20,7 +28,7 @@ import {
   isNode,
   isExpression,
   templateElement,
-  templateLiteral
+  templateLiteral,
 } from '@babel/types';
 import { format, Options } from 'prettier';
 import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
@@ -47,30 +55,18 @@ export function generateIntlNode(
       objectProperty(stringLiteral(`nameMe${index}`), isExpression(expr) ? expr : toBabelLiteral(expr))
     );
     getParam = properties.length ? objectExpression(properties) : null;
-    // 以下是提取模板字符串里的普通字符串，不要了
-    // // 首尾trim，不能直接对quasis首尾进行trim，需要判断该部分字符串是否真的是在首尾
-    // // 比如`${a} 11 ${c} 22 ${b}`这种情况，11左边的空格和22右边的空格可不能直接拿掉
-    // const qFirst = dValue.quasis[0];
-    // const qLast = dValue.quasis[dValue.quasis.length - 1];
-    // const eFirst = dValue.expressions[0];
-    // const eLast = dValue.expressions[dValue.expressions.length - 1];
-    // if (qFirst && (!eFirst || qFirst.start! < eFirst.start!)) {
-    //   qFirst.value.cooked = qFirst.value.cooked?.trimStart(); // trimStart是es2019的
-    //   qFirst.value.raw = qFirst.value.raw.trimStart();
-    // }
-    // // 当quasis数组长度大于1时，判断expressions里面有没有，没有的话就是纯字符串，直接trimEnd，有的话判断quasis的最后一项是不是在expressions最后一项的后面
-    // if (qFirst !== qLast && (!eLast || qLast.start! > eLast.start!)) {
-    //   qLast.value.cooked = qLast.value.cooked?.trimEnd();
-    //   qLast.value.raw = qLast.value.raw.trimEnd();
-    // }
   } else {
     // 其他情况则构造为一个模板字符串
     getParam = objectExpression([objectProperty(stringLiteral('nameMe'), dValue)]);
-    dValue = templateLiteral([templateElement({ raw: '', cooked: '' }, true)], [dValue])
+    // quais一定比expression的长度多一，最少开头和结尾？
+    dValue = templateLiteral(
+      [templateElement({ raw: '', cooked: '' }), templateElement({ raw: '', cooked: '' }, true)],
+      [dValue]
+    );
   }
-  const build = template.expression(`
-    ${nameMap.l1}.${nameMap.l2}(%%getString%%${getParam ? ', %%getParam%%' : ''}).${nameMap.l3}(%%dValue%%)
-  `);
+  const build = template.expression(
+    `${nameMap.l1}.${nameMap.l2}(%%getString%%${getParam ? ', %%getParam%%' : ''}).${nameMap.l3}(%%dValue%%)`
+  );
   return build({
     getString: stringLiteral(getString),
     ...(getParam ? { getParam } : {}), // 如果build里面没写还传的话会报错
@@ -107,6 +103,7 @@ export function generateAndFormat(node: Node, formatOptions?: Options): string {
     jsescOption: {
       minimal: true,
     },
+    retainLines: true, // 尝试保留相同的行号
   });
   return format(code, {
     parser: 'typescript', // parser根据语言必传

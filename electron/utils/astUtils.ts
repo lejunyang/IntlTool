@@ -20,7 +20,15 @@ import type {
   VElement,
 } from 'vue-eslint-parser/ast/nodes';
 import type { StringLiteral, TemplateLiteral, TemplateElement, Expression, TSType, CallExpression } from '@babel/types';
-import { isStringLiteral, isTemplateLiteral, numericLiteral, stringLiteral, booleanLiteral } from '@babel/types';
+import {
+  isStringLiteral,
+  isTemplateLiteral,
+  numericLiteral,
+  stringLiteral,
+  booleanLiteral,
+  isThisExpression,
+  isIdentifier,
+} from '@babel/types';
 import { shallowEqual } from './objectUtils';
 
 /**
@@ -30,7 +38,6 @@ import { shallowEqual } from './objectUtils';
  * ClassMethod, ObjectProperty, and ObjectMethod value property's properties in FunctionExpression is coerced/brought into the main method node.
  * vue-eslint-parser的ast就是基于estree，所以针对不同的node写函数进行判断，其他的用babel的就行
  */
-
 
 export function isESLintStringLiteral(node: any, value?: string): node is ESLintStringLiteral {
   return node?.type === 'Literal' && typeof node?.value === 'string' && (!value || value === node.value);
@@ -66,6 +73,14 @@ export function isVExpressionContainer(node: any): node is VExpressionContainer 
 export function isStringNode(node: any): node is ESLintStringLiteral | StringLiteral | TemplateLiteral {
   if (isESLintStringLiteral(node)) return true;
   else return isStringLiteral(node) || isTemplateLiteral(node);
+}
+
+/**
+ * 将this也视为Identifier的版本，省得intl老是要判断..
+ */
+export function isIdentifierPlus(node: any, options?: Record<any, any>) {
+  if (options?.name === 'this') return isThisExpression(node);
+  else return isIdentifier(node, options);
 }
 
 /**
@@ -124,7 +139,7 @@ export function isSingleStrArg(
 
 /**
  * 将number string boolean类型转为Babel Literal节点
- * @param literal 
+ * @param literal
  */
 export function toBabelLiteral(literal: TSType) {
   switch (typeof literal) {

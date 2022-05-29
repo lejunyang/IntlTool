@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-05-27 14:35:07
+ * @LastEditTime: 2022-05-29 11:32:15
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\chToIntlVisitor.ts
@@ -17,10 +17,11 @@ import type {
   ArrowFunctionExpression,
   CallExpression,
 } from '@babel/types';
-import { jsxExpressionContainer, isIdentifier, isObjectProperty } from '@babel/types';
+import { jsxExpressionContainer, isIdentifier, isObjectProperty, isMemberExpression, isCallExpression } from '@babel/types';
 import { generateIntlNode } from '../../generate';
 import { containsCh } from '../../utils/stringUtils';
 import type { ProcessFile } from '../../types';
+import { isIdentifierPlus } from '../../utils/astUtils';
 
 /**
  * 用于将代码中的中文替换为intl的visitor
@@ -63,6 +64,20 @@ export const getChToIntlVisitor = (prefix: string = '', nameMap?: Parameters<typ
         path.container.find(i => isObjectProperty(i) && isIdentifier(i.key, { name: 'code' }))
       )
         return;
+      // 下面这一段是为了防止在generateIntlNode的时候，getParam添加了一个含有中文值的对象，然后又会触发到ObjectProperty，就死循环了
+      if (isCallExpression(path.parentPath?.parent)) {
+        // path.parentPath.parent存在的话就是get调用表达式，可能为intl.get('')，可能为intl('')
+        const callExpr = path.parentPath.parent.callee;
+        // 为intl.get('')，同样的，l1需要考虑为this的情况。。。
+        if (
+          isMemberExpression(callExpr) &&
+          isIdentifierPlus(callExpr.object, { name: nameMap.l1 }) &&
+          isIdentifier(callExpr.property, { name: nameMap.l2 })
+        )
+          return;
+        // 为intl('')
+        if (isIdentifier(callExpr, { name: nameMap.l2 })) return;
+      }
       path.get('value').replaceWith(generateIntlNode(prefix, node, nameMap));
       state.isChTransformed = true;
     },
