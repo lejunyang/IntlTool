@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-05-29 11:32:15
+ * @LastEditTime: 2022-05-29 20:03:26
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\chToIntlVisitor.ts
@@ -35,6 +35,13 @@ export const getChToIntlVisitor = (prefix: string = '', nameMap?: Parameters<typ
       const node = path.node.init;
       if (!containsCh(node)) return;
       path.get('init').replaceWith(generateIntlNode(prefix, node, nameMap));
+      state.isChTransformed = true;
+    },
+    // 赋值表达式
+    AssignmentExpression(path, state) {
+      const node = path.node.right;
+      if (!containsCh(node)) return;
+      path.get('right').replaceWith(generateIntlNode(prefix, node, nameMap));
       state.isChTransformed = true;
     },
     // 将jsx属性中的中文字符串替换为intl表达式
