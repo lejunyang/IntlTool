@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-05-28 10:40:36
+ * @LastEditTime: 2022-05-29 15:50:46
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
@@ -14,8 +14,8 @@ import FileDiff from '../../components/FileDiff';
 import { AppState } from '../../@types';
 
 const options = [
-  { label: 'side-by-side', value: 'side-by-side' },
-  { label: 'line-by-line', value: 'line-by-line' },
+  { label: 'side-by-side', value: 'split' },
+  { label: 'line-by-line', value: 'unified' },
 ];
 
 const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
@@ -25,7 +25,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
     remoteData: { files },
   },
 }) => {
-  const [outputFormat, setOutputFormat] = useState<'side-by-side' | 'line-by-line'>('side-by-side');
+  const [outputFormat, setOutputFormat] = useState<'split' | 'unified'>('split');
 
   const transformedFiles = files.filter(file => file.isChTransformed);
 
@@ -85,18 +85,20 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
           </Button>
         )}
       </div>
-      <div>
-        <Radio.Group
-          options={options}
-          onChange={e => {
-            setOutputFormat(e.target.value);
-          }}
-          value={outputFormat}
-          optionType="button"
-        />
-      </div>
+      {!!transformedFiles.length && (
+        <div>
+          <Radio.Group
+            options={options}
+            onChange={e => {
+              setOutputFormat(e.target.value);
+            }}
+            value={outputFormat}
+            optionType="button"
+          />
+        </div>
+      )}
       {transformedFiles.map((file, index) => (
-        <FileDiff file={file} showContent={index < 5} key={file.path} />
+        <FileDiff file={file} showContent={index < 5} key={file.path} outputFormat={outputFormat} />
       ))}
     </div>
   );

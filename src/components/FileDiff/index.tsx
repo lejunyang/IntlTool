@@ -13,11 +13,15 @@ import { Event, ProcessFile } from '../../../electron/types';
 import { FileTextOutlined } from '@ant-design/icons';
 import 'react-diff-view/style/index.css';
 
-const FileDiff: FC<{ file: ProcessFile; showContent: boolean }> = ({ file, showContent }) => {
+const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'split' | 'unified' }> = ({
+  file,
+  showContent,
+  outputFormat = 'split',
+}) => {
   const [show, setShow] = useState(showContent);
   const diffFiles = show && parseDiff(file.diffPatchOfChTransform, { nearbySequences: 'zip' });
   const renderFile = ({ newPath, type, hunks }) => (
-    <Diff key={newPath} viewType="split" diffType={type} hunks={hunks}></Diff>
+    <Diff key={newPath} viewType={outputFormat} diffType={type} hunks={hunks}></Diff>
   );
   return (
     <div className="file-diff">
