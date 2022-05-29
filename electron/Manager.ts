@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-27 16:49:11
+ * @LastEditTime: 2022-05-29 15:55:09
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -211,21 +211,15 @@ export default class Manager {
                 // 没有写额外参数，检查这个需要调用的函数的参数数量是否为1
                 if (StringUtils[funcName].length === 1) return StringUtils[funcName](p);
                 else {
-                  console.error({
-                    type: 'error',
-                    message: `错误: ${funcName}需要${StringUtils[funcName].length - 1}个额外参数，但并没有传递参数`,
-                  });
+                  console.error(`错误: ${funcName}需要${StringUtils[funcName].length - 1}个额外参数，但并没有传递参数`);
                 }
               } else {
                 const args = params.split(',').map(param => param.trim());
                 if (args.length === StringUtils[funcName].length - 1) return StringUtils[funcName](p, ...args);
                 else
-                  console.error({
-                    type: 'error',
-                    message: `错误: 传给${funcName}的额外参数数量为${args.length}，应为${
-                      StringUtils[funcName].length - 1
-                    }个`,
-                  });
+                  console.error(
+                    `错误: 传给${funcName}的额外参数数量为${args.length}，应为${StringUtils[funcName].length - 1}个`
+                  );
               }
             } else return p;
           } else return str;
