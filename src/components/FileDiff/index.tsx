@@ -12,6 +12,7 @@ import { parseDiff, Diff } from 'react-diff-view';
 import { Event, ProcessFile } from '../../../electron/types';
 import { FileTextOutlined } from '@ant-design/icons';
 import 'react-diff-view/style/index.css';
+import "./index.less";
 
 const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'split' | 'unified' }> = ({
   file,
