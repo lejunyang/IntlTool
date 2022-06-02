@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-29 16:04:55
+ * @LastEditTime: 2022-05-29 23:27:58
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -24,6 +24,10 @@ export default class Manager {
   };
 
   private mode = 'React';
+
+  getMode() {
+    return this.mode;
+  }
 
   switchMode(mode: string) {
     if (this.modeMap[mode]) {

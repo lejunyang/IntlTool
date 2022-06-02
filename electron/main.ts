@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-26 21:52:38
+ * @LastEditTime: 2022-05-29 23:28:27
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -189,7 +189,9 @@ async function registerListeners() {
        */
       properties: ['createDirectory', 'showOverwriteConfirmation'],
       // 过滤条件
-      filters: [{ name: 'CSV', extensions: ['csv'] }],
+      filters: [
+        manager.getMode() === 'React' ? { name: 'CSV', extensions: ['csv'] } : { name: 'JSON', extensions: ['json'] },
+      ],
     });
     if (path) {
       // 这个writeFileSync的utf-8是没有BOM的，encoding选项也不支持带bom的utf-8，而没有bom的utf8用excel打开会乱码。。
