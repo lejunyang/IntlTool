@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 14:33:35
- * @LastEditTime: 2022-05-25 11:51:51
+ * @LastEditTime: 2022-06-02 14:37:38
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueIntlTraverseVisitor.ts
@@ -58,7 +58,8 @@ export const getVueIntlTraverseVisitor = (
   // visitorKeys指明要继续traverse每个类型下的哪些节点，默认已经定义了一些，就不用自己传了
   return {
     enterNode: (node: Node) => {
-      if (node.type !== 'CallExpression') return;
+      // node可能为空，比如没有template的vue代码（微笑
+      if (node?.type !== 'CallExpression') return;
       const dArgs = node.arguments;
       // 检查d里面是否仅有一个参数且为字符串
       if (!isSingleStrArg(dArgs)) return;
