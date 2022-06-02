@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-05-29 20:03:26
+ * @LastEditTime: 2022-06-02 17:49:09
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\chToIntlVisitor.ts
@@ -110,7 +110,7 @@ export const getChToIntlVisitor = (prefix: string = '', nameMap?: Parameters<typ
     },
     /**
      * () => {
-		 *  return 'bbb';
+     *  return 'bbb';
      * }
      */
     ReturnStatement(path, state) {
@@ -119,7 +119,7 @@ export const getChToIntlVisitor = (prefix: string = '', nameMap?: Parameters<typ
       path.get('argument').replaceWith(generateIntlNode(prefix, node, nameMap));
       state.isChTransformed = true;
     },
-    // 只处理单个函数调用的参数，其他情况的调用者callee不是Identifier，比如intl.get.d的callee就是MemberExpression
+    // 只处理单个Identifier函数调用的参数，其他情况的调用者callee不是Identifier，比如intl.get.d的callee就是MemberExpression，console.log也是成员访问
     CallExpression(path: NodePath<CallExpression>, state) {
       if (!isIdentifier(path.node.callee)) return;
       const args = path.node.arguments;

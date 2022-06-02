@@ -1,25 +1,30 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-05-29 19:39:13
+ * @LastEditTime: 2022-06-02 18:30:20
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
  */
 import type { Visitor } from 'vue-eslint-parser/ast/traverse';
+// import { isTemplateLiteral } from '@babel/types';
 import { isVLiteral, isVText, isVExpressionContainer, isVElement } from '../../utils/astUtils';
 import type { ProcessFile } from '../../types';
 import { containsCh } from '../../utils/stringUtils';
 import { generateCode } from '../../generate';
-// import { VLiteral } from 'vue-eslint-parser/ast/nodes';
 
 export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') => {
   file.chTransformedContent = file.content;
   // 由于是直接使用字符串进行替换，原AST上的range代表的index在进行一次替换后就有偏差了。。后面的节点index位置全是错的，直接爆炸
   // 用leftStartIndex标明最左边的进行过替换的节点开始位置，其后面的节点全部都要重算index，其前面的不用。indexAcc表示增加的长度
-  let indexAcc = 0,
-    leftStartIndex = Number.MAX_SAFE_INTEGER;
-  const getCorrectIndex = (index: number) => (index > leftStartIndex ? index + indexAcc : index);
+  // let indexAcc = 0,
+  //   leftStartIndex = Number.MAX_SAFE_INTEGER;
+  // const getCorrectIndex = (index: number) => (index > leftStartIndex ? index + indexAcc : index);
+
+  // 上面这个废弃，有bug
+  // 我下面的VElement的遍历方式，会提前遍历到childrent里面的text，比如<p><div>我</div>文字</p>，就是先访问到p里面的“文字”，然后再从traverse进入到div，这样的顺序就乱了，indexAcc变得不可信
+  // 故不再进行实时替换，而是存下来，在leave template的时候排个序，根据节点位置从头替换过去
+  const replaceActions: { rangeStart: number; replaceStr: string; rangeEnd: number }[] = [];
   return {
     enterNode(node) {
       let replaceStr: string;
@@ -27,11 +32,15 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
         case 'VAttribute':
           if (node.directive) {
             // 目前先不考虑 :attr="`中文`"，:option="{ a: '中文' }"这样的情况
+            // const expr = node.value.expression;
+            // if (isTemplateLiteral(expr) && containsCh(expr)) {
+            //   replaceStr = 
+            // }
           } else {
             // 不是v指令的情况（缩写也算指令），检查其值是否包含中文
             if (!isVLiteral(node.value) || !containsCh(node.value.value)) return;
             replaceStr = `:${node.key.name}="intl('${prefix}').d('${node.value.value.trim()}')"`;
-            file.isChTransformed = true;
+            replaceActions.push({ rangeStart: node.range[0], replaceStr, rangeEnd: node.range[1] });
           }
           break;
         case 'VElement':
@@ -55,6 +64,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
                 isVExpressionContainer(child) &&
                 (node.children.length === 1 || index !== node.children.length - 1)
               ) {
+                // FIXME 有个bug，把最后一个表达式忽略了
                 // 如果它是children里的最后一个且为表达式，那就不计入了（除非只有一个节点），毕竟前面的就已经可以组成intl，没必要带上后面的表达式
                 const exprCode = generateCode(child.expression);
                 dStr += `\${${exprCode}}`;
@@ -65,13 +75,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
                 const intlArgStr = JSON.stringify(intlArg).replaceAll('"', '');
                 replaceStr = `{{ intl("${prefix}"${intlArgStr === '{}' ? '' : `, ${intlArgStr}`}).d(\`${dStr}\`) }}`;
                 const rangeEnd = index === node.children.length - 1 ? child.range[1] : child.range[0];
-                file.chTransformedContent =
-                  file.chTransformedContent.slice(0, getCorrectIndex(rangeStart)) +
-                  replaceStr +
-                  file.chTransformedContent.slice(getCorrectIndex(rangeEnd));
-                file.isChTransformed = true;
-                leftStartIndex = Math.min(rangeStart, leftStartIndex);
-                indexAcc += replaceStr.length - rangeEnd + rangeStart;
+                replaceActions.push({ rangeStart, replaceStr, rangeEnd });
                 replaceStr = '';
                 rangeStart = null;
                 intlArg = {};
@@ -81,15 +85,20 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
           }
           break;
       }
-      if (replaceStr) {
-        file.chTransformedContent =
-          file.chTransformedContent.slice(0, getCorrectIndex(node.range[0])) +
-          replaceStr +
-          file.chTransformedContent.slice(getCorrectIndex(node.range[1]));
-        leftStartIndex = Math.min(node.range[0], leftStartIndex);
-        indexAcc += replaceStr.length - node.range[1] + node.range[0];
-      }
     },
-    leaveNode() {},
+    leaveNode(node) {
+      if (node?.type !== 'VElement' || node.name !== 'template') return;
+      if (replaceActions.length) file.isChTransformed = true;
+      else return;
+      replaceActions.sort((a, b) => a.rangeStart - b.rangeStart);
+      let indexAcc = 0;
+      replaceActions.forEach(action => {
+        file.chTransformedContent =
+          file.chTransformedContent.slice(0, action.rangeStart + indexAcc) +
+          action.replaceStr +
+          file.chTransformedContent.slice(action.rangeEnd + indexAcc);
+        indexAcc += action.replaceStr.length - action.rangeEnd + action.rangeStart;
+      });
+    },
   } as Visitor;
 };
