@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-05-27 17:13:08
+ * @LastEditTime: 2022-05-29 23:34:13
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
@@ -103,8 +103,13 @@ export function processTemplateLiteral<T extends ProcessParams['type']>(
                   result.content += `{${objProp.key.name}}`;
                   varNameFind = true;
                 }
-              } else if (isExpression(i)) {
-                if (!varNameFind) varNameFind = exprCode === generateCode(objProp.value);
+              } else if (isExpression(i) && isIdentifier(objProp.key)) {
+                if (!varNameFind) {
+                  varNameFind = exprCode === generateCode(objProp.value);
+                  if (varNameFind) {
+                    result.content += `{${objProp.key.name}}`;
+                  }
+                }
               }
             });
             if (!varNameFind) result.error += `d里面有模板字符串变量或表达式'${exprCode}'，但get的第二个参数缺少该值；`;
