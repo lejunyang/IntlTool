@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-05-29 15:46:42
+ * @LastEditTime: 2022-06-02 17:43:05
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -17,6 +17,7 @@ import type {
   ObjectExpression,
   ConditionalExpression,
   BinaryExpression,
+  LogicalExpression,
 } from '@babel/types';
 import type { ESLintStringLiteral, Node as ESNode } from 'vue-eslint-parser/ast/nodes';
 import {
@@ -29,9 +30,16 @@ import {
   isExpression,
   templateElement,
   templateLiteral,
+  isConditionalExpression,
+  conditionalExpression,
+  isLogicalExpression,
+  logicalExpression,
+  isBinaryExpression,
+  binaryExpression,
 } from '@babel/types';
 import { format, Options } from 'prettier';
 import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
+import { containsCh } from '../utils/stringUtils';
 
 /**
  * 生成l1.l2().l3()的intl AST节点，l1、l2、l3的名字由参数nameMap确定，默认为intl.get().d()
@@ -41,7 +49,14 @@ import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
  */
 export function generateIntlNode(
   getString: string,
-  dValue: string | StringLiteral | TemplateLiteral | ESLintStringLiteral | ConditionalExpression | BinaryExpression,
+  dValue:
+    | string
+    | StringLiteral
+    | TemplateLiteral
+    | ESLintStringLiteral
+    | ConditionalExpression
+    | BinaryExpression
+    | LogicalExpression,
   nameMap = { l1: 'intl', l2: 'get', l3: 'd' }
 ): Expression {
   let getParam: ObjectExpression;
@@ -55,6 +70,22 @@ export function generateIntlNode(
       objectProperty(stringLiteral(`nameMe${index}`), isExpression(expr) ? expr : toBabelLiteral(expr))
     );
     getParam = properties.length ? objectExpression(properties) : null;
+  } else if (isBinaryExpression(dValue) || isLogicalExpression(dValue)) {
+    // 如果是二元表达式或逻辑表达式，那么仍然返回它，尝试操作符两边的值转为intl
+    const left = containsCh(dValue.left) ? generateIntlNode(getString, dValue.left, nameMap) : dValue.left;
+    const right = containsCh(dValue.right) ? generateIntlNode(getString, dValue.right, nameMap) : dValue.right;
+    return isBinaryExpression(dValue)
+      ? binaryExpression(dValue.operator, left, right)
+      : logicalExpression(dValue.operator, left as Expression, right);
+  } else if (isConditionalExpression(dValue)) {
+    // 如果是三元表达式 ? :  那么仍然返回三元表达式，尝试将后面的两个值转为intl
+    const consequent = containsCh(dValue.consequent)
+      ? generateIntlNode(getString, dValue.consequent, nameMap)
+      : dValue.consequent;
+    const alternate = containsCh(dValue.alternate)
+      ? generateIntlNode(getString, dValue.alternate, nameMap)
+      : dValue.alternate;
+    return conditionalExpression(dValue.test, consequent, alternate);
   } else {
     // 其他情况则构造为一个模板字符串
     getParam = objectExpression([objectProperty(stringLiteral('nameMe'), dValue)]);
