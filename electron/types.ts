@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-06-06 13:46:05
+ * @LastEditTime: 2022-06-06 15:29:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -85,6 +85,7 @@ export enum Event {
   LaunchEditor = 'launch-editor', // 打开编辑器
   DownloadIntlResult = 'download-intl-result',
   SelectFile = 'select-file',
+  SetCommonIntlData = 'set-common-intl-data',
 }
 
 export enum Mode {
@@ -111,4 +112,5 @@ export type IntlOptions = {
   ignorePrefix?: boolean;
   formatAfterTransform?: boolean;
   formatOptions?: PrettierOptions;
+  commonIntlData?: object;
 };

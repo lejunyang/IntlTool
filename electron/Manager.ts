@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-06-06 14:02:11
+ * @LastEditTime: 2022-06-06 15:33:58
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -18,15 +18,18 @@ export default class Manager {
     [Mode.HzeroIntlReact]: {
       allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
       formatAfterTransform: true,
+      commonIntlData: {},
     },
     [Mode.VueI18N]: {
       allowedFileSuffix: new Set(['.vue']),
       formatAfterTransform: true,
+      commonIntlData: {},
     },
     [Mode.UmiIntlReact]: {
       allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
       ignorePrefix: true,
       formatAfterTransform: true,
+      commonIntlData: {},
     },
   };
 
@@ -43,6 +46,14 @@ export default class Manager {
       this.resetAll();
     } else {
       console.error(`模式${mode}不存在`);
+    }
+  }
+
+  setModeData(mode: any, key: string, data: any) {
+    if (this.modeMap[mode] && this.modeMap[mode][key]) {
+      this.modeMap[mode][key] = data;
+    } else {
+      console.error(`模式${mode}或key${key}不存在`);
     }
   }
 
@@ -196,6 +207,7 @@ export default class Manager {
       allowedFileSuffix: this.getAllowedFileSuffix(),
       excludedPaths: this.getExcludedPaths(),
       files: this.getFiles(),
+      commonIntlData: this.modeMap[this.mode].commonIntlData,
     };
   }
 

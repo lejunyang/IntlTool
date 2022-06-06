@@ -49,6 +49,7 @@ export function App() {
         intlResult: [],
         allowedFileSuffix: [],
         excludedPaths: [],
+        commonIntlData: {},
       },
     },
   });

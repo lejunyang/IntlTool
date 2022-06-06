@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-06-06 13:55:35
+ * @LastEditTime: 2022-06-06 15:29:26
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -47,6 +47,7 @@ import { IntlOptions } from '../types';
  * @param getString
  * @param dValue 字符串或AST字符串字面量节点
  * @param nameMap l1.l2().l3()，它们三个名字的映射
+ * @param commonIntlData 公共的intl数据，当中文一致时，编码则直接使用那个中文的编码，而非prefix
  */
 export function generateIntlNode(
   getString: string,
@@ -58,13 +59,18 @@ export function generateIntlNode(
     | ConditionalExpression
     | BinaryExpression
     | LogicalExpression,
-  nameMap = { l1: 'intl', l2: 'get', l3: 'd' }
+  nameMap = { l1: 'intl', l2: 'get', l3: 'd' },
+  commonIntlData = {}
 ): Expression {
   let getParam: ObjectExpression;
   if (typeof dValue === 'string') {
-    dValue = stringLiteral(dValue.trim());
+    dValue = dValue.trim();
+    if (commonIntlData[dValue]) getString = commonIntlData[dValue];
+    dValue = stringLiteral(dValue);
   } else if (isStringLiteral(dValue) || isESLintStringLiteral(dValue)) {
     dValue.value = dValue.value.trim();
+    const d = dValue.value.trim()
+    if (commonIntlData[d]) getString = commonIntlData[d];
   } else if (isTemplateLiteral(dValue)) {
     // d里面使用了模板字符串且有表达式时，需要生成对应的get参数
     const properties = dValue.expressions.map((expr, index) =>

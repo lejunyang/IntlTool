@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-06-06 11:20:19
+ * @LastEditTime: 2022-06-06 15:25:27
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\chToIntlVisitor.ts
@@ -29,28 +29,28 @@ import { isIdentifierPlus } from '../../utils/astUtils';
  * @returns
  */
 export const getChToIntlVisitor = (options: IntlOptions) => {
-  const { prefix, nameMap } = options;
+  const { prefix, nameMap, commonIntlData } = options;
   const callExpressionBlackList = ['log', nameMap.l3]; // 函数调用表达式，callee的黑名单
   const visitor: Visitor<ProcessFile> = {
     // 为什么不用StringLiteral嵌套在VariableDeclarator里呢，因为除了const a = 'bbb'，还有const b = intl.get('dfs').d('dfas')，其中同样也有StringLiteral
     VariableDeclarator(path: NodePath<VariableDeclarator>, state) {
       const node = path.node.init;
       if (!containsCh(node)) return;
-      path.get('init').replaceWith(generateIntlNode(prefix, node, nameMap));
+      path.get('init').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
       state.isChTransformed = true;
     },
     // 赋值表达式
     AssignmentExpression(path, state) {
       const node = path.node.right;
       if (!containsCh(node)) return;
-      path.get('right').replaceWith(generateIntlNode(prefix, node, nameMap));
+      path.get('right').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
       state.isChTransformed = true;
     },
     // 将jsx属性中的中文字符串替换为intl表达式
     JSXAttribute(path: NodePath<JSXAttribute>, state) {
       const node = path.node.value;
       if (!containsCh(node)) return;
-      path.get('value').replaceWith(jsxExpressionContainer(generateIntlNode(prefix, node, nameMap)));
+      path.get('value').replaceWith(jsxExpressionContainer(generateIntlNode(prefix, node, nameMap, commonIntlData)));
       state.isChTransformed = true;
     },
     // 将jsx children中的中文字符串替换为intl表达式
@@ -58,14 +58,14 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
       const value = path.node.value;
       if (!containsCh(value)) return;
       // JSXText是直接将它自己这个path替换，那个value已经没有path了
-      path.replaceWith(jsxExpressionContainer(generateIntlNode(prefix, value, nameMap)));
+      path.replaceWith(jsxExpressionContainer(generateIntlNode(prefix, value, nameMap, commonIntlData)));
       state.isChTransformed = true;
     },
     // jsx表达式
     JSXExpressionContainer(path, state) {
       const node = path.node.expression;
       if (!containsCh(node)) return;
-      path.get('expression').replaceWith(generateIntlNode(prefix, node, nameMap));
+      path.get('expression').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
       state.isChTransformed = true;
     },
     // 对象键值
@@ -94,7 +94,7 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
         // 为intl('')
         if (isIdentifier(callExpr, { name: nameMap.l2 })) return;
       }
-      path.get('value').replaceWith(generateIntlNode(prefix, node, nameMap));
+      path.get('value').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
       state.isChTransformed = true;
     },
     // 数组
@@ -103,7 +103,7 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
       const elementPaths = path.get('elements');
       elements.forEach((e, index) => {
         if (!containsCh(e)) return;
-        elementPaths[index].replaceWith(generateIntlNode(prefix, e, nameMap));
+        elementPaths[index].replaceWith(generateIntlNode(prefix, e, nameMap, commonIntlData));
         state.isChTransformed = true;
       });
     },
@@ -114,7 +114,7 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
     ArrowFunctionExpression(path: NodePath<ArrowFunctionExpression>, state) {
       const node = path.node.body;
       if (!containsCh(node)) return;
-      path.get('body').replaceWith(generateIntlNode(prefix, node, nameMap));
+      path.get('body').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
       state.isChTransformed = true;
     },
     /**
@@ -125,7 +125,7 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
     ReturnStatement(path, state) {
       const node = path.node.argument;
       if (!containsCh(node)) return;
-      path.get('argument').replaceWith(generateIntlNode(prefix, node, nameMap));
+      path.get('argument').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
       state.isChTransformed = true;
     },
     // 当调用者callee是成员表达式，且名字在黑名单里则不访问，比如intl.get.d的callee就是MemberExpression，然后d在黑名单里，console.log也是成员访问
@@ -140,7 +140,7 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
       const argumentsPaths = path.get('arguments');
       args.forEach((a, index) => {
         if (!containsCh(a)) return;
-        argumentsPaths[index].replaceWith(generateIntlNode(prefix, a, nameMap));
+        argumentsPaths[index].replaceWith(generateIntlNode(prefix, a, nameMap, commonIntlData));
         state.isChTransformed = true;
       });
     },
@@ -151,7 +151,7 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
       const argumentsPaths = path.get('arguments');
       args.forEach((a, index) => {
         if (!containsCh(a)) return;
-        argumentsPaths[index].replaceWith(generateIntlNode(prefix, a, nameMap));
+        argumentsPaths[index].replaceWith(generateIntlNode(prefix, a, nameMap, commonIntlData));
         state.isChTransformed = true;
       });
     },

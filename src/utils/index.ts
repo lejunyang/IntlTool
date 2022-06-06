@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:33:40
- * @LastEditTime: 2022-02-17 17:13:51
+ * @LastEditTime: 2022-06-06 16:53:08
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\utils\index.ts
@@ -50,4 +50,17 @@ export function parseCss(cssJson: string) {
     console.error(e);
     return e.toString();
   }
+}
+
+/**
+ * 将{ a: 'b' }变为{ b: 'a' }，对象中只有值为字符串才会变成key
+ */
+export function reverseObject(obj: object) {
+  const result = {};
+  for (const key in obj) {
+    if (typeof obj[key] === 'string') {
+      result[obj[key]] = key;
+    }
+  }
+  return result;
 }

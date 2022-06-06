@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-29 23:28:27
+ * @LastEditTime: 2022-06-06 16:35:07
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -157,6 +157,15 @@ async function registerListeners() {
     manager.setExcludedPaths(data);
     updateRemoteData();
   });
+
+  ipcMain.on(Event.SetCommonIntlData, (_, data: any) => {
+    if (data !== null && typeof data === 'object') {
+      manager.setModeData(manager.getMode(), 'commonIntlData', data);
+      updateRemoteData();
+    } else {
+      console.error('CommonIntlData必须为对象');
+    }
+  })
 
   ipcMain.on(Event.ScanIntl, () => {
     manager.traverseAllIntl();

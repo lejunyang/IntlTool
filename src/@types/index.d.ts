@@ -21,6 +21,7 @@ export type AppState = {
       allowedFileSuffix: string[]; // 文件使用
       excludedPaths: string[]; // 文件使用
       files: TransferFile[]; // Manage用
+      commonIntlData: object;
     };
   };
 };
