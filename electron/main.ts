@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-06 16:35:07
+ * @LastEditTime: 2022-06-06 18:01:08
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -125,10 +125,10 @@ async function registerListeners() {
       file.diffPatchOfChTransform = '';
       file.parseResult = null;
       file.vueParseResult = null;
-      updateRemoteData();
     } catch (e) {
       console.error(e);
     }
+    updateRemoteData();
   })
 
   ipcMain.on(Event.ReplaceAllProcessedFile, () => {
@@ -141,6 +141,7 @@ async function registerListeners() {
     } catch (e) {
       console.error(e);
     }
+    updateRemoteData();
   })
 
   ipcMain.on(Event.SetPrefixes, (_, data: string) => {
