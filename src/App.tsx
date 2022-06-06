@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-06 10:46:01
+ * @LastEditTime: 2022-06-06 13:39:08
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -98,9 +98,9 @@ export function App() {
                 } else change();
               }}
               options={[
-                { label: 'React', value: 'React' },
+                { label: 'Hzero-Intl-React', value: 'Hzero-Intl-React' },
                 { label: 'Vue', value: 'Vue' },
-                { label: 'B2B-React', value: 'B2B-React' }
+                { label: 'Umi-Intl-React', value: 'Umi-Intl-React' }
               ]} />
           </div>
         )}

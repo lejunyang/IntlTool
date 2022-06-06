@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-06-06 11:51:17
+ * @LastEditTime: 2022-06-06 13:37:53
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -15,19 +15,19 @@ import { parseJSFile, parseVueFile } from './parse';
 
 export default class Manager {
   private modeMap = {
-    React: {
+    'Hzero-Intl-React': {
       allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
     },
     Vue: {
       allowedFileSuffix: new Set(['.vue']),
     },
-    'B2B-React': {
+    'Umi-Intl-React': {
       allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
       ignorePrefix: true,
     },
   };
 
-  private mode = 'React';
+  private mode = 'Hzero-Intl-React';
 
   getMode() {
     return this.mode;
@@ -102,6 +102,7 @@ export default class Manager {
       else parseJSFile(file);
       file.chTransformedContent = '';
       file.diffPatchOfChTransform = '';
+      file.isChTransformed = false;
     });
   }
 
