@@ -14,6 +14,17 @@
 我并没有找到合适的`Vue AST`工具，目前使用的是`vue-eslint-parser`转化为语法树并检测，其中`template`中的中文转`intl`是手动字符串替换，因为`vue-eslint-parser`并没有提供好的工具函数，恼（
 `Vue`中的`script`仍然是使用`babel`处理，目前还存在一些问题，比如`uniapp`预编译注释的会使`babel`解析报错（比如在不同的预编译注释里面重复定义了变量）
 
+# 代码结构
+```
+electron -- 主线程代码
+  generate -- 代码或AST节点生成相关
+  parse -- 代码解析为AST
+  traverse -- 遍历AST相关
+  main.ts -- 主线程入口
+  Manager.ts -- 管理数据的类
+src -- 渲染线程代码
+```
+
 ## Installation
 
 Use a package manager of your choice (npm, yarn, etc.) in order to install all dependencies
