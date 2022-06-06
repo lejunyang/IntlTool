@@ -8,12 +8,14 @@
  */
 import type { BasicLayoutProps } from '@ant-design/pro-layout/lib/BasicLayout';
 import { SlidersOutlined, ItalicOutlined } from '@ant-design/icons';
+import { Mode } from '../electron/types';
 import ManageFiles from './pages/ManageFiles';
 import ProcessCh from './pages/ProcessCh';
 import ManagePrefixes from './pages/ManagePrefixes';
 import ScanIntl from './pages/ScanIntl';
 import { AppState } from './@types/index';
 import ManageOption from './pages/ManageOption';
+import ImportIntlData from './pages/ImportIntlData';
 
 /**
  * 生成ProLayout的属性设置
@@ -55,7 +57,13 @@ export default (state: AppState) =>
               name: '设置前缀',
               component: ManagePrefixes,
               tooltip: '为intl.get设置前缀，以便于扫描后的结果统计，在扫描Intl前设置才有效',
-              hideWhenMode: ['Vue', 'B2B-React'],
+              hideWhenMode: [Mode.VueI18N, Mode.UmiIntlReact],
+            },
+            {
+              path: '/intl/import-intl',
+              name: '导入已有Intl数据',
+              component: ImportIntlData,
+              tooltip: '导入已有的Intl数据，在扫描Intl中导出时会与该数据合并',
             },
             {
               path: '/intl/scan',

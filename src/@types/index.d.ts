@@ -6,15 +6,16 @@
  * @Description: your description
  * @FilePath: \tool\src\@types\index.d.ts
  */
-import { TransferFile, IntlResult } from '../../electron/types';
+import { TransferFile, IntlResult, Mode } from '../../electron/types';
 
 export type AppState = {
   pathname: string;
   pageData: {
     processing: boolean;
     intlPrefixPattern: string; // ProcessCh使用
+    existedIntlData: any;
     remoteData: {
-      mode: 'React' | 'Vue';
+      mode: Mode;
       prefixes: string[]; // Intl使用
       intlResult: IntlResult; // Intl使用
       allowedFileSuffix: string[]; // 文件使用

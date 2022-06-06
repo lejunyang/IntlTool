@@ -1,13 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-06-06 13:37:53
+ * @LastEditTime: 2022-06-06 14:02:11
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
  */
 import { omit } from 'lodash';
-import { ProcessFile, TransferFile, IntlItem, IntlResult } from './types';
+import { ProcessFile, TransferFile, IntlItem, IntlResult, Mode } from './types';
 import { transformCh, transformVueCh, traverseIntl, traverseVueIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 import { readFile } from './utils/fileUtils';
@@ -15,29 +15,34 @@ import { parseJSFile, parseVueFile } from './parse';
 
 export default class Manager {
   private modeMap = {
-    'Hzero-Intl-React': {
+    [Mode.HzeroIntlReact]: {
       allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
+      formatAfterTransform: true,
     },
-    Vue: {
+    [Mode.VueI18N]: {
       allowedFileSuffix: new Set(['.vue']),
+      formatAfterTransform: true,
     },
-    'Umi-Intl-React': {
+    [Mode.UmiIntlReact]: {
       allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
       ignorePrefix: true,
+      formatAfterTransform: true,
     },
   };
 
-  private mode = 'Hzero-Intl-React';
+  private mode = Mode.HzeroIntlReact;
 
   getMode() {
     return this.mode;
   }
 
-  switchMode(mode: string) {
+  switchMode(mode: any) {
     if (this.modeMap[mode]) {
       this.mode = mode;
       this.allowedFileSuffix = this.modeMap[mode].allowedFileSuffix;
       this.resetAll();
+    } else {
+      console.error(`模式${mode}不存在`);
     }
   }
 

@@ -8,7 +8,7 @@
  */
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import fs from 'fs';
-import { Event, ProcessFile, Message } from './types';
+import { Event, ProcessFile, Message, Mode } from './types';
 import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
 import { readFile, traversePaths } from './utils/fileUtils';
@@ -105,7 +105,7 @@ async function registerListeners() {
 
   ipcMain.on(Event.GetRemoteData, updateRemoteData);
 
-  ipcMain.on(Event.SwitchMode, (_, mode: string) => {
+  ipcMain.on(Event.SwitchMode, (_, mode: any) => {
     manager.switchMode(mode);
     updateRemoteData();
   })
@@ -182,6 +182,10 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.DownloadIntlResult, (_, data) => {
+    let filter;
+    if (manager.getMode() === Mode.HzeroIntlReact) filter = { name: 'CSV', extensions: ['csv'] };
+    else if (manager.getMode() === Mode.VueI18N) filter = { name: 'JSON', extensions: ['json'] };
+    else if (manager.getMode() === Mode.UmiIntlReact) filter = { name: 'Javascript', extensions: ['js'] };
     const path = dialog.showSaveDialogSync(mainWindow, {
       /**
        * createDirectory macOS -允许你通过对话框的形式创建新的目录
@@ -189,9 +193,7 @@ async function registerListeners() {
        */
       properties: ['createDirectory', 'showOverwriteConfirmation'],
       // 过滤条件
-      filters: [
-        manager.getMode() === 'React' ? { name: 'CSV', extensions: ['csv'] } : { name: 'JSON', extensions: ['json'] },
-      ],
+      filters: [filter],
     });
     if (path) {
       // 这个writeFileSync的utf-8是没有BOM的，encoding选项也不支持带bom的utf-8，而没有bom的utf8用excel打开会乱码。。

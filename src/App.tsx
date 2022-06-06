@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-06 13:39:08
+ * @LastEditTime: 2022-06-06 13:49:25
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -13,7 +13,7 @@ import { useReactive } from 'ahooks';
 import getSettings from './pageSettings';
 import './styles/index.less';
 import { AppState } from './@types/index';
-import { Event, Message } from '../electron/types';
+import { Event, Message, Mode } from '../electron/types';
 
 const cacheMenus = (() => {
   const menus = [],
@@ -41,8 +41,9 @@ export function App() {
     pageData: {
       processing: true,
       intlPrefixPattern: '',
+      existedIntlData: '',
       remoteData: {
-        mode: 'React',
+        mode: Mode.HzeroIntlReact,
         files: [],
         prefixes: [],
         intlResult: [],
@@ -98,9 +99,9 @@ export function App() {
                 } else change();
               }}
               options={[
-                { label: 'Hzero-Intl-React', value: 'Hzero-Intl-React' },
-                { label: 'Vue', value: 'Vue' },
-                { label: 'Umi-Intl-React', value: 'Umi-Intl-React' }
+                { label: 'Hzero-Intl', value: Mode.HzeroIntlReact },
+                { label: 'Vue-i18n', value: Mode.VueI18N },
+                { label: 'Umi-Intl', value: Mode.UmiIntlReact }
               ]} />
           </div>
         )}

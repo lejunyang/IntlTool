@@ -29,7 +29,7 @@ import {
   isExpression,
 } from '@babel/types';
 import { generateCode } from '../../generate';
-import type { State, StringObject, IntlItem, TraverseOptions } from '../../types';
+import type { State, StringObject, IntlItem, IntlOptions } from '../../types';
 import { manager } from '../../Manager';
 
 /**
@@ -141,7 +141,7 @@ export function processTemplateLiteral<T extends ProcessParams['type']>(
 }
 
 
-export const getIntlCallExpression = (options: TraverseOptions) => {
+export const getIntlCallExpression = (options: IntlOptions) => {
   return ((path: NodePath<CallExpression>, state: State) => {
     const { node } = path;
     const dArgs = node.arguments;
@@ -206,7 +206,7 @@ export const getIntlCallExpression = (options: TraverseOptions) => {
 /**
  * 用于统计代码中的intl的visitor
  */
-export const getIntlTraverseVisitor = (options: TraverseOptions) => {
+export const getIntlTraverseVisitor = (options: IntlOptions) => {
   return {
     Program(path, state) {
       path.node.body.forEach(statement => {

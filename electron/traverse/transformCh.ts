@@ -1,14 +1,14 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-17 15:27:55
- * @LastEditTime: 2022-06-06 11:52:21
+ * @LastEditTime: 2022-06-06 14:01:06
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\transformCh.ts
  */
 import traverse from '@babel/traverse';
 import { createTwoFilesPatch } from 'diff';
-import type { State, ProcessFile, TraverseOptions } from '../types';
+import type { State, ProcessFile, IntlOptions } from '../types';
 import { parseJSFile } from '../parse';
 import { getChToIntlVisitor } from './visitor';
 import { generateAndFormat } from '../generate';
@@ -18,12 +18,12 @@ import { generateAndFormat } from '../generate';
  */
 export function transformCh(
   file: ProcessFile,
-  options: TraverseOptions
+  options: IntlOptions
 ) {
   if (!file.parseResult) parseJSFile(file);
   if (file.parseError) return;
   traverse<State>(file.parseResult, getChToIntlVisitor(options), undefined, file);
-  file.chTransformedContent = generateAndFormat(file.parseResult);
+  file.chTransformedContent = generateAndFormat(file.parseResult, options);
   file.diffPatchOfChTransform = createTwoFilesPatch(
     file.path,
     file.path,

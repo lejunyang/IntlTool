@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-06-06 11:48:55
+ * @LastEditTime: 2022-06-06 13:46:05
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -9,6 +9,7 @@
 import type { ParseResult as BabelParseResult } from '@babel/parser';
 import type { File as BabelFile } from '@babel/types';
 import { AST } from 'vue-eslint-parser';
+import { Options as PrettierOptions } from 'prettier';
 
 export type Message = {
   type: 'error' | 'warning' | 'success' | 'info';
@@ -86,6 +87,12 @@ export enum Event {
   SelectFile = 'select-file',
 }
 
+export enum Mode {
+  HzeroIntlReact = 'HzeroIntlReact',
+  VueI18N = 'VueI18N',
+  UmiIntlReact = 'UmiIntlReact',
+}
+
 export type NameMap = {
   l1?: string;
   l2: string;
@@ -98,8 +105,10 @@ export type NameMapRe = {
   l3: string;
 };
 
-export type TraverseOptions = {
+export type IntlOptions = {
   prefix: string;
   nameMap: NameMapRe;
   ignorePrefix?: boolean;
+  formatAfterTransform?: boolean;
+  formatOptions?: PrettierOptions;
 };

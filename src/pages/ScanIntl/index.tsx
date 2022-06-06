@@ -1,7 +1,8 @@
+/* eslint-disable no-case-declarations */
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-06-02 14:33:31
+ * @LastEditTime: 2022-06-06 14:50:21
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -12,7 +13,7 @@ import type { ColumnType } from 'antd/lib/table';
 import { useState, FC } from 'react';
 import { set } from 'lodash';
 import Button from '../../components/Button';
-import { Event, IntlItem } from '../../../electron/types';
+import { Event, IntlItem, Mode } from '../../../electron/types';
 import { AppState } from '../../@types';
 import { copy } from '../../utils';
 
@@ -69,6 +70,7 @@ const excludedPrefixesDefault = [
 const Intl: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
   pageData: {
+    existedIntlData,
     remoteData: { intlResult, mode },
   },
 }) => {
@@ -87,7 +89,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
   let columns: ColumnType<IntlRecord>[] = [
-    mode === 'React' && {
+    mode === Mode.HzeroIntlReact && {
       dataIndex: 'prefix',
       title: '前缀',
       onCell: record => {
@@ -122,22 +124,29 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   };
 
   const getData = () => {
-    if (pageData.remoteData.mode === 'Vue') {
-      const result = {};
-      for (const item of data) {
-        set(result, item.code, item.d);
-      }
-      return JSON.stringify(result, null, 2);
+    const result = existedIntlData || {};
+    switch (mode) {
+      case Mode.VueI18N:
+        for (const item of data) {
+          set(result, item.code, item.d);
+        }
+        return JSON.stringify(result, null, 2);
+      case Mode.UmiIntlReact:
+        for (const item of data) {
+          result[item.code] = item.d;
+        }
+        return `export default ${JSON.stringify(result, null, 2)}`;
+      case Mode.HzeroIntlReact:
+        let head = `模板代码,代码,语言,描述\n`;
+        for (const item of data) {
+          if (!item.error) head += `${item.prefix},${item.get},zh_CN,${item.d}\n`;
+        }
+        return head;
     }
-    let head = `模板代码,代码,语言,描述\n`;
-    for (const item of data) {
-      if (!item.error) head += `${item.prefix},${item.get},zh_CN,${item.d}\n`;
-    }
-    return head;
   };
 
   return (
-    <div className="page-wrapper">
+    <div className="page-wrapper" spellCheck={false}>
       <Button
         onClick={async () => {
           window.Main.emit(Event.ScanIntl);
@@ -164,7 +173,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           layout="inline"
           initialValues={{ excludedPrefixes: excludedPrefixesDefault }}
         >
-          {mode === 'React' && (
+          {mode === Mode.HzeroIntlReact && (
             <Form.Item name="excludedPrefixes" label="排除的前缀" style={{ width: 250 }} className="flex-1">
               <Select mode="tags" allowClear maxTagCount="responsive">
                 <Select.Option value="hzero.common">hzero.common</Select.Option>

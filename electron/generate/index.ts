@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-06-02 17:43:05
+ * @LastEditTime: 2022-06-06 13:55:35
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -37,9 +37,10 @@ import {
   isBinaryExpression,
   binaryExpression,
 } from '@babel/types';
-import { format, Options } from 'prettier';
+import { format } from 'prettier';
 import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
 import { containsCh } from '../utils/stringUtils';
+import { IntlOptions } from '../types';
 
 /**
  * 生成l1.l2().l3()的intl AST节点，l1、l2、l3的名字由参数nameMap确定，默认为intl.get().d()
@@ -126,9 +127,8 @@ export function generateCode(node: Node | ESNode): string {
 /**
  * 将babel节点转换为代码，并用prettier格式化
  * @param node babel节点
- * @param formatOptions prettier format选项
  */
-export function generateAndFormat(node: Node, formatOptions?: Options): string {
+export function generateAndFormat(node: Node, options?: IntlOptions): string {
   const { code } = babelGenerate(node, {
     // 默认babel/generator使用jsesc来将非ascii字符转换，会把中文字符转成了unicode，关掉
     jsescOption: {
@@ -136,13 +136,15 @@ export function generateAndFormat(node: Node, formatOptions?: Options): string {
     },
     retainLines: true, // 尝试保留相同的行号
   });
-  return format(code, {
-    parser: 'typescript', // parser根据语言必传
-    semi: true,
-    singleQuote: true,
-    arrowParens: 'avoid',
-    printWidth: 120,
-    endOfLine: 'crlf',
-    ...(formatOptions || {}),
-  });
+  if (options?.formatAfterTransform)
+    return format(code, {
+      parser: 'typescript', // parser根据语言必传
+      semi: true,
+      singleQuote: true,
+      arrowParens: 'avoid',
+      printWidth: 120,
+      endOfLine: 'crlf', // 统一为crlf
+      ...(options.formatOptions || {}),
+    });
+  else return code.replace(/(?<!\r)\n/g, '\r\n'); // 统一替换为crlf;
 }

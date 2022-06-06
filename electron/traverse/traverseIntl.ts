@@ -9,9 +9,9 @@
 import traverse from '@babel/traverse';
 import { parseJSFile } from '../parse';
 import { getIntlTraverseVisitor } from './visitor';
-import { State, ProcessFile, TraverseOptions } from '../types';
+import { State, ProcessFile, IntlOptions } from '../types';
 
-export function traverseIntl(file: ProcessFile, options: TraverseOptions) {
+export function traverseIntl(file: ProcessFile, options: IntlOptions) {
   if (!file.parseResult) parseJSFile(file);
   if (file.parseError) return;
   traverse<State>(file.parseResult, getIntlTraverseVisitor(options), undefined, file);

@@ -20,7 +20,7 @@ import type {
 import { jsxExpressionContainer, isIdentifier, isObjectProperty, isMemberExpression, isCallExpression } from '@babel/types';
 import { generateIntlNode } from '../../generate';
 import { containsCh } from '../../utils/stringUtils';
-import type { ProcessFile, TraverseOptions } from '../../types';
+import type { ProcessFile, IntlOptions } from '../../types';
 import { isIdentifierPlus } from '../../utils/astUtils';
 
 /**
@@ -28,7 +28,7 @@ import { isIdentifierPlus } from '../../utils/astUtils';
  * @param prefix intl.get中get里字符串的前缀
  * @returns
  */
-export const getChToIntlVisitor = (options: TraverseOptions) => {
+export const getChToIntlVisitor = (options: IntlOptions) => {
   const { prefix, nameMap } = options;
   const callExpressionBlackList = ['log', nameMap.l3]; // 函数调用表达式，callee的黑名单
   const visitor: Visitor<ProcessFile> = {
