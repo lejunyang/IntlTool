@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-05-29 23:27:58
+ * @LastEditTime: 2022-06-06 11:51:17
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -20,6 +20,10 @@ export default class Manager {
     },
     Vue: {
       allowedFileSuffix: new Set(['.vue']),
+    },
+    'B2B-React': {
+      allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
+      ignorePrefix: true,
     },
   };
 
@@ -230,7 +234,7 @@ export default class Manager {
         }
       );
       if (file.path.endsWith('vue')) transformVueCh(file, prefix);
-      else transformCh(file, prefix);
+      else transformCh(file, { prefix, nameMap: { l1: 'intl', l2: 'get', l3: 'd' }, ...this.modeMap[this.mode] });
     });
   }
 
@@ -238,7 +242,7 @@ export default class Manager {
     this.resetIntl();
     this.files.forEach(file => {
       if (file.path.endsWith('vue')) traverseVueIntl(file);
-      else traverseIntl(file);
+      else traverseIntl(file, { prefix: '', nameMap: { l1: 'intl', l2: 'get', l3: 'd' }, ...this.modeMap[this.mode] });
     });
   }
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-05-29 23:34:13
+ * @LastEditTime: 2022-06-06 10:58:23
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
@@ -29,7 +29,7 @@ import {
   isExpression,
 } from '@babel/types';
 import { generateCode } from '../../generate';
-import type { State, StringObject, IntlItem } from '../../types';
+import type { State, StringObject, IntlItem, TraverseOptions } from '../../types';
 import { manager } from '../../Manager';
 
 /**
@@ -140,70 +140,73 @@ export function processTemplateLiteral<T extends ProcessParams['type']>(
   return result;
 }
 
-export const IntlCallExpression: VisitNodeFunction<State, CallExpression> = (
-  path: NodePath<CallExpression>,
-  state: State
-) => {
-  const { node } = path;
-  const dArgs = node.arguments;
-  // 检查d里面是否仅有一个参数且为字符串
-  if (!isSingleStrArg(dArgs)) return;
-  const dCallee = node.callee; // callee，调用者，函数调用括号前面的内容
-  // 检查是否为成员表达式，且调用方式为xx.yy()，而不是xx['yy']()
-  if (!isMemberExpression(dCallee, { computed: false })) return;
-  // 检查是不是xx.yy()中的yy是不是'd'
-  if (!isIdentifier(dCallee.property, { name: 'd' })) return;
-  const intlGetCallExpression = dCallee.object; // xx.d()中的xx
-  // 检查上面的xx是否为函数调用，即yy().d()
-  if (!isCallExpression(intlGetCallExpression)) return;
-  const getArgs = intlGetCallExpression.arguments;
-  // 检查get里面是否仅有一个参数且为字符串，或者有两个参数，第二个为对象表达式
-  if (!isIntlGetArgs(getArgs)) return;
-  const intlGetCallee = intlGetCallExpression.callee;
-  // 检查是否为成员表达式，且调用方式为xx.yy().d()，而不是xx['yy']().d()
-  if (!isMemberExpression(intlGetCallee, { computed: false })) return;
-  // 检查xx.get().d()中的get
-  if (!isIdentifier(intlGetCallee.property, { name: 'get' })) return;
-  // 检查intl.get().d()中的intl
-  if (!isIdentifier(intlGetCallee.object, { name: 'intl' })) return;
 
-  const result: IntlItem = { get: '', d: '', code: '', error: '' };
-  const dTemplateLiteral = dArgs[0];
-  // 普通字符串字面量
-  if (isStringLiteral(dTemplateLiteral)) result.d = dTemplateLiteral.value;
-  // 模板字符串字面量
-  else if (isTemplateLiteral(dTemplateLiteral)) {
-    const temp = processTemplateLiteral(dTemplateLiteral, 'd', getArgs[1]);
-    if (temp.error) result.error += temp.error;
-    result.d = temp.content;
-  }
+export const getIntlCallExpression = (options: TraverseOptions) => {
+  return ((path: NodePath<CallExpression>, state: State) => {
+    const { node } = path;
+    const dArgs = node.arguments;
+    // 检查d里面是否仅有一个参数且为字符串
+    if (!isSingleStrArg(dArgs)) return;
+    const dCallee = node.callee; // callee，调用者，函数调用括号前面的内容
+    // 检查是否为成员表达式，且调用方式为xx.yy()，而不是xx['yy']()
+    if (!isMemberExpression(dCallee, { computed: false })) return;
+    // 检查是不是xx.yy()中的yy是不是'd'
+    if (!isIdentifier(dCallee.property, { name: 'd' })) return;
+    const intlGetCallExpression = dCallee.object; // xx.d()中的xx
+    // 检查上面的xx是否为函数调用，即yy().d()
+    if (!isCallExpression(intlGetCallExpression)) return;
+    const getArgs = intlGetCallExpression.arguments;
+    // 检查get里面是否仅有一个参数且为字符串，或者有两个参数，第二个为对象表达式
+    if (!isIntlGetArgs(getArgs)) return;
+    const intlGetCallee = intlGetCallExpression.callee;
+    // 检查是否为成员表达式，且调用方式为xx.yy().d()，而不是xx['yy']().d()
+    if (!isMemberExpression(intlGetCallee, { computed: false })) return;
+    // 检查xx.get().d()中的get
+    if (!isIdentifier(intlGetCallee.property, { name: 'get' })) return;
+    // 检查intl.get().d()中的intl
+    if (!isIdentifier(intlGetCallee.object, { name: 'intl' })) return;
 
-  const getTemplateLiteral = getArgs[0];
-  if (isStringLiteral(getTemplateLiteral)) result.code = getTemplateLiteral.value;
-  else {
-    const temp = processTemplateLiteral(getTemplateLiteral, 'get', state.vars);
-    if (temp.error) result.error += temp.error;
-    result.code = temp.content;
-  }
-  for (const prefix of manager.getPrefixes()) {
-    const reg = new RegExp(prefix);
-    const matchResult = result.code.match(reg);
-    if (matchResult) {
-      result.prefix = matchResult[0].substring(0, matchResult[0].length - 1);
-      result.get = result.code.replace(reg, '');
-      break;
-    } else result.get = result.code;
-  }
-  if (!result.prefix) result.error += '没有设定前缀；';
-  result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
-  result.path = `${state.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
-  manager.addIntlItem(result);
+    const result: IntlItem = { get: '', d: '', code: '', error: '' };
+    const dTemplateLiteral = dArgs[0];
+    // 普通字符串字面量
+    if (isStringLiteral(dTemplateLiteral)) result.d = dTemplateLiteral.value;
+    // 模板字符串字面量
+    else if (isTemplateLiteral(dTemplateLiteral)) {
+      const temp = processTemplateLiteral(dTemplateLiteral, 'd', getArgs[1]);
+      if (temp.error) result.error += temp.error;
+      result.d = temp.content;
+    }
+
+    const getTemplateLiteral = getArgs[0];
+    if (isStringLiteral(getTemplateLiteral)) result.code = getTemplateLiteral.value;
+    else {
+      const temp = processTemplateLiteral(getTemplateLiteral, 'get', state.vars);
+      if (temp.error) result.error += temp.error;
+      result.code = temp.content;
+    }
+    if (!options.ignorePrefix) {
+      for (const prefix of manager.getPrefixes()) {
+        const reg = new RegExp(prefix);
+        const matchResult = result.code.match(reg);
+        if (matchResult) {
+          result.prefix = matchResult[0].substring(0, matchResult[0].length - 1);
+          result.get = result.code.replace(reg, '');
+          break;
+        } else result.get = result.code;
+      }
+      if (!result.prefix) result.error += '没有设定前缀；';
+    }
+    if (!result.get) result.get = result.code;
+    result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
+    result.path = `${state.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
+    manager.addIntlItem(result);
+  }) as VisitNodeFunction<State, CallExpression>;
 };
 
 /**
  * 用于统计代码中的intl的visitor
  */
-export const getIntlTraverseVisitor = () => {
+export const getIntlTraverseVisitor = (options: TraverseOptions) => {
   return {
     Program(path, state) {
       path.node.body.forEach(statement => {
@@ -216,6 +219,6 @@ export const getIntlTraverseVisitor = () => {
         }
       });
     },
-    CallExpression: IntlCallExpression,
+    CallExpression: getIntlCallExpression(options),
   } as Visitor<State>;
 };

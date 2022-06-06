@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 10:52:47
- * @LastEditTime: 2022-05-25 20:47:16
+ * @LastEditTime: 2022-06-06 11:35:23
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pageSettings.tsx
@@ -55,7 +55,7 @@ export default (state: AppState) =>
               name: '设置前缀',
               component: ManagePrefixes,
               tooltip: '为intl.get设置前缀，以便于扫描后的结果统计，在扫描Intl前设置才有效',
-              hideWhenMode: 'Vue',
+              hideWhenMode: ['Vue', 'B2B-React'],
             },
             {
               path: '/intl/scan',
@@ -68,7 +68,12 @@ export default (state: AppState) =>
               component: ProcessCh,
               tooltip: '扫描代码中的中文，将其替换为intl格式',
             },
-          ].filter(r => !r.hideWhenMode || r.hideWhenMode !== state.pageData.remoteData.mode),
+          ].filter(r => {
+            if (!r.hideWhenMode) return true;
+            else if (typeof r.hideWhenMode === 'string') return r.hideWhenMode !== state.pageData.remoteData.mode
+            else if (r.hideWhenMode instanceof Array) return !r.hideWhenMode.includes(state.pageData.remoteData.mode)
+            else return false;
+          }),
         },
       ],
     },

@@ -139,7 +139,7 @@ export function generateAndFormat(node: Node, formatOptions?: Options): string {
   return format(code, {
     parser: 'typescript', // parser根据语言必传
     semi: true,
-    // singleQuote: true,
+    singleQuote: true,
     arrowParens: 'avoid',
     printWidth: 120,
     endOfLine: 'crlf',

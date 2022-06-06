@@ -45,7 +45,7 @@ export function transformVueCh(file: ProcessFile, prefix = '') {
         if (!scriptParseResult.parseError) {
           traverse<ProcessFile>(
             scriptParseResult,
-            getChToIntlVisitor(prefix, { l1: 'this', l2: 'intl', l3: 'd' }),
+            getChToIntlVisitor({prefix, nameMap:{ l1: 'this', l2: 'intl', l3: 'd' }}),
             null,
             file
           );

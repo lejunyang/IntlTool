@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-05-27 14:33:11
+ * @LastEditTime: 2022-06-06 11:48:55
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -85,3 +85,21 @@ export enum Event {
   DownloadIntlResult = 'download-intl-result',
   SelectFile = 'select-file',
 }
+
+export type NameMap = {
+  l1?: string;
+  l2: string;
+  l3: string;
+};
+
+export type NameMapRe = {
+  l1: string;
+  l2: string;
+  l3: string;
+};
+
+export type TraverseOptions = {
+  prefix: string;
+  nameMap: NameMapRe;
+  ignorePrefix?: boolean;
+};

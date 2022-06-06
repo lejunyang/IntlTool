@@ -1,14 +1,14 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-27 20:11:00
+ * @LastEditTime: 2022-06-06 10:46:01
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
  */
 import { useEffect } from 'react';
 import ProLayout, { RouteContext, RouteContextType } from '@ant-design/pro-layout';
-import { notification, Tooltip, Spin, Radio, Modal } from 'antd';
+import { notification, Tooltip, Spin, Modal, Select } from 'antd';
 import { useReactive } from 'ahooks';
 import getSettings from './pageSettings';
 import './styles/index.less';
@@ -82,10 +82,9 @@ export function App() {
         menuExtraRender={() => (
           <div className="flex item-center">
             <div>模式：</div>
-            <Radio.Group
+            <Select
               value={state.pageData.remoteData.mode}
-              disabled={state.pageData.processing}
-              onChange={({ target: { value } }) => {
+              onChange={value => {
                 const change = () => {
                   state.pageData.processing = true;
                   window.Main.emit(Event.SwitchMode, value);
@@ -98,12 +97,11 @@ export function App() {
                   });
                 } else change();
               }}
-              optionType="button"
               options={[
                 { label: 'React', value: 'React' },
                 { label: 'Vue', value: 'Vue' },
-              ]}
-            />
+                { label: 'B2B-React', value: 'B2B-React' }
+              ]} />
           </div>
         )}
         location={{
