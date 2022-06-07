@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-06 13:49:25
+ * @LastEditTime: 2022-06-07 09:20:40
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -85,6 +85,7 @@ export function App() {
           <div className="flex item-center">
             <div>模式：</div>
             <Select
+              disabled={state.pageData.processing}
               value={state.pageData.remoteData.mode}
               onChange={value => {
                 const change = () => {
