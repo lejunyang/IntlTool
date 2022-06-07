@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-06-06 10:58:23
+ * @LastEditTime: 2022-06-07 16:52:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
@@ -41,7 +41,7 @@ function isIntlGetArgs(
   args: CallExpression['arguments']
 ): args is [StringLiteral | TemplateLiteral] | [StringLiteral | TemplateLiteral, ObjectExpression] {
   if (args.length === 1) return isStringNode(args[0]);
-  else if (args.length === 2) return isStringNode([args[0]]) && isObjectExpression(args[1]);
+  else if (args.length === 2) return isStringNode(args[0]) && isObjectExpression(args[1]);
   return false;
 }
 
