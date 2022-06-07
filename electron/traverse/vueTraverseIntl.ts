@@ -14,7 +14,7 @@ import { ProcessFile } from '../types';
 const { traverseNodes } = AST;
 
 export function traverseVueIntl(file: ProcessFile) {
-  if (!file.vueParseResult) parseVueFile(file);
+  parseVueFile(file);
   if (file.parseError) return;
   // 遍历vue的template
   traverseNodes(file.vueParseResult.templateBody, getVueIntlTraverseVisitor(file, { l2: 'intl', l3: 'd' }));

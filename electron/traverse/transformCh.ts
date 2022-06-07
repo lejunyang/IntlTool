@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-17 15:27:55
- * @LastEditTime: 2022-06-06 14:01:06
+ * @LastEditTime: 2022-06-07 16:03:18
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\transformCh.ts
@@ -20,7 +20,7 @@ export function transformCh(
   file: ProcessFile,
   options: IntlOptions
 ) {
-  if (!file.parseResult) parseJSFile(file);
+  parseJSFile(file);
   if (file.parseError) return;
   traverse<State>(file.parseResult, getChToIntlVisitor(options), undefined, file);
   file.chTransformedContent = generateAndFormat(file.parseResult, options);

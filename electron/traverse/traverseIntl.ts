@@ -12,7 +12,7 @@ import { getIntlTraverseVisitor } from './visitor';
 import { State, ProcessFile, IntlOptions } from '../types';
 
 export function traverseIntl(file: ProcessFile, options: IntlOptions) {
-  if (!file.parseResult) parseJSFile(file);
+  parseJSFile(file);
   if (file.parseError) return;
   traverse<State>(file.parseResult, getIntlTraverseVisitor(options), undefined, file);
 }

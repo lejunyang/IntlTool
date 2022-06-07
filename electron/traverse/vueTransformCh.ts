@@ -18,7 +18,7 @@ const { traverseNodes } = AST;
 
 // 目前遇到的问题还有，在不同的uniapp预编译块中定义相同的变量导致js报错。。。想到的解决方法是提取出这些东西，单独处理
 export function transformVueCh(file: ProcessFile, prefix = '') {
-  if (!file.vueParseResult) parseVueFile(file);
+  parseVueFile(file);
   if (file.parseError) return;
   // 遍历vue的template
   // ...有些没有template的vue文件，然后下面也没进去，直接在外面赋一次值吧
