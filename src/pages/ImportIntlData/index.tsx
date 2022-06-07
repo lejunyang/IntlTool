@@ -1,13 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-06-06 14:02:59
- * @LastEditTime: 2022-06-06 16:49:42
+ * @LastEditTime: 2022-06-07 18:11:59
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ImportIntlData\index.tsx
  */
 import { useState, FC } from 'react';
-import { Button, Input, notification } from 'antd';
+import { Button, Input, notification, Divider, Modal } from 'antd';
 import { AppState } from '../../@types';
 import { Event, Mode } from '../../../electron/types';
 import { reverseObject } from '../../utils';
@@ -47,14 +47,32 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
   }
   return (
     <div className="page-wrapper" spellCheck={false}>
+      <Button onClick={() => {
+        const contentMap = {
+          [Mode.HzeroIntlReact]: "prefix.common button.create 新建",
+          [Mode.VueI18N]: {
+            common: {
+              button: {
+                create: '新建',
+                total: '共{num}条',
+              }
+            }
+          },
+          [Mode.UmiIntlReact]: {
+            'common.button.create': '新建',
+            'common.text.total': '共{num}条',
+          }
+        };
+        Modal.info({
+          content: <pre>
+            {JSON.stringify(contentMap[mode], null, 2)}
+          </pre>
+        })
+      }}>查看当前模式的数据格式</Button>
+      <Divider orientation="left">导入通用Intl数据</Divider>
       <div>
-        当前模式的数据格式为：
-        {mode === Mode.VueI18N && `{ "common": { "text": "中文" } }`}
-        {mode === Mode.UmiIntlReact && `{ 'code.code1': '中文{var}', 'code.code2': '中文', }`}
+        通用的Intl数据，在将中文转为intl的时候，比如要将“新建”文本转为intl，然后如果在通用的Intl数据当中存在'button.create': '新建'，则会直接使用它的编码'button.create'，而不是使用预先设置的prefix
       </div>
-      <h2>
-        导入通用的Intl数据，导入之后在将中文转为intl的时候，如果中文在通用的Intl数据当中，则会直接使用它的编码，而不是使用prefix
-      </h2>
       <TextArea
         autoSize={{ minRows: 5 }}
         value={commonInput}
@@ -83,10 +101,15 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
       >
         导入
       </Button>
-      <div>
-        {JSON.stringify(commonIntlData)}
-      </div>
-      <h2>设置已经整理的Intl数据，设置之后在扫描Intl中将会与该数据合并导出</h2>
+      <Button onClick={() => {
+        Modal.info({
+          content: <pre>
+            {JSON.stringify(commonIntlData, null, 2)}
+          </pre>
+        })
+      }}>查看已导入的通用数据</Button>
+      <Divider orientation="left">导入项目里的Intl数据</Divider>
+      <div>导入项目里的Intl数据，之后在扫描Intl中将会与该数据合并导出</div>
       <TextArea
         autoSize={{ minRows: 5 }}
         value={input}
@@ -112,11 +135,15 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
           }
         }}
       >
-        设置
+        导入
       </Button>
-      <div>
-        {JSON.stringify(existedIntlData)}
-      </div>
+      <Button onClick={() => {
+        Modal.info({
+          content: <pre>
+            {JSON.stringify(existedIntlData, null, 2)}
+          </pre>
+        })
+      }}>查看已导入的项目数据</Button>
     </div>
   );
 };
