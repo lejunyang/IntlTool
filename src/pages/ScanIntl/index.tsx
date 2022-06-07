@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-06-06 14:50:21
+ * @LastEditTime: 2022-06-07 16:39:56
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -11,7 +11,7 @@ import { Table, Tooltip, Form, Select, Input, notification } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import type { ColumnType } from 'antd/lib/table';
 import { useState, FC } from 'react';
-import { set } from 'lodash';
+import { set, get as lodashGet } from 'lodash';
 import Button from '../../components/Button';
 import { Event, IntlItem, Mode } from '../../../electron/types';
 import { AppState } from '../../@types';
@@ -124,17 +124,37 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   };
 
   const getData = () => {
+    if (data.length === 0) {
+      notification.info({ message: '没有数据可以导出' });
+      return;
+    }
     const result = existedIntlData || {};
+    let isOverride = false;
+    const checkOverride = () => {
+      if (isOverride) {
+        notification.warn({ message: '导出过程中，存在扫描出的数据和导入数据不同，请前往控制台查看详细信息' });
+      }
+    }
     switch (mode) {
       case Mode.VueI18N:
         for (const item of data) {
+          if (lodashGet(result, item.code) && lodashGet(result, item.code) !== item.d) {
+            console.warn('编码“', item.code, '”已经存在值“', lodashGet(result, item.code), '”，它将被覆盖为:', item.d)
+            isOverride = true;
+          }
           set(result, item.code, item.d);
         }
+        checkOverride();
         return JSON.stringify(result, null, 2);
       case Mode.UmiIntlReact:
         for (const item of data) {
+          if (result[item.code] && result[item.code] !== item.d) {
+            console.warn('编码“', item.code, '”已经存在值“', result[item.code], '”，它将被覆盖为:', item.d)
+            isOverride = true;
+          }
           result[item.code] = item.d;
         }
+        checkOverride();
         return `export default ${JSON.stringify(result, null, 2)}`;
       case Mode.HzeroIntlReact:
         let head = `模板代码,代码,语言,描述\n`;
@@ -180,9 +200,11 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
               </Select>
             </Form.Item>
           )}
-          <Form.Item name="prefix" label="前缀">
-            <Input onPressEnter={() => update(new Date().getTime())} />
-          </Form.Item>
+          {mode === Mode.HzeroIntlReact && (
+            <Form.Item name="prefix" label="前缀">
+              <Input onPressEnter={() => update(new Date().getTime())} />
+            </Form.Item>
+          )}
           <Form.Item name="get" label="编码">
             <Input onPressEnter={() => update(new Date().getTime())} />
           </Form.Item>
