@@ -79,13 +79,12 @@ export enum Event {
   ScanIntl = 'scan-intl',
   ReScanIntl = 're-scan-intl', // 刷新文件并重新扫描intl
   SetPrefixes = 'set-prefixes',
-  SetAllowedFileSuffix = 'set-allowed-suffixes',
-  SetExcludedPaths = 'set-excluded-paths',
   Message = 'message', // 后端向前端发送消息
   LaunchEditor = 'launch-editor', // 打开编辑器
   DownloadIntlResult = 'download-intl-result',
   SelectFile = 'select-file',
   SetCommonIntlData = 'set-common-intl-data',
+  SetModeOptions = 'set-mode-options',
 }
 
 export enum Mode {
@@ -95,22 +94,21 @@ export enum Mode {
 }
 
 export type NameMap = {
-  l1?: string;
-  l2: string;
-  l3: string;
-};
-
-export type NameMapRe = {
   l1: string;
   l2: string;
   l3: string;
 };
 
-export type IntlOptions = {
-  prefix: string;
-  nameMap: NameMapRe;
-  ignorePrefix?: boolean;
+export type ModeOptions = {
+  nameMap: NameMap;
+  requirePrefix?: boolean;
   formatAfterTransform?: boolean;
   formatOptions?: PrettierOptions;
   commonIntlData?: object;
+  allowedFileSuffix?: string[];
+  excludedPaths?: string[];
+};
+
+export type IntlOptions = ModeOptions & {
+  prefix: string;
 };

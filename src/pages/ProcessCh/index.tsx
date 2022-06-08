@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-05-29 15:50:46
+ * @LastEditTime: 2022-06-08 15:18:14
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ProcessCh\index.tsx
@@ -41,15 +41,23 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
               style={{ height: '100%', border: 'none' }}
               onClick={() => {
                 Modal.info({
-                  content: String.raw`假设path为C:\Users\Lenovo Thinkbook 16P\Desktop\Projects\o2\o2-console-share\packages\o2-product\src\routes\PlatformBrand\index.js
-我们需要某些文件夹名作为前缀，而且需要处理
-假设我们需要o2.product.platformBrand，那么prefixPattern为设为 $9{replace}[-, .]$12{toLowerCamel}
-其中$9代表path中的位置，即o2-product，{function}表示调用内置的工具函数s
+                  width: 750,
+                  content: <pre>
+                    {String.raw`如果你只需要某些固定的字符串作为前缀，那么直接填就行
+如果需要某些文件夹名作为前缀，而且需要处理
+假设path为C:\Users\Lenovo Thinkbook 16P\Desktop\Projects\o2
+\o2-console-share\packages\o2-product\src\routes\PlatformBrand\index.js
+假设我们需要o2.product.platformBrand
+那么prefixPattern为设为`}<strong>{`$9{replace}[-, .]$12{toLowerCamel}`}</strong>{`
+其中$9代表path中的位置，即o2-product，{function}表示调用内置的工具函数
 这里这个replace将o2-product转化为o2.product，toLowerCamel将PlatformBrand转为小驼峰
 处理函数后面跟着的方括号是额外向处理函数传递的参数，写不写根据你调用的函数
-方括号里的字符串会以逗号split并trim处理，上面就相当于调用StringUtils.replace($9, '-', '.')
-注意参数数量需要是和对应函数匹配的，否则不调用。如果这个函数本身需要额外的参数却没有传递，也不会调用
-除了上述特殊被匹配的字符，prefixPattern中的其他字符均会保留`,
+方括号里的字符串会以逗号split并trim处理
+上面就相当于调用StringUtils.replace($9, '-', '.')
+目前StringUtils里面只有replace和toLowerCamel
+注意参数数量需要是和对应函数匹配的，否则不调用
+如果这个函数本身需要额外的参数却没有传递，也不会调用
+除了上述特殊被匹配的字符，prefixPattern中的其他字符均会保留`}</pre>,
                 });
               }}
             >

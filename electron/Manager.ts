@@ -1,35 +1,50 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-06-06 15:33:58
+ * @LastEditTime: 2022-06-08 15:37:05
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
  */
 import { omit } from 'lodash';
-import { ProcessFile, TransferFile, IntlItem, IntlResult, Mode } from './types';
+import type { Options as PrettierOptions } from 'prettier';
+import { ProcessFile, TransferFile, IntlItem, IntlResult, Mode, ModeOptions } from './types';
 import { transformCh, transformVueCh, traverseIntl, traverseVueIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 import { readFile } from './utils/fileUtils';
 import { parseJSFile, parseVueFile } from './parse';
 
 export default class Manager {
-  private modeMap = {
+  private commonOptions = {
+    excludedPaths: ['node_modules', 'lib'],
+    requirePrefix: false,
+    formatAfterTransform: true,
+    commonIntlData: {},
+    formatOptions: {
+      semi: true,
+      singleQuote: true,
+      arrowParens: 'avoid',
+      printWidth: 120,
+      endOfLine: 'crlf',
+    } as PrettierOptions,
+  };
+
+  private modeMap: { [mode: string]: ModeOptions } = {
     [Mode.HzeroIntlReact]: {
-      allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
-      formatAfterTransform: true,
-      commonIntlData: {},
+      ...this.commonOptions,
+      nameMap: { l1: 'intl', l2: 'get', l3: 'd' },
+      allowedFileSuffix: ['.js', '.ts', '.tsx', '.jsx'],
+      requirePrefix: true,
     },
     [Mode.VueI18N]: {
-      allowedFileSuffix: new Set(['.vue']),
-      formatAfterTransform: true,
-      commonIntlData: {},
+      ...this.commonOptions,
+      nameMap: { l1: 'this', l2: 'intl', l3: 'd' },
+      allowedFileSuffix: ['.vue'],
     },
     [Mode.UmiIntlReact]: {
-      allowedFileSuffix: new Set(['.js', '.ts', '.tsx', '.jsx']),
-      ignorePrefix: true,
-      formatAfterTransform: true,
-      commonIntlData: {},
+      ...this.commonOptions,
+      nameMap: { l1: 'intl', l2: 'get', l3: 'd' },
+      allowedFileSuffix: ['.js', '.ts', '.tsx', '.jsx'],
     },
   };
 
@@ -42,48 +57,43 @@ export default class Manager {
   switchMode(mode: any) {
     if (this.modeMap[mode]) {
       this.mode = mode;
-      this.allowedFileSuffix = this.modeMap[mode].allowedFileSuffix;
       this.resetAll();
     } else {
       console.error(`模式${mode}不存在`);
     }
   }
 
-  setModeData(mode: any, key: string, data: any) {
-    if (this.modeMap[mode] && this.modeMap[mode][key]) {
-      this.modeMap[mode][key] = data;
+  setOptionValue(key: string, value: any) {
+    if (this.modeMap[this.mode][key]) {
+      this.modeMap[this.mode][key] = value;
     } else {
-      console.error(`模式${mode}或key${key}不存在`);
+      console.error(`选项${key}不存在`);
     }
   }
 
-  private allowedFileSuffix: Set<string> = this.modeMap[this.mode].allowedFileSuffix;
-
-  setAllowedFileSuffix(suffixes: string[]) {
-    this.allowedFileSuffix = new Set(suffixes.map(i => i.trim()).filter(i => i));
+  setOptions(options: ModeOptions) {
+    if (!options || typeof options !== 'object') return;
+    this.modeMap[this.mode] = {
+      ...this.modeMap[this.mode],
+      ...options,
+    };
   }
 
   getAllowedFileSuffix(): string[] {
-    return [...this.allowedFileSuffix];
-  }
-
-  private excludedPaths: string[] = ['node_modules', 'lib'];
-
-  setExcludedPaths(paths: string[]) {
-    this.excludedPaths = paths.map(i => i.trim()).filter(i => i);
+    return this.modeMap[this.mode].allowedFileSuffix || [];
   }
 
   getExcludedPaths(): string[] {
-    return this.excludedPaths;
+    return this.modeMap[this.mode].excludedPaths || [];
   }
 
   isPathAllowed(path: string): boolean {
-    return !this.excludedPaths.some(ex => path.includes(ex));
+    return !this.getExcludedPaths().some(ex => path.includes(ex));
   }
 
   isFileAllowed(filePath: string): boolean {
     const type = filePath.substring(filePath.lastIndexOf('.'));
-    return this.allowedFileSuffix.has(type) && this.isPathAllowed(filePath);
+    return this.getAllowedFileSuffix().includes(type) && this.isPathAllowed(filePath);
   }
 
   private filesUIDSet: Set<string> = new Set(); // 用于避免文件重复
@@ -204,10 +214,8 @@ export default class Manager {
       mode: this.mode,
       prefixes: this.getPrefixes(),
       intlResult: this.intlResult,
-      allowedFileSuffix: this.getAllowedFileSuffix(),
-      excludedPaths: this.getExcludedPaths(),
       files: this.getFiles(),
-      commonIntlData: this.modeMap[this.mode].commonIntlData,
+      options: this.modeMap[this.mode],
     };
   }
 
@@ -252,7 +260,7 @@ export default class Manager {
         }
       );
       if (file.path.endsWith('vue')) transformVueCh(file, prefix);
-      else transformCh(file, { prefix, nameMap: { l1: 'intl', l2: 'get', l3: 'd' }, ...this.modeMap[this.mode] });
+      else transformCh(file, { prefix, ...this.modeMap[this.mode] });
     });
   }
 
@@ -260,7 +268,7 @@ export default class Manager {
     this.resetIntl();
     this.files.forEach(file => {
       if (file.path.endsWith('vue')) traverseVueIntl(file);
-      else traverseIntl(file, { prefix: '', nameMap: { l1: 'intl', l2: 'get', l3: 'd' }, ...this.modeMap[this.mode] });
+      else traverseIntl(file, { prefix: '', ...this.modeMap[this.mode] });
     });
   }
 }

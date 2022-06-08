@@ -1,13 +1,14 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-08 09:50:14
+ * @LastEditTime: 2022-06-08 15:38:04
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
  */
 import { useEffect } from 'react';
 import ProLayout, { RouteContext, RouteContextType } from '@ant-design/pro-layout';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { notification, Tooltip, Spin, Modal, Select } from 'antd';
 import { useReactive } from 'ahooks';
 import getSettings from './pageSettings';
@@ -47,9 +48,13 @@ export function App() {
         files: [],
         prefixes: [],
         intlResult: [],
-        allowedFileSuffix: [],
-        excludedPaths: [],
-        commonIntlData: {},
+        options: {
+          nameMap: { l1: 'intl', l2: 'get', l3: 'd' },
+          allowedFileSuffix: ['.js', '.ts', '.tsx', '.jsx'],
+          excludedPaths: ['node_modules', 'lib'],
+          formatAfterTransform: true,
+          commonIntlData: {},
+        }
       },
     },
   });
@@ -105,6 +110,18 @@ export function App() {
                 { label: 'Vue-i18n', value: Mode.VueI18N },
                 { label: 'Umi-Intl', value: Mode.UmiIntlReact }
               ]} />
+            <Tooltip title="模式间的区别">
+              <InfoCircleOutlined style={{ marginLeft: 10 }} onClick={() => {
+                Modal.info({
+                  width: 920,
+                  content: <pre>
+                    Hzero Intl格式，即intl.get(code, params).d()，其导出格式为csv，默认开启requirePrefix<br />
+                    Vue i18n格式，intl(code, params).d()或this.intl().d()，导出格式为JSON<br />
+                    Umi Intl格式，目前并没有直接支持其intl.formatMessage格式，而是需要通过工具函数改为intl.get.d，其导出格式为JS对象
+                  </pre>
+                })
+              }} />
+            </Tooltip>
           </div>
         )}
         location={{

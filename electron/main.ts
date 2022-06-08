@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-08 09:53:11
+ * @LastEditTime: 2022-06-08 13:53:10
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -149,23 +149,18 @@ async function registerListeners() {
     updateRemoteData();
   });
 
-  ipcMain.on(Event.SetAllowedFileSuffix, (_, data: string[]) => {
-    manager.setAllowedFileSuffix(data);
-    updateRemoteData();
-  });
-
-  ipcMain.on(Event.SetExcludedPaths, (_, data: string[]) => {
-    manager.setExcludedPaths(data);
-    updateRemoteData();
-  });
-
   ipcMain.on(Event.SetCommonIntlData, (_, data: any) => {
     if (data !== null && typeof data === 'object') {
-      manager.setModeData(manager.getMode(), 'commonIntlData', data);
+      manager.setOptionValue('commonIntlData', data);
       updateRemoteData();
     } else {
       console.error('CommonIntlData必须为对象');
     }
+  })
+
+  ipcMain.on(Event.SetModeOptions, (_, options: any) => {
+    manager.setOptions(options);
+    updateRemoteData();
   })
 
   ipcMain.on(Event.ScanIntl, () => {

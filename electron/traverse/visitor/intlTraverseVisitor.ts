@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-06-07 16:52:36
+ * @LastEditTime: 2022-06-08 13:38:46
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
@@ -184,7 +184,7 @@ export const getIntlCallExpression = (options: IntlOptions) => {
       if (temp.error) result.error += temp.error;
       result.code = temp.content;
     }
-    if (!options.ignorePrefix) {
+    if (options.requirePrefix) {
       for (const prefix of manager.getPrefixes()) {
         const reg = new RegExp(prefix);
         const matchResult = result.code.match(reg);

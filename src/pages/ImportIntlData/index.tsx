@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-06-06 14:02:59
- * @LastEditTime: 2022-06-08 11:04:07
+ * @LastEditTime: 2022-06-08 15:23:50
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ImportIntlData\index.tsx
@@ -18,7 +18,7 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
   pageData: {
     existedIntlData,
-    remoteData: { mode, commonIntlData },
+    remoteData: { mode, options: { commonIntlData } },
   },
 }) => {
   const [input, setInput] = useState('');
@@ -79,9 +79,10 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
         })
       }}>查看当前模式的数据格式</Button>
       <Divider orientation="left">导入通用Intl数据</Divider>
-      <div>
-        通用的Intl数据，在将中文转为intl的时候，比如要将“新建”文本转为intl，然后如果在通用的Intl数据当中存在'button.create': '新建'，则会直接使用它的编码'button.create'，而不是使用预先设置的prefix
-      </div>
+      <pre>
+        通用的Intl数据，在将中文转为intl的时候，比如要将“新建”文本转为intl，然后如果在通用的Intl数据当中存在'button.create': '新建'<br />
+        则会直接使用它的编码'button.create'，而不是使用预先设置的prefix
+      </pre>
       <TextArea
         autoSize={{ minRows: 5 }}
         value={commonInput}
@@ -131,7 +132,7 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
         {mode !== Mode.HzeroIntlReact && (
           <>
             <Divider orientation="left">导入项目里的Intl数据</Divider>
-            <div>导入项目里的Intl数据，之后在扫描Intl中将会与该数据合并导出</div>
+            <pre>导入项目里的Intl数据，之后在扫描Intl中将会与该数据合并导出</pre>
             <TextArea
               autoSize={{ minRows: 5 }}
               value={input}
