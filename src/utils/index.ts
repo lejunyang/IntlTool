@@ -52,15 +52,4 @@ export function parseCss(cssJson: string) {
   }
 }
 
-/**
- * 将{ a: 'b' }变为{ b: 'a' }，对象中只有值为字符串才会变成key
- */
-export function reverseObject(obj: object) {
-  const result = {};
-  for (const key in obj) {
-    if (typeof obj[key] === 'string') {
-      result[obj[key]] = key;
-    }
-  }
-  return result;
-}
+export * from '../../electron/utils/objectUtils';

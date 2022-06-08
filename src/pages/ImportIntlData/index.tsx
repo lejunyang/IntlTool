@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-06-06 14:02:59
- * @LastEditTime: 2022-06-08 09:41:58
+ * @LastEditTime: 2022-06-08 10:30:16
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ImportIntlData\index.tsx
@@ -10,7 +10,7 @@ import { useState, FC } from 'react';
 import { Button, Input, notification, Divider, Modal } from 'antd';
 import { AppState } from '../../@types';
 import { Event, Mode } from '../../../electron/types';
-import { reverseObject } from '../../utils';
+import { reverseObject, flattenObject } from '../../utils';
 
 const TextArea = Input.TextArea;
 const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
@@ -87,8 +87,7 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
           let intlData;
           switch (mode) {
             case Mode.VueI18N:
-              intlData = JSON.parse(inputProcessed);
-              // TODO 需要将该对象扁平化
+              intlData = flattenObject(JSON.parse(inputProcessed));
               break;
             case Mode.UmiIntlReact:
               // eslint-disable-next-line no-eval
