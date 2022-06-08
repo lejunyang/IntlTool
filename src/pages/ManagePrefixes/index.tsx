@@ -20,7 +20,7 @@ const ManagePrefixes: FC<Pick<AppState, 'pageData'>> = ({
 }) => {
   const [input, setInput] = useState(prefixes.join('\n') || '');
   return (
-    <div className="page-wrapper" spellCheck={false}>
+    <div className="page-wrapper">
       前缀使用正则进行替换
       <TextArea
         autoSize={{ minRows: 5 }}

@@ -18,7 +18,17 @@ body {
     display: flex; // 修复popconfirm按钮的显示问题
   }
   .ant-divider-horizontal.ant-divider-with-text-left::before {
-    width: 20px; // 分割线左边固定宽度
+    width: @normal-gap; // 分割线左边固定宽度
+  }
+  .ant-design-pro.ant-pro-basicLayout {
+    // 固定左边的菜单高度，右边的内容滚动
+    height: 100vh;
+    overflow: hidden;
+    section {
+      .ant-layout {
+        overflow-y: auto;
+      }
+    }
   }
 }
 

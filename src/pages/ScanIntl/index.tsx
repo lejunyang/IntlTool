@@ -166,7 +166,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   };
 
   return (
-    <div className="page-wrapper" spellCheck={false}>
+    <div className="page-wrapper">
       <Button
         onClick={async () => {
           window.Main.emit(Event.ScanIntl);

@@ -46,7 +46,7 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
     }
   }
   return (
-    <div className="page-wrapper" spellCheck={false}>
+    <div className="page-wrapper">
       <Button onClick={() => {
         const contentMap = {
           [Mode.HzeroIntlReact]: "prefix.common button.create 新建",

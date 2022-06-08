@@ -22,7 +22,7 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
     form.setFieldsValue({ allowedFileSuffix, excludedPaths });
   }, [allowedFileSuffix, excludedPaths]);
   return (
-    <div className="page-wrapper" spellCheck={false}>
+    <div className="page-wrapper">
       <Form form={form}>
         <Form.Item name="allowedFileSuffix" initialValue={allowedFileSuffix} label="允许的文件格式">
           <Select mode="tags" />
