@@ -1,7 +1,8 @@
+/* eslint-disable no-case-declarations */
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-06-06 14:02:59
- * @LastEditTime: 2022-06-08 10:30:16
+ * @LastEditTime: 2022-06-08 11:04:07
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ImportIntlData\index.tsx
@@ -48,8 +49,13 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
   return (
     <div className="page-wrapper">
       <Button onClick={() => {
+        const titleMap = {
+          [Mode.HzeroIntlReact]: "每一行为一条数据\nprefix code description\n它们之间可以用空白字符或逗号分隔",
+          [Mode.VueI18N]: "JSON数据",
+          [Mode.UmiIntlReact]: "扁平JS对象，每个key都是完整的code"
+        };
         const contentMap = {
-          [Mode.HzeroIntlReact]: "prefix.common button.create 新建",
+          [Mode.HzeroIntlReact]: "prefix.common button.create 新建\nprefix.common,button.add,添加",
           [Mode.VueI18N]: {
             common: {
               button: {
@@ -64,9 +70,12 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
           }
         };
         Modal.info({
+          title: <pre>
+            {titleMap[mode]}
+          </pre>,
           content: <pre>
-            {JSON.stringify(contentMap[mode], null, 2)}
-          </pre>
+            {typeof contentMap[mode] === 'string' ? contentMap[mode] : JSON.stringify(contentMap[mode], null, 2)}
+          </pre>,
         })
       }}>查看当前模式的数据格式</Button>
       <Divider orientation="left">导入通用Intl数据</Divider>
@@ -83,9 +92,20 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
       <Button
         onClick={() => {
           if (!assertInput(commonInput)) return;
+          pageData.processing = true;
           const inputProcessed = commonInput.trim();
-          let intlData;
+          let intlData = {};
           switch (mode) {
+            case Mode.HzeroIntlReact:
+              const lines = inputProcessed.split('\n');
+              lines.forEach(line => {
+                let intlLine: string[];
+                if (line.includes(',')) intlLine = line.split(',').map(i => i.trim());
+                else intlLine = line.split(/\s/).map(i => i.trim());
+                if (intlLine.length < 3) return;
+                intlData[`${intlLine[0]}.${intlLine[1]}`] = intlLine[2];
+              })
+              break;
             case Mode.VueI18N:
               intlData = flattenObject(JSON.parse(inputProcessed));
               break;
@@ -94,8 +114,8 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
               intlData = eval(`(${inputProcessed})`)
               break;
           }
-          pageData.processing = true;
           window.Main.emit(Event.SetCommonIntlData, reverseObject(intlData));
+          notification.success({ message: '导入成功' });
         }}
       >
         覆盖导入
@@ -107,42 +127,49 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
           </pre>
         })
       }}>查看已导入的通用数据</Button>
-      <Divider orientation="left">导入项目里的Intl数据</Divider>
-      <div>导入项目里的Intl数据，之后在扫描Intl中将会与该数据合并导出</div>
-      <TextArea
-        autoSize={{ minRows: 5 }}
-        value={input}
-        onChange={e => {
-          setInput(e.target.value);
-        }}
-      />
-      <Button
-        onClick={() => {
-          if (!assertInput(input)) return;
-          const inputProcessed = input.trim();
-          let intlData;
-          switch (mode) {
-            case Mode.VueI18N:
-              intlData = JSON.parse(inputProcessed);
-              pageData.existedIntlData = intlData;
-              break;
-            case Mode.UmiIntlReact:
-              // eslint-disable-next-line no-eval
-              intlData = eval(`(${inputProcessed})`)
-              pageData.existedIntlData = intlData;
-              break;
-          }
-        }}
-      >
-        覆盖导入
-      </Button>
-      <Button onClick={() => {
-        Modal.info({
-          content: <pre>
-            {JSON.stringify(existedIntlData, null, 2)}
-          </pre>
-        })
-      }}>查看已导入的项目数据</Button>
+      <>
+        {mode !== Mode.HzeroIntlReact && (
+          <>
+            <Divider orientation="left">导入项目里的Intl数据</Divider>
+            <div>导入项目里的Intl数据，之后在扫描Intl中将会与该数据合并导出</div>
+            <TextArea
+              autoSize={{ minRows: 5 }}
+              value={input}
+              onChange={e => {
+                setInput(e.target.value);
+              }}
+            />
+            <Button
+              onClick={() => {
+                if (!assertInput(input)) return;
+                const inputProcessed = input.trim();
+                let intlData;
+                switch (mode) {
+                  case Mode.VueI18N:
+                    intlData = JSON.parse(inputProcessed);
+                    pageData.existedIntlData = intlData;
+                    break;
+                  case Mode.UmiIntlReact:
+                    // eslint-disable-next-line no-eval
+                    intlData = eval(`(${inputProcessed})`)
+                    pageData.existedIntlData = intlData;
+                    break;
+                }
+                notification.success({ message: '导入成功' });
+              }}
+            >
+              覆盖导入
+            </Button>
+            <Button onClick={() => {
+              Modal.info({
+                content: <pre>
+                  {JSON.stringify(existedIntlData, null, 2)}
+                </pre>
+              })
+            }}>查看已导入的项目数据</Button>
+          </>
+        )}
+      </>
     </div>
   );
 };
