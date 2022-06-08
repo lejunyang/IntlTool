@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-06-06 14:02:59
- * @LastEditTime: 2022-06-07 18:11:59
+ * @LastEditTime: 2022-06-08 09:41:58
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ImportIntlData\index.tsx
@@ -20,7 +20,7 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
     remoteData: { mode, commonIntlData },
   },
 }) => {
-  const [input, setInput] = useState(existedIntlData);
+  const [input, setInput] = useState('');
   const [commonInput, setCommonInput] = useState('');
   const assertInput = (_input: string): boolean => {
     try {
@@ -99,7 +99,7 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
           window.Main.emit(Event.SetCommonIntlData, reverseObject(intlData));
         }}
       >
-        导入
+        覆盖导入
       </Button>
       <Button onClick={() => {
         Modal.info({
@@ -135,7 +135,7 @@ const ImportIntlData: FC<Pick<AppState, 'pageData'>> = ({
           }
         }}
       >
-        导入
+        覆盖导入
       </Button>
       <Button onClick={() => {
         Modal.info({
