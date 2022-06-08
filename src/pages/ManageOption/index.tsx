@@ -1,13 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2022-06-08 14:50:45
+ * @LastEditTime: 2022-06-08 15:46:03
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageOption\index.tsx
  */
 import { FC, useEffect } from 'react';
-import { Button, Select, Form, Switch, Input } from 'antd';
+import { Button, Select, Form, Switch, Input, notification } from 'antd';
 import { Event } from '../../../electron/types';
 import { AppState } from '../../@types';
 import { omit } from 'lodash';
@@ -114,12 +114,13 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
               pageData.processing = true;
               window.Main.emit(Event.SetModeOptions, {
                 ...omit(values, ['l1', 'l2', 'l3']),
-                formatOptions: JSON.parse(values.formatOptions),
+                ...(values.formatAfterTransform ? { formatOptions: JSON.parse(values.formatOptions) } : {}),
                 nameMap: { l1: values.l1, l2: values.l2, l3: values.l3 },
               });
+              notification.success({ message: '设置成功' })
             })
             .catch(errorInfo => {
-              form.scrollToField(errorInfo.errorFields[0].name);
+              if (errorInfo.errorFields) form.scrollToField(errorInfo.errorFields[0].name);
             });
         }}
       >
