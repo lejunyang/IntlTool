@@ -1,15 +1,15 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-06-06 15:29:36
+ * @LastEditTime: 2022-06-08 16:48:43
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
  */
 import type { ParseResult as BabelParseResult } from '@babel/parser';
 import type { File as BabelFile } from '@babel/types';
-import { AST } from 'vue-eslint-parser';
-import { Options as PrettierOptions } from 'prettier';
+import type { AST } from 'vue-eslint-parser';
+import type { Options as PrettierOptions } from 'prettier';
 
 export type Message = {
   type: 'error' | 'warning' | 'success' | 'info';
