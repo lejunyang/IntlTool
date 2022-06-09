@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-08 13:53:10
+ * @LastEditTime: 2022-06-09 14:00:52
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -12,6 +12,9 @@ import { Event, ProcessFile, Message, Mode } from './types';
 import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
 import { readFile, traversePaths } from './utils/fileUtils';
+import { handleSquirrelEvent } from './squirrel-startup';
+
+handleSquirrelEvent();
 
 let mainWindow: BrowserWindow | null;
 
