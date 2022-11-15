@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 10:48:17
- * @LastEditTime: 2022-05-26 21:44:51
+ * @LastEditTime: 2022-08-23 16:51:52
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\fileUtils.ts
@@ -15,6 +15,7 @@ export function readFile(path: string) {
     return fs.readFileSync(path, 'utf-8').replace(/(?<!\r)\n/g, '\r\n'); // 统一替换为crlf，防止后续diff时因为这个而全篇不一样
   } catch (e) {
     console.error(e);
+    return '';
   }
 }
 
@@ -49,8 +50,9 @@ export function traversePath(
   const files = fs.readdirSync(_path);
   files.forEach(fileOrDir => {
     const p = path.join(_path, fileOrDir);
+    if (options?.isPathAllowed instanceof Function && !options.isPathAllowed(p)) return;
     const stat = fs.statSync(p);
-    if (stat.isDirectory() && (!(options?.isPathAllowed instanceof Function) || options.isPathAllowed(p))) {
+    if (stat.isDirectory()) {
       traversePath(p, options);
     }
     if (stat.isFile()) fileCallback(stat.ino, p);

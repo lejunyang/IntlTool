@@ -44,5 +44,5 @@ export function replace(input: string, searchValue: string | RegExp, replaceValu
 export function toLowerCamel(input: string): string {
   return input
     .replace(/[-_]([a-z])/g, (_, match: string) => match.toUpperCase())
-    .replace(/([A-Z])/, (_, match: string) => match.toLowerCase());
+    .replace(/^([A-Z])/, (_, match: string) => match.toLowerCase());
 }

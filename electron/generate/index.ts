@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-06-06 15:29:26
+ * @LastEditTime: 2022-08-23 14:18:53
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -45,7 +45,7 @@ import { IntlOptions } from '../types';
 /**
  * 生成l1.l2().l3()的intl AST节点，l1、l2、l3的名字由参数nameMap确定，默认为intl.get().d()
  * @param getString
- * @param dValue 字符串或AST字符串字面量节点
+ * @param dValue 字符串或允许的AST节点
  * @param nameMap l1.l2().l3()，它们三个名字的映射
  * @param commonIntlData 公共的intl数据，当中文一致时，编码则直接使用那个中文的编码，而非prefix
  */
@@ -140,6 +140,7 @@ export function generateAndFormat(node: Node, options?: IntlOptions): string {
     jsescOption: {
       minimal: true,
     },
+    decoratorsBeforeExport: true, // 用于支持@xxx export defaul class，不指定该选项会变成 export defaul @xxx class，下面prettier用typescript解析就会报错
     retainLines: true, // 尝试保留相同的行号
   });
   if (options?.formatAfterTransform)
