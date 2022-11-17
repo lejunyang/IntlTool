@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-09 14:00:52
+ * @LastEditTime: 2022-11-17 15:33:19
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -185,8 +185,8 @@ async function registerListeners() {
       if (path.charAt(1) === ':') path = info[0] + ':' + info.slice(1, info.length - 2).join('');
       else path = info.slice(0, info.length - 2).join('');
       console.log('path with line column:', path);
-      launchEditor(path, +info[info.length - 2], +info[info.length - 1], { editor: 'code' });
-    } else launchEditor(path, 1, 1, { editor: 'code' });
+      launchEditor(path, +info[info.length - 2], +info[info.length - 1]);
+    } else launchEditor(path, 1, 1);
   });
 
   ipcMain.on(Event.DownloadIntlResult, (_, data) => {

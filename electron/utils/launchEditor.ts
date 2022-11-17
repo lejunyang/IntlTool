@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 // eslint-disable-next-line camelcase
 import child_process from 'child_process';
+import type { ChildProcess } from 'child_process';
 import os from 'os';
 import chalk from 'chalk';
 import shellQuote from 'shell-quote';
@@ -171,7 +172,7 @@ function getArgumentsForLineNumber(editor, fileName, lineNumber, colNumber, work
   return [fileName];
 }
 
-function guessEditor(editor: string) {
+function guessEditor(editor?: string) {
   // Explicit config always wins
   editor = editor || process.env.REACT_EDITOR;
   if (editor) {
@@ -254,7 +255,7 @@ function printInstructions(fileName, errorMessage) {
   console.log();
 }
 
-let _childProcess = null;
+let _childProcess: ChildProcess = null;
 function launchEditor(fileName: string, lineNumber: number, colNumber?: number, option?: { editor: string }) {
   if (!fs.existsSync(fileName)) {
     console.log('fileName ', fileName, ' not exist');
@@ -275,8 +276,8 @@ function launchEditor(fileName: string, lineNumber: number, colNumber?: number, 
     colNumber = 1;
   }
 
-  let [editor, ...args] = guessEditor(option.editor);
-  console.log('editor', editor)
+  let [editor, ...args] = guessEditor(option?.editor);
+  console.log('editor', editor, args)
   if (!editor) {
     printInstructions(fileName, null);
     return;
