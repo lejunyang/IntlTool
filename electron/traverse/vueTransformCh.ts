@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-26 14:24:46
- * @LastEditTime: 2022-05-29 17:11:02
+ * @LastEditTime: 2022-11-17 15:18:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\vueTransformCh.ts
@@ -9,15 +9,16 @@
 import { AST } from 'vue-eslint-parser';
 import { parseVueFile, parseJSCode } from '../parse';
 import { getVueTemplateChToIntlVisitor, getChToIntlVisitor } from './visitor';
-import { generateAndFormat } from '../generate';
+import { generateAndFormat, format } from '../generate';
 import traverse from '@babel/traverse';
 import { createTwoFilesPatch } from 'diff';
-import { ProcessFile } from '../types';
+import { ProcessFile, IntlOptions } from '../types';
 
 const { traverseNodes } = AST;
 
 // 目前遇到的问题还有，在不同的uniapp预编译块中定义相同的变量导致js报错。。。想到的解决方法是提取出这些东西，单独处理
-export function transformVueCh(file: ProcessFile, prefix = '') {
+export function transformVueCh(file: ProcessFile, options: IntlOptions) {
+  const { prefix = '' } = options;
   parseVueFile(file);
   if (file.parseError) return;
   // 遍历vue的template
@@ -45,13 +46,13 @@ export function transformVueCh(file: ProcessFile, prefix = '') {
         if (!scriptParseResult.parseError) {
           traverse<ProcessFile>(
             scriptParseResult,
-            getChToIntlVisitor({prefix, nameMap:{ l1: 'this', l2: 'intl', l3: 'd' }}),
+            getChToIntlVisitor({prefix, nameMap:{ l1: 'this', l2: 'intl', l3: 'd' }, filepath: file.path}),
             null,
             file
           );
           const scriptStartTag = script.replace(/(<script.*?>)[\s\S]*?<\/script>/, '$1');
           file.chTransformedContent = file.chTransformedContent
-            .replace(script, `${scriptStartTag}\r\n${generateAndFormat(scriptParseResult)}\r\n</script>`)
+            .replace(script, `${scriptStartTag}\r\n${generateAndFormat(scriptParseResult, options)}\r\n</script>`)
             .replace(/\r\n{\s*\/\/TEMP/g, '')
             .replace(/}\s*\/\/TEMP\r\n/g, '');
         } else {
@@ -60,11 +61,15 @@ export function transformVueCh(file: ProcessFile, prefix = '') {
           return;
         }
       } catch (e) {
-        const error = { ...e, message: e.message, path: file.path, stack: e.stack, scriptCode };
+        const error = { ...e, message: e.message, path: file.path, stack: e.stack };
         console.error('transformVueCh script error: ', error);
       }
     }
   });
+  // 让script和style缩进
+  if (options.formatAfterTransform && options.formatOptions.vueIndentScriptAndStyle) {
+    file.chTransformedContent = format(file.chTransformedContent, options);
+  }
   // 这个createTwoFilesPatch，如果传的文件名是一样的，开头会多一句Index: 文件名。。。我不理解，手动把它去掉
   // 另外，分割线那一行也不要
   file.diffPatchOfChTransform = createTwoFilesPatch(

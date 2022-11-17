@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 16:40:17
- * @LastEditTime: 2022-05-26 12:12:24
+ * @LastEditTime: 2022-11-17 15:12:23
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\astUtils.ts
@@ -28,6 +28,8 @@ import {
   booleanLiteral,
   isThisExpression,
   isIdentifier,
+  isMemberExpression,
+  isCallExpression,
 } from '@babel/types';
 import { shallowEqual } from './objectUtils';
 
@@ -152,4 +154,17 @@ export function toBabelLiteral(literal: TSType) {
     default:
       return null;
   }
+}
+
+/**
+ * 获取成员表达式或函数调用表达式的调用名，如a.b().c.d['e']()结果为a.b.c.d
+ */
+export function getCallStr(expr: any): string {
+  if (isThisExpression(expr)) return 'this';
+  if (isIdentifier(expr)) return expr.name;
+  if (isCallExpression(expr)) return getCallStr(expr.callee);
+  if (isMemberExpression(expr)) {
+    return expr.computed ? getCallStr(expr.object) : `${getCallStr(expr.object)}.${getCallStr(expr.property)}`;
+  }
+  return '';
 }

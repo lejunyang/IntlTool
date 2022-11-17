@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-06-08 15:37:05
+ * @LastEditTime: 2022-11-17 15:43:31
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -16,7 +16,7 @@ import { parseJSFile, parseVueFile } from './parse';
 
 export default class Manager {
   private commonOptions = {
-    excludedPaths: ['node_modules', 'lib'],
+    excludedPaths: ['node_modules', 'lib', '.umi', 'dist'],
     requirePrefix: false,
     formatAfterTransform: true,
     commonIntlData: {},
@@ -26,6 +26,7 @@ export default class Manager {
       arrowParens: 'avoid',
       printWidth: 120,
       endOfLine: 'crlf',
+      vueIndentScriptAndStyle: true,
     } as PrettierOptions,
   };
 
@@ -103,6 +104,7 @@ export default class Manager {
     if (!this.isFileAllowed(file.path)) return;
     Object.assign(file, {
       vars: {},
+      chTransformed: '',
     });
     if (this.filesUIDSet.has(file.uid)) {
       const index = this.files.findIndex(f => f.uid === file.uid);
@@ -128,7 +130,7 @@ export default class Manager {
       else parseJSFile(file);
       file.chTransformedContent = '';
       file.diffPatchOfChTransform = '';
-      file.isChTransformed = false;
+      file.chTransformed = '';
     });
   }
 
@@ -259,8 +261,8 @@ export default class Manager {
           } else return str;
         }
       );
-      if (file.path.endsWith('vue')) transformVueCh(file, prefix);
-      else transformCh(file, { prefix, ...this.modeMap[this.mode] });
+      if (file.path.endsWith('vue')) transformVueCh(file, { prefix, ...this.modeMap[this.mode], filepath: file.path });
+      else transformCh(file, { prefix, ...this.modeMap[this.mode], filepath: file.path });
     });
   }
 
@@ -268,7 +270,7 @@ export default class Manager {
     this.resetIntl();
     this.files.forEach(file => {
       if (file.path.endsWith('vue')) traverseVueIntl(file);
-      else traverseIntl(file, { prefix: '', ...this.modeMap[this.mode] });
+      else traverseIntl(file, { prefix: '', ...this.modeMap[this.mode], filepath: file.path });
     });
   }
 }

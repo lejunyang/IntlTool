@@ -88,7 +88,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
     },
     leaveNode(node) {
       if (node?.type !== 'VElement' || node.name !== 'template') return;
-      if (replaceActions.length) file.isChTransformed = true;
+      if (replaceActions.length) file.chTransformed += `vue template replace nums: ${replaceActions.length}`;
       else return;
       replaceActions.sort((a, b) => a.rangeStart - b.rangeStart);
       let indexAcc = 0;

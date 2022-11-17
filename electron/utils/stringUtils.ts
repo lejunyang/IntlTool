@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-17 13:41:26
- * @LastEditTime: 2022-06-02 17:07:33
+ * @LastEditTime: 2022-11-17 14:37:41
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\stringUtils.ts
@@ -26,7 +26,7 @@ export function containsCh(
   } else if (isTemplateLiteral(input)) {
     return !!input.quasis.find(t => reg.test(t.value.cooked ?? ''));
   } else if (isConditionalExpression(input)) {
-    return containsCh(input.consequent) || containsCh(input.alternate);
+    return containsCh(input.consequent) || containsCh(input.alternate) || containsCh(input.test);
   } else if (['BinaryExpression', 'LogicalExpression'].includes(input?.type) && ['+', '&&', '||', '??'].includes(input?.operator)) {
     return containsCh(input.left) || containsCh(input.right);
   } return false;

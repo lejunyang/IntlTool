@@ -27,7 +27,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
 }) => {
   const [outputFormat, setOutputFormat] = useState<'split' | 'unified'>('split');
 
-  const transformedFiles = files.filter(file => file.isChTransformed);
+  const transformedFiles = files.filter(file => file.chTransformed);
 
   return (
     <div className="page-wrapper">

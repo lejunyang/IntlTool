@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-08-23 14:18:53
+ * @LastEditTime: 2022-11-17 15:45:03
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -37,7 +37,7 @@ import {
   isBinaryExpression,
   binaryExpression,
 } from '@babel/types';
-import { format } from 'prettier';
+import { format as prettierFormat } from 'prettier';
 import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
 import { containsCh } from '../utils/stringUtils';
 import { IntlOptions } from '../types';
@@ -122,12 +122,34 @@ export function generateCode(node: Node | ESNode): string {
     // vue template里解析的node即使是babel Node，它的子结点也可能有各种Literal，真是吐了，比如LogicalExpression MemberExpression TemplateLiteral ConditionalExpression BinaryExpression
     // 所以曲线救国，直接catch转换方式
     try {
-      const { code } = babelGenerate(node);
+      const { code } = babelGenerate(node, {
+        comments: false,
+        compact: true,
+      });
       return code;
     } catch (e) {
       return generate(node);
     }
   } else return generate(node);
+}
+
+export function format(code: string, options?: IntlOptions & { errorInfo?: any }): string {
+  try {
+    return prettierFormat(code, {
+      filepath: options?.filepath,
+      ...(options?.filepath ? {} : { parser: 'typescript' }), // 传了filepath可以推导parser，没传默认ts
+      semi: true,
+      singleQuote: true,
+      arrowParens: 'avoid',
+      printWidth: 120,
+      endOfLine: 'crlf', // 统一为crlf
+      vueIndentScriptAndStyle: true, // vue代码缩进script和style
+      ...(options.formatOptions || {}),
+    })
+  } catch (e) {
+    console.error({ message: '格式化时发生错误' + e, path: options?.filepath });
+    return code;
+  }
 }
 
 /**
@@ -141,17 +163,9 @@ export function generateAndFormat(node: Node, options?: IntlOptions): string {
       minimal: true,
     },
     decoratorsBeforeExport: true, // 用于支持@xxx export defaul class，不指定该选项会变成 export defaul @xxx class，下面prettier用typescript解析就会报错
-    retainLines: true, // 尝试保留相同的行号
+    // retainLines: true, // 尝试保留相同的行号 // retainLines会出现莫名其妙的空行，单个模板字符串节点也会出现空行
   });
   if (options?.formatAfterTransform)
-    return format(code, {
-      parser: 'typescript', // parser根据语言必传
-      semi: true,
-      singleQuote: true,
-      arrowParens: 'avoid',
-      printWidth: 120,
-      endOfLine: 'crlf', // 统一为crlf
-      ...(options.formatOptions || {}),
-    });
+    return format(code, options);
   else return code.replace(/(?<!\r)\n/g, '\r\n'); // 统一替换为crlf;
 }

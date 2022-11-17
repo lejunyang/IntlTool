@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-06-08 16:48:43
+ * @LastEditTime: 2022-11-17 10:12:41
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -53,7 +53,7 @@ export type TransferFile = BasicFile & {
   content: string;
   chTransformedContent?: string;
   diffPatchOfChTransform?: string;
-  isChTransformed?: boolean; // 因为prettier会对代码格式化，没法判断是否是改了intl，故加一个变量
+  chTransformed?: string; // 因为prettier会对代码格式化，没法判断是否是改了intl，故加一个变量
   parseError?: string;
   intlResult?: IntlResult;
 };
@@ -111,4 +111,5 @@ export type ModeOptions = {
 
 export type IntlOptions = ModeOptions & {
   prefix: string;
+  filepath: string;
 };
