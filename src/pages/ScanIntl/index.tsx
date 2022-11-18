@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-06-07 16:39:56
+ * @LastEditTime: 2022-11-18 15:05:10
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -15,7 +15,7 @@ import { set, get as lodashGet } from 'lodash';
 import Button from '../../components/Button';
 import { Event, IntlItem, Mode } from '../../../electron/types';
 import { AppState } from '../../@types';
-import { copy } from '../../utils';
+import { copy, getCSVLine } from '../../utils';
 
 type IntlRecord = IntlItem & {
   path?: string;
@@ -132,14 +132,23 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     let isOverride = false;
     const checkOverride = () => {
       if (isOverride) {
-        notification.warn({ message: '导出过程中，存在扫描出的数据和导入数据不同，请前往控制台查看详细信息' });
+        notification.warn({
+          message: '在合并导入数据和扫描数据时，有一些导入数据中的条目将被覆盖，请前往控制台warnings和errors确认',
+          description: '控制台打开方式：Views -> Toggle Developer Tools',
+        });
       }
-    }
+    };
     switch (mode) {
       case Mode.VueI18N:
         for (const item of data) {
-          if (lodashGet(result, item.code) && lodashGet(result, item.code) !== item.d) {
-            console.warn('编码“', item.code, '”已经存在值“', lodashGet(result, item.code), '”，它将被覆盖为:', item.d)
+          const exsited = lodashGet(result, item.code);
+          if (exsited && exsited !== item.d) {
+            // exsited如果是对象，说明你code路径写太短了，少写了后面的编码，这会把整个对象都给覆盖掉的！
+            console[typeof exsited === 'object' ? 'error' : 'warn'](
+              `编码“${item.code}”已经存在值“${exsited}”`,
+              '它将被覆盖为:',
+              item.d
+            );
             isOverride = true;
           }
           set(result, item.code, item.d);
@@ -149,7 +158,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       case Mode.UmiIntlReact:
         for (const item of data) {
           if (result[item.code] && result[item.code] !== item.d) {
-            console.warn('编码“', item.code, '”已经存在值“', result[item.code], '”，它将被覆盖为:', item.d)
+            console.warn(`编码“${item.code}”已经存在值“${result[item.code]}”`, '它将被覆盖为:', item.d);
             isOverride = true;
           }
           result[item.code] = item.d;
@@ -159,7 +168,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       case Mode.HzeroIntlReact:
         let head = `模板代码,代码,语言,描述\n`;
         for (const item of data) {
-          if (!item.error) head += `${item.prefix},${item.get},zh_CN,${item.d}\n`;
+          if (!item.error) head += getCSVLine(item.prefix, item.get, 'zh_CN', item.d);
         }
         return head;
     }

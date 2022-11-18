@@ -53,3 +53,4 @@ export function parseCss(cssJson: string) {
 }
 
 export * from '../../electron/utils/objectUtils';
+export * from '../../electron/utils/stringUtils';
