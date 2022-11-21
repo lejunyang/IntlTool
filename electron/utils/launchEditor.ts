@@ -240,7 +240,7 @@ function printInstructions(fileName, errorMessage) {
     if (errorMessage[errorMessage.length - 1] !== '.') {
       errorMessage += '.';
     }
-    console.log(chalk.red('The editor process exited with an error: ' + errorMessage));
+    console.error(chalk.red('The editor process exited with an error: ' + errorMessage));
   }
   console.log();
   console.log(

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-26 14:24:46
- * @LastEditTime: 2022-11-18 18:12:11
+ * @LastEditTime: 2022-11-21 11:59:01
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\vueTransformCh.ts
@@ -60,12 +60,12 @@ export function transformVueCh(file: ProcessFile, options: IntlOptions) {
             .replace(/}\s*\/\/TEMP\r\n/g, '');
         } else {
           file.parseError = scriptParseResult.parseError;
-          console.error({ message: file.parseError, path: file.path });
+          console.error({ message: `${file.path}解析Vue script时发生错误`, error: file.parseError });
           return;
         }
       } catch (e) {
-        const error = { ...e, message: e.message, path: file.path, stack: e.stack };
-        console.error('transformVueCh script error: ', error);
+        const error = { ...e, message: `${file.path}解析Vue script时发生错误`+ e.message, stack: e.stack };
+        console.error(error);
       }
     }
   });

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-11-21 11:27:50
+ * @LastEditTime: 2022-11-21 11:56:51
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -145,8 +145,8 @@ export function format(code: string, options?: IntlOptions & { errorInfo?: any }
       vueIndentScriptAndStyle: true, // vue代码缩进script和style
       ...(options?.formatOptions || {}),
     })
-  } catch (e) {
-    console.error({ message: '格式化时发生错误' + e, path: options?.filepath });
+  } catch (error) {
+    console.error({ message: `${options?.filepath ?? ''}格式化时发生错误`, error });
     return code;
   }
 }

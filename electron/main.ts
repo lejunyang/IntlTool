@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-11-18 16:11:40
+ * @LastEditTime: 2022-11-21 11:45:49
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
@@ -54,12 +54,21 @@ function sendMessage(data: Message) {
 
 const originalConsoleError = console.error.bind(console);
 console.error = (...args: any[]) => {
-  sendMessage({
-    type: 'error',
-    message: args.length === 2 ? args[0] : JSON.stringify(args),
-    description: args.length === 2 ? JSON.stringify(args[1]) : undefined,
-  });
-  originalConsoleError(...args);
+  const params = { type: 'error' as const, message: '', description: '' };
+  if (typeof args[0] === 'string') params.message = args[0];
+  else if (args[0] && typeof args[0] === 'object') {
+    const { message, ...other } = args[0];
+    if (message) {
+      params.message = message;
+      params.description = JSON.stringify(other);
+    } else {
+      params.message = '程序错误';
+      params.description = JSON.stringify(args[0]);
+    }
+  }
+  params.description += args.slice(1).map(i => typeof i === 'string' ? i : JSON.stringify(i)).join('，')
+  sendMessage(params);
+  originalConsoleError(params.message, params.description);
 };
 
 async function registerListeners() {
@@ -135,7 +144,7 @@ async function registerListeners() {
       });
       manager.refreshFiles();
     } catch (e) {
-      console.error(e);
+      console.error('替换文件时出错', e);
     }
     updateRemoteData();
   });

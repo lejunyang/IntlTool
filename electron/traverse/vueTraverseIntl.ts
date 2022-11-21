@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 20:53:09
- * @LastEditTime: 2022-11-18 18:11:55
+ * @LastEditTime: 2022-11-21 11:59:14
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\vueTraverseIntl.ts
@@ -30,6 +30,6 @@ export function traverseVueIntl(file: ProcessFile, options: IntlOptions) {
       traverseNodes(node, getVueIntlTraverseVisitor(file, options.nameMap));
     });
   } catch (e) {
-    console.error(`${file.path}遍历Vue中的intl时发生错误:`, e);
+    console.error(`${file.path}遍历Vue中的intl时发生错误`, e);
   }
 }

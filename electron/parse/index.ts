@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-02 16:05:03
- * @LastEditTime: 2022-11-18 18:04:27
+ * @LastEditTime: 2022-11-21 11:55:07
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\parse\index.ts
@@ -12,7 +12,13 @@ import { parse as vueParse } from 'vue-eslint-parser';
 
 export function parseJSCode(code: string): ParseResult {
   const ast: ParseResult = parse(code, {
-    errorRecovery: true, // 默认转换错误直接报错，加上此选项则不会，而是返回错误
+    /**
+     * 默认情况下，Babel总是在发现一些无效代码时抛出一个错误。
+     * 当此选项设置为true时，它将存储解析错误并尝试继续解析无效的输入文件。
+     * 生成的AST将有一个errors属性，表示所有解析错误的数组。
+     * 请注意，即使启用了此选项，@babel/parser也可能抛出不可恢复的错误
+     */
+    errorRecovery: true,
     sourceType: 'module', // 不指定的话，有import等语句会报错
     plugins: ['decorators-legacy', 'jsx', 'typescript'], // 代码中有装饰器，需要decorators-legacy
   });
@@ -27,13 +33,13 @@ export function parseJSFile(file: ProcessFile) {
     const ast: ParseResult = parseJSCode(file.content);
     if (ast.parseError) {
       file.parseError = ast.parseError;
-      console.error(file.parseError);
+      console.error(`${file.path}发生Babel解析错误`, file.parseError);
     }
     file.parseResult = ast;
   } catch (e) {
-    const error = { ...e, message: e.message, path: file.path };
+    const error = { ...e, message: `${file.path}发生Babel解析错误${e.message}` };
     file.parseError = JSON.stringify(error);
-    console.error(file.parseError);
+    console.error(error);
   }
 }
 
@@ -42,7 +48,6 @@ export function parseVueCode(code: string) {
   const ast: VueParseResult = vueParse(code, { sourceType: 'module', ecmaVersion: 'latest' });
   if (ast.errors?.length) {
     ast.parseError = ast.errors!.map(error => `${error.code}: ${error.message}`).join(', ');
-    console.error(ast.parseError);
   }
   return ast;
 }
@@ -52,12 +57,12 @@ export function parseVueFile(file: ProcessFile) {
     const ast: VueParseResult = parseVueCode(file.content);
     if (ast.parseError) {
       file.parseError = ast.parseError;
-      console.error(file.parseError);
+      console.error(`${file.path}发生Vue解析错误`, file.parseError);
     }
     file.vueParseResult = ast;
   } catch (e) {
-    const error = { ...e, message: e.message, path: file.path };
+    const error = { ...e, message: `${file.path}发生Vue解析错误${e.message}` };
     file.parseError = JSON.stringify(error);
-    console.error(file.parseError);
+    console.error(error);
   }
 }
