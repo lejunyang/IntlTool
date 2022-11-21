@@ -9,8 +9,13 @@
 import { api } from '../../electron/bridge';
 
 declare global {
-  // eslint-disable-next-line
   interface Window {
     Main: typeof api;
+  }
+}
+
+declare module 'vue-eslint-parser/ast/nodes' {
+  interface VElement {
+    isRootTemplate?: boolean; // 用于表明这个template是不是vue根结点的template
   }
 }

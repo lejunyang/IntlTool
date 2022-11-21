@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-11-21 15:46:41
+ * @LastEditTime: 2022-11-21 17:01:17
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
@@ -99,7 +99,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
       }
     },
     leaveNode(node) {
-      if (node?.type !== 'VElement' || node.name !== 'template') return;
+      if (node?.type !== 'VElement' || node.name !== 'template' || !node.isRootTemplate) return;
       if (replaceActions.length) {
         file.chTransformedInfo = file.chTransformedInfo.concat(replaceActions);
       } else return;
