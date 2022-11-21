@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-11-18 16:14:56
+ * @LastEditTime: 2022-11-21 14:07:25
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -182,8 +182,16 @@ export default class Manager {
   setPrefixes(prefixString: string) {
     this.prefixes = prefixString.split(/\r?\n/).flatMap(p => {
       const result = p.trim();
-      if (result) return [result];
-      else return [];
+      try {
+        // 通过new测试能否转为正则，比如new RegExp('^*')是非法的
+        // eslint-disable-next-line no-new
+        new RegExp(result);
+        if (result) return [result];
+        else return [];
+      } catch (e) {
+        console.error(`${result}不能转为正则，请检查`)
+        return [];
+      }
     });
   }
 

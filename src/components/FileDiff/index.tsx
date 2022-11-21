@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-27 15:41:11
- * @LastEditTime: 2022-11-21 11:22:18
+ * @LastEditTime: 2022-11-21 14:36:38
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\components\FileDiff\index.tsx
@@ -75,6 +75,9 @@ const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'spl
               { dataIndex: 'original', title: '替换前' },
               { dataIndex: 'replace', title: '替换后' },
             ]}
+            pagination={{
+              showTotal: total => `共 ${total} 条`,
+            }}
           />
         </div>
       )}

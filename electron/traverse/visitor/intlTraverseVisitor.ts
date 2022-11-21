@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-11-18 17:37:28
+ * @LastEditTime: 2022-11-21 13:49:18
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
@@ -178,12 +178,13 @@ export const getIntlCallExpression = (options: IntlOptions) => {
     }
 
     const getTemplateLiteral = getArgs[0];
-    if (isStringLiteral(getTemplateLiteral)) result.code = getTemplateLiteral.value;
+    if (isStringLiteral(getTemplateLiteral)) result.code = getTemplateLiteral.value
     else {
       const temp = processTemplateLiteral(getTemplateLiteral, 'get', state.vars);
       if (temp.error) result.error += temp.error;
       result.code = temp.content;
     }
+    if (!result.code.match(/^[\w.]+$/)) result.error += '编码只能由字母、数字、小数点和下划线组成';
     if (options.requirePrefix) {
       for (const prefix of manager.getPrefixes()) {
         const reg = new RegExp(prefix);

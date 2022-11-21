@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-11-21 11:56:51
+ * @LastEditTime: 2022-11-21 14:31:08
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -123,7 +123,9 @@ export function generateCode(node: Node | ESNode): string {
     try {
       const { code } = babelGenerate(node, {
         comments: false,
-        compact: true,
+        jsescOption: {
+          minimal: true,
+        },
       });
       return code;
     } catch (e) {
