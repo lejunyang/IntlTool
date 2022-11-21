@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-11-18 15:40:59
+ * @LastEditTime: 2022-11-21 15:16:40
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\chToIntlVisitor.ts
@@ -23,6 +23,7 @@ import {
   isObjectProperty,
   isMemberExpression,
   isCallExpression,
+  isJSXIdentifier,
 } from '@babel/types';
 import { generateCode, generateIntlNode } from '../../generate';
 import type { ProcessFile, IntlOptions } from '../../types';
@@ -66,6 +67,11 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
     JSXAttribute(path: NodePath<JSXAttribute>, state) {
       const node = path.node.value;
       if (!containsCh(node)) return;
+      // 忽略O2design中filterHandler里的中文
+      if (isJSXIdentifier(path.node.name, { name: 'filterHandler' })) {
+        const jsxNameNode = (path.parentPath.get('name') as unknown as NodePath<Node>).node;
+        if (isJSXIdentifier(jsxNameNode) && jsxNameNode.name.startsWith('O2Column')) return;
+      }
       const replaceNode = jsxExpressionContainer(generateIntlNode(prefix, node, nameMap, commonIntlData));
       state.chTransformedItems.push(generateCode(replaceNode));
       path.get('value').replaceWith(replaceNode);

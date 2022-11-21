@@ -11,6 +11,7 @@ import React from 'react'
 const intl = {
   get: (code: string, params?: object) => ({ d: (str: string) => code + str + params })
 };
+const O2Column = (props: any) => <div {...props}></div>;
 
 export function App() {
   const simpleVar = '测试';
@@ -42,6 +43,7 @@ export function App() {
         空白字符行为 &nbsp;&nbsp;
         空白字符行为
       </div>
+      <O2Column title="标题" filterHandler="精确查询" />
     </>
   )
 }
