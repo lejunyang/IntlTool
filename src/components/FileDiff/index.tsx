@@ -1,26 +1,29 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-27 15:41:11
- * @LastEditTime: 2022-11-17 11:38:40
+ * @LastEditTime: 2022-11-21 11:22:18
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\components\FileDiff\index.tsx
  */
-import { Button, Modal } from 'antd';
-import { useState, FC, memo } from 'react';
+import { Button, Modal, Table } from 'antd';
+import { useState, FC, memo, useMemo } from 'react';
 import { parseDiff, Diff } from 'react-diff-view';
 import { Event, ProcessFile } from '../../../electron/types';
 import { FileTextOutlined } from '@ant-design/icons';
 import 'react-diff-view/style/index.css';
 import './index.less';
 
-const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'split' | 'unified' }> = ({
+const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'split' | 'unified' | 'table' }> = ({
   file,
   showContent,
   outputFormat = 'split',
 }) => {
   const [show, setShow] = useState(showContent);
-  const diffFiles = show && parseDiff(file.diffPatchOfChTransform, { nearbySequences: 'zip' });
+  const diffFiles = useMemo(
+    () => parseDiff(file.diffPatchOfChTransform, { nearbySequences: 'zip' }),
+    [file.diffPatchOfChTransform]
+  );
   const renderFile = ({ newPath, type, hunks }) => (
     <Diff key={newPath} viewType={outputFormat} diffType={type} hunks={hunks}></Diff>
   );
@@ -33,36 +36,11 @@ const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'spl
           setShow(!show);
         }}
       >
-        <div
-          className="flex gap-small item-center"
-          title={file.path}
-          style={{ maxWidth: 'calc(100% - 198px)' }}
-        >
+        <div className="flex gap-small item-center" title={file.path} style={{ maxWidth: 'calc(100% - 160px)' }}>
           <FileTextOutlined />
           <div className="text-ellipsis">{file.path}</div>
         </div>
         <div className="file-diff-buttons" title="">
-          <Button
-            size="small"
-            onClick={e => {
-              e.stopPropagation();
-              Modal.info({
-                title: '替换前包含中文的表达式',
-                content: (
-                  <ul style={{ paddingInlineStart: 20 }}>
-                    {file.chTransformed
-                      .split('$||$')
-                      .filter(i => i.trim())
-                      .map(i => (
-                        <li>{i}</li>
-                      ))}
-                  </ul>
-                ),
-              });
-            }}
-          >
-            查看
-          </Button>
           <Button
             size="small"
             onClick={e => {
@@ -88,7 +66,18 @@ const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'spl
           </Button>
         </div>
       </div>
-      <div>{show && diffFiles.map(renderFile)}</div>
+      <div>{show && outputFormat !== 'table' && diffFiles.map(renderFile)}</div>
+      {outputFormat === 'table' && show && (
+        <div>
+          <Table
+            dataSource={file.chTransformedInfo}
+            columns={[
+              { dataIndex: 'original', title: '替换前' },
+              { dataIndex: 'replace', title: '替换后' },
+            ]}
+          />
+        </div>
+      )}
     </div>
   );
 };

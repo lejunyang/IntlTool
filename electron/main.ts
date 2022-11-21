@@ -1,17 +1,17 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-11-17 15:33:19
+ * @LastEditTime: 2022-11-18 16:11:40
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\main.ts
  */
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import fs from 'fs';
-import { Event, ProcessFile, Message, Mode } from './types';
+import { Event, Message, Mode } from './types';
 import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
-import { readFile, traversePaths } from './utils/fileUtils';
+import { traversePaths } from './utils/fileUtils';
 import { handleSquirrelEvent } from './squirrel-startup';
 
 handleSquirrelEvent();
@@ -45,32 +45,24 @@ function createWindow() {
 }
 
 function updateRemoteData() {
-  mainWindow.webContents.send(Event.UpdateRemoteData, manager.getRemoteData());
+  if (mainWindow) mainWindow.webContents.send(Event.UpdateRemoteData, manager.getRemoteData());
 }
 
 function sendMessage(data: Message) {
-  mainWindow.webContents.send(Event.Message, data);
+  if (mainWindow) mainWindow.webContents.send(Event.Message, data);
 }
 
 const originalConsoleError = console.error.bind(console);
 console.error = (...args: any[]) => {
-  sendMessage({ type: 'error', message: JSON.stringify(args) })
+  sendMessage({
+    type: 'error',
+    message: args.length === 2 ? args[0] : JSON.stringify(args),
+    description: args.length === 2 ? JSON.stringify(args[1]) : undefined,
+  });
   originalConsoleError(...args);
 };
 
 async function registerListeners() {
-  ipcMain.on(Event.AddFile, (_, file: ProcessFile) => {
-    if (!manager.isFileAllowed(file.name)) return;
-    const stat = fs.statSync(file.path);
-    if (stat.isFile()) {
-      Object.assign(file, {
-        content: readFile(file.path),
-        path: file.path.replace(/\\/g, '/'),
-      });
-      manager.addFile(file);
-    }
-  });
-
   ipcMain.on(Event.RemoveFile, (_, uid: string) => {
     manager.removeFile(uid);
     updateRemoteData();
@@ -91,6 +83,7 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.SelectFile, (_, isDir?: boolean) => {
+    if (!mainWindow) return;
     const paths = dialog.showOpenDialogSync(mainWindow, {
       properties: [isDir ? 'openDirectory' : 'openFile', 'multiSelections'],
       filters: !isDir
@@ -111,7 +104,7 @@ async function registerListeners() {
   ipcMain.on(Event.SwitchMode, (_, mode: any) => {
     manager.switchMode(mode);
     updateRemoteData();
-  })
+  });
 
   ipcMain.on(Event.StartProcessCh, (_, prefixPattern?: string) => {
     manager.processAllCh(prefixPattern);
@@ -126,13 +119,13 @@ async function registerListeners() {
       file.content = file.chTransformedContent;
       file.chTransformedContent = '';
       file.diffPatchOfChTransform = '';
-      file.parseResult = null;
-      file.vueParseResult = null;
+      file.parseResult = undefined;
+      file.vueParseResult = undefined;
     } catch (e) {
-      console.error(e);
+      console.error(`${file.path}替换文件时出错`, e);
     }
     updateRemoteData();
-  })
+  });
 
   ipcMain.on(Event.ReplaceAllProcessedFile, () => {
     try {
@@ -145,7 +138,7 @@ async function registerListeners() {
       console.error(e);
     }
     updateRemoteData();
-  })
+  });
 
   ipcMain.on(Event.SetPrefixes, (_, data: string) => {
     manager.setPrefixes(data);
@@ -159,12 +152,12 @@ async function registerListeners() {
     } else {
       console.error('CommonIntlData必须为对象');
     }
-  })
+  });
 
   ipcMain.on(Event.SetModeOptions, (_, options: any) => {
     manager.setOptions(options);
     updateRemoteData();
-  })
+  });
 
   ipcMain.on(Event.ScanIntl, () => {
     manager.traverseAllIntl();
@@ -190,6 +183,7 @@ async function registerListeners() {
   });
 
   ipcMain.on(Event.DownloadIntlResult, (_, data) => {
+    if (!mainWindow) return;
     let filter;
     if (manager.getMode() === Mode.HzeroIntlReact) filter = { name: 'CSV', extensions: ['csv'] };
     else if (manager.getMode() === Mode.VueI18N) filter = { name: 'JSON', extensions: ['json'] };

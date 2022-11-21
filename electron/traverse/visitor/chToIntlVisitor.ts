@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-11-17 15:23:14
+ * @LastEditTime: 2022-11-18 15:40:59
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\chToIntlVisitor.ts
@@ -24,10 +24,9 @@ import {
   isMemberExpression,
   isCallExpression,
 } from '@babel/types';
-import { generateAndFormat, generateIntlNode } from '../../generate';
-import { containsCh } from '../../utils/stringUtils';
+import { generateCode, generateIntlNode } from '../../generate';
 import type { ProcessFile, IntlOptions } from '../../types';
-import { getCallStr, isIdentifierPlus } from '../../utils/astUtils';
+import { getCallStr, isIdentifierPlus, containsCh } from '../../utils/astUtils';
 
 /**
  * 用于将代码中的中文替换为intl的visitor
@@ -49,37 +48,47 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
     VariableDeclarator(path: NodePath<VariableDeclarator>, state) {
       const node = path.node.init;
       if (!containsCh(node)) return;
-      path.get('init').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
-      state.chTransformed += `$||$${generateAndFormat(node)}`;
+      const replaceNode = generateIntlNode(prefix, node, nameMap, commonIntlData);
+      state.chTransformedItems.push(generateCode(replaceNode));
+      path.get('init').replaceWith(replaceNode);
+      state.chOriginalItems.push({ start: node.start, end: node.end, str: generateCode(node) });
     },
     // 赋值表达式
     AssignmentExpression(path, state) {
       const node = path.node.right;
       if (!containsCh(node)) return;
-      path.get('right').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
-      state.chTransformed += `$||$${generateAndFormat(node)}`;
+      const replaceNode = generateIntlNode(prefix, node, nameMap, commonIntlData);
+      state.chTransformedItems.push(generateCode(replaceNode));
+      path.get('right').replaceWith(replaceNode);
+      state.chOriginalItems.push({ start: node.start, end: node.end, str: generateCode(node) });
     },
     // 将jsx属性中的中文字符串替换为intl表达式
     JSXAttribute(path: NodePath<JSXAttribute>, state) {
       const node = path.node.value;
       if (!containsCh(node)) return;
-      path.get('value').replaceWith(jsxExpressionContainer(generateIntlNode(prefix, node, nameMap, commonIntlData)));
-      state.chTransformed += `$||$${generateAndFormat(node)}`;
+      const replaceNode = jsxExpressionContainer(generateIntlNode(prefix, node, nameMap, commonIntlData));
+      state.chTransformedItems.push(generateCode(replaceNode));
+      path.get('value').replaceWith(replaceNode);
+      state.chOriginalItems.push({ start: node.start, end: node.end, str: generateCode(node) });
     },
     // 将jsx children中的中文字符串替换为intl表达式
     JSXText(path: NodePath<JSXText>, state) {
       const value = path.node.value;
       if (!containsCh(value)) return;
       // JSXText是直接将它自己这个path替换，那个value已经没有path了
-      path.replaceWith(jsxExpressionContainer(generateIntlNode(prefix, value, nameMap, commonIntlData)));
-      state.chTransformed += `$||$${value}`;
+      const replaceNode = jsxExpressionContainer(generateIntlNode(prefix, value, nameMap, commonIntlData));
+      state.chTransformedItems.push(generateCode(replaceNode));
+      path.replaceWith(replaceNode);
+      state.chOriginalItems.push({ start: path.node.start, end: path.node.end, str: value });
     },
     // jsx表达式
     JSXExpressionContainer(path, state) {
       const node = path.node.expression;
       if (!containsCh(node)) return;
-      path.get('expression').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
-      state.chTransformed += `$||$${generateAndFormat(node)}`;
+      const replaceNode = generateIntlNode(prefix, node, nameMap, commonIntlData);
+      state.chTransformedItems.push(generateCode(replaceNode));
+      path.get('expression').replaceWith(replaceNode);
+      state.chOriginalItems.push({ start: node.start, end: node.end, str: generateCode(node) });
     },
     // 对象键值
     ObjectProperty(path: NodePath<ObjectProperty>, state) {
@@ -107,8 +116,10 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
         // 为intl('')
         if (isIdentifier(callExpr, { name: nameMap.l2 })) return;
       }
-      path.get('value').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
-      state.chTransformed += `$||$${generateAndFormat(node)}`;
+      const replaceNode = generateIntlNode(prefix, node, nameMap, commonIntlData);
+      state.chTransformedItems.push(generateCode(replaceNode));
+      path.get('value').replaceWith(replaceNode);
+      state.chOriginalItems.push({ start: node.start, end: node.end, str: generateCode(node) });
     },
     // 数组
     ArrayExpression(path: NodePath<ArrayExpression>, state) {
@@ -116,8 +127,10 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
       const elementPaths = path.get('elements');
       elements.forEach((e, index) => {
         if (!containsCh(e)) return;
-        elementPaths[index].replaceWith(generateIntlNode(prefix, e, nameMap, commonIntlData));
-        state.chTransformed += `$||$${generateAndFormat(e)}`;
+        const replaceNode = generateIntlNode(prefix, e, nameMap, commonIntlData);
+        state.chTransformedItems.push(generateCode(replaceNode));
+        elementPaths[index].replaceWith(replaceNode);
+        state.chOriginalItems.push({ start: e.start, end: e.end, str: generateCode(e) });
       });
     },
     /*
@@ -127,8 +140,10 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
     ArrowFunctionExpression(path: NodePath<ArrowFunctionExpression>, state) {
       const node = path.node.body;
       if (!containsCh(node)) return;
-      path.get('body').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
-      state.chTransformed += `$||$${generateAndFormat(node)}`;
+      const replaceNode = generateIntlNode(prefix, node, nameMap, commonIntlData);
+      state.chTransformedItems.push(generateCode(replaceNode));
+      path.get('body').replaceWith(replaceNode);
+      state.chOriginalItems.push({ start: node.start, end: node.end, str: generateCode(node) });
     },
     /**
      * () => {
@@ -138,8 +153,10 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
     ReturnStatement(path, state) {
       const node = path.node.argument;
       if (!containsCh(node)) return;
-      path.get('argument').replaceWith(generateIntlNode(prefix, node, nameMap, commonIntlData));
-      state.chTransformed += `$||$${generateAndFormat(node)}`;
+      const replaceNode = generateIntlNode(prefix, node, nameMap, commonIntlData);
+      state.chTransformedItems.push(generateCode(replaceNode));
+      path.get('argument').replaceWith(replaceNode);
+      state.chOriginalItems.push({ start: node.start, end: node.end, str: generateCode(node) });
     },
     // 当调用者callee是成员表达式，且名字在黑名单里则不访问，比如intl.get.d的callee就是MemberExpression，然后d在黑名单里，console.log也是成员访问
     CallExpression(path: NodePath<CallExpression>, state) {
@@ -153,8 +170,10 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
       const argumentsPaths = path.get('arguments');
       args.forEach((a, index) => {
         if (!containsCh(a)) return;
-        argumentsPaths[index].replaceWith(generateIntlNode(prefix, a, nameMap, commonIntlData));
-        state.chTransformed += `$||$${generateAndFormat(a)}`;
+        const replaceNode = generateIntlNode(prefix, a, nameMap, commonIntlData);
+        state.chTransformedItems.push(generateCode(replaceNode));
+        argumentsPaths[index].replaceWith(replaceNode);
+        state.chOriginalItems.push({ start: a.start, end: a.end, str: generateCode(a) });
       });
     },
     // 针对new Error('中文')的情况
@@ -164,8 +183,10 @@ export const getChToIntlVisitor = (options: IntlOptions) => {
       const argumentsPaths = path.get('arguments');
       args.forEach((a, index) => {
         if (!containsCh(a)) return;
-        argumentsPaths[index].replaceWith(generateIntlNode(prefix, a, nameMap, commonIntlData));
-        state.chTransformed += `$||$${generateAndFormat(a)}`;
+        const replaceNode = generateIntlNode(prefix, a, nameMap, commonIntlData);
+        state.chTransformedItems.push(generateCode(replaceNode));
+        argumentsPaths[index].replaceWith(replaceNode);
+        state.chOriginalItems.push({ start: a.start, end: a.end, str: generateCode(a) });
       });
     },
   };

@@ -44,7 +44,7 @@ function isIntlArgs(
 
 /**
  * 用于统计Vue代码中的intl的visitor
- * @param options l1,l2,l3代表了调用者的名字及顺序，例如this.$intl('xx').d('yy')，l1就是this，l2就是$intl。如果不传l1，那就是在template里面，intl().d()
+ * @param options l1,l2,l3代表了调用者的名字及顺序，例如this.intl('xx').d('yy')，l1就是this，l2就是intl。如果不传l1，那就是在template里面，intl().d()
  * @returns 
  */
 export const getVueIntlTraverseVisitor = (

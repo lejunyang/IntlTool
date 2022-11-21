@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-06-08 13:38:46
+ * @LastEditTime: 2022-11-18 17:37:28
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
@@ -198,7 +198,7 @@ export const getIntlCallExpression = (options: IntlOptions) => {
     }
     if (!result.get) result.get = result.code;
     result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
-    result.path = `${state.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
+    result.path = `${state.path}:${node.loc?.start.line || 0}:${node.loc?.start.column || 0}`; // 加上path，行，列，以方便定位
     manager.addIntlItem(result);
   }) as VisitNodeFunction<State, CallExpression>;
 };

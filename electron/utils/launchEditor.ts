@@ -235,7 +235,7 @@ function guessEditor(editor?: string) {
 
 function printInstructions(fileName, errorMessage) {
   console.log();
-  console.log(chalk.red('Could not open ' + path.basename(fileName) + ' in the editor.'));
+  console.error(chalk.red('Could not open ' + path.basename(fileName) + ' in the editor.'));
   if (errorMessage) {
     if (errorMessage[errorMessage.length - 1] !== '.') {
       errorMessage += '.';
@@ -255,7 +255,7 @@ function printInstructions(fileName, errorMessage) {
   console.log();
 }
 
-let _childProcess: ChildProcess = null;
+let _childProcess: ChildProcess | null = null;
 function launchEditor(fileName: string, lineNumber: number, colNumber?: number, option?: { editor: string }) {
   if (!fs.existsSync(fileName)) {
     console.log('fileName ', fileName, ' not exist');
@@ -272,7 +272,7 @@ function launchEditor(fileName: string, lineNumber: number, colNumber?: number, 
 
   // colNumber is optional, but should be a positive integer too
   // default is 1
-  if (!(Number.isInteger(colNumber) && colNumber > 0)) {
+  if (!(Number.isInteger(colNumber) && colNumber! > 0)) {
     colNumber = 1;
   }
 

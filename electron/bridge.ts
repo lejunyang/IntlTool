@@ -1,13 +1,13 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-05-19 22:45:41
+ * @LastEditTime: 2022-11-18 18:09:24
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\bridge.ts
  */
 import { contextBridge, ipcRenderer } from 'electron';
-import { Event, BasicFile, ProcessFile } from './types';
+import { Event, ProcessFile } from './types';
 
 export const api = {
   emit: (event: Event, data?: any) => {
@@ -16,10 +16,6 @@ export const api = {
 
   emitSync: (event: Event, data?: any) => {
     ipcRenderer.sendSync(event, data);
-  },
-
-  addFile: (file: BasicFile) => {
-    ipcRenderer.send(Event.AddFile, file);
   },
 
   getFiles: (): ProcessFile[] => {

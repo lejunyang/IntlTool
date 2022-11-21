@@ -16,6 +16,7 @@ import { AppState } from '../../@types';
 const options = [
   { label: 'side-by-side', value: 'split' },
   { label: 'line-by-line', value: 'unified' },
+  { label: '表格对比', value: 'table' },
 ];
 
 const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
@@ -25,9 +26,9 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
     remoteData: { files },
   },
 }) => {
-  const [outputFormat, setOutputFormat] = useState<'split' | 'unified'>('split');
+  const [outputFormat, setOutputFormat] = useState<'split' | 'unified' | 'table'>('split');
 
-  const transformedFiles = files.filter(file => file.chTransformed);
+  const transformedFiles = files.filter(file => file.chTransformedInfo?.length);
 
   return (
     <div className="page-wrapper">

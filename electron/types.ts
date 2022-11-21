@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-11-17 10:12:41
+ * @LastEditTime: 2022-11-18 18:02:31
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -21,7 +21,7 @@ export type IntlItem = {
   code: string; // 完整的code
   get: string;
   d: string;
-  error?: string;
+  error: string;
   prefix?: string;
   path?: string;
 };
@@ -45,15 +45,17 @@ export type VueParseResult = AST.ESLintProgram & {
 
 export type BasicFile = {
   name?: string;
+  content: string
   path: string;
   uid: string;
 };
 
 export type TransferFile = BasicFile & {
-  content: string;
   chTransformedContent?: string;
   diffPatchOfChTransform?: string;
-  chTransformed?: string; // 因为prettier会对代码格式化，没法判断是否是改了intl，故加一个变量
+  chOriginalItems: ({ start: number | null | undefined, end: number | null | undefined, str: string })[];
+  chTransformedItems: string[]; // 转换后的代码
+  chTransformedInfo?: ({ original: string, replace: string })[]; // 用给前端表格展示的
   parseError?: string;
   intlResult?: IntlResult;
 };
@@ -68,7 +70,7 @@ export enum Event {
   SwitchMode = 'switch-mode', // 切换模式
   GetRemoteData = 'get-remote-data',
   UpdateRemoteData = 'update-remote-data',
-  AddFile = 'add-file',
+  // AddFile = 'add-file',
   RemoveFile = 'remove-file',
   ResetFiles = 'reset-files', // 清空文件
   RefreshFiles = 'refresh-files', // 刷新文件内容

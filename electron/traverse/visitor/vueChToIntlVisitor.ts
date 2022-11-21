@@ -1,16 +1,15 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-06-02 18:30:20
+ * @LastEditTime: 2022-11-21 11:14:21
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
  */
 import type { Visitor } from 'vue-eslint-parser/ast/traverse';
 // import { isTemplateLiteral } from '@babel/types';
-import { isVLiteral, isVText, isVExpressionContainer, isVElement } from '../../utils/astUtils';
+import { isVLiteral, isVText, isVExpressionContainer, isVElement, containsCh } from '../../utils/astUtils';
 import type { ProcessFile } from '../../types';
-import { containsCh } from '../../utils/stringUtils';
 import { generateCode } from '../../generate';
 
 export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') => {
@@ -34,7 +33,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
             // 目前先不考虑 :attr="`中文`"，:option="{ a: '中文' }"这样的情况
             // const expr = node.value.expression;
             // if (isTemplateLiteral(expr) && containsCh(expr)) {
-            //   replaceStr = 
+            //   replaceStr =
             // }
           } else {
             // 不是v指令的情况（缩写也算指令），检查其值是否包含中文
@@ -51,7 +50,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
            * 有些情况下会问题，如<div>1、{{a}}中文</div>，显然中文前面的节点都被忽略了，暂时不考虑这样的 = =
            */
           {
-            let rangeStart: number,
+            let rangeStart: number | null,
               intlArg = {},
               dStr = '';
             node.children.forEach((child, index) => {
@@ -62,6 +61,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
               } else if (
                 rangeStart &&
                 isVExpressionContainer(child) &&
+                child.expression &&
                 (node.children.length === 1 || index !== node.children.length - 1)
               ) {
                 // FIXME 有个bug，把最后一个表达式忽略了
@@ -73,7 +73,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
               if (rangeStart && (index === node.children.length - 1 || isVElement(child))) {
                 // 到达结尾或者遇到VElement，进行替换，并重新计算intl
                 const intlArgStr = JSON.stringify(intlArg).replaceAll('"', '');
-                replaceStr = `{{ intl("${prefix}"${intlArgStr === '{}' ? '' : `, ${intlArgStr}`}).d(\`${dStr}\`) }}`;
+                replaceStr = `{{ intl('${prefix}'${intlArgStr === '{}' ? '' : `, ${intlArgStr}`}).d(\`${dStr}\`) }}`;
                 const rangeEnd = index === node.children.length - 1 ? child.range[1] : child.range[0];
                 replaceActions.push({ rangeStart, replaceStr, rangeEnd });
                 replaceStr = '';
@@ -88,15 +88,23 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
     },
     leaveNode(node) {
       if (node?.type !== 'VElement' || node.name !== 'template') return;
-      if (replaceActions.length) file.chTransformed += `vue template replace nums: ${replaceActions.length}`;
-      else return;
+      if (replaceActions.length) {
+        file.chOriginalItems = file.chOriginalItems.concat(
+          replaceActions.map(action => ({
+            start: action.rangeStart,
+            end: action.rangeEnd,
+            str: file.content.substring(action.rangeStart, action.rangeEnd),
+          }))
+        );
+        file.chTransformedItems = file.chTransformedItems.concat(replaceActions.map(action => action.replaceStr));
+      } else return;
       replaceActions.sort((a, b) => a.rangeStart - b.rangeStart);
       let indexAcc = 0;
       replaceActions.forEach(action => {
         file.chTransformedContent =
-          file.chTransformedContent.slice(0, action.rangeStart + indexAcc) +
+          file.chTransformedContent!.slice(0, action.rangeStart + indexAcc) +
           action.replaceStr +
-          file.chTransformedContent.slice(action.rangeEnd + indexAcc);
+          file.chTransformedContent!.slice(action.rangeEnd + indexAcc);
         indexAcc += action.replaceStr.length - action.rangeEnd + action.rangeStart;
       });
     },

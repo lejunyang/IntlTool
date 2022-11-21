@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-11-18 15:05:10
+ * @LastEditTime: 2022-11-21 10:53:32
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ScanIntl\index.tsx
@@ -88,7 +88,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   const errorLength = data.filter(item => item.error).length;
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
-  let columns: ColumnType<IntlRecord>[] = [
+  let columns: (ColumnType<IntlRecord> | false)[] = [
     mode === Mode.HzeroIntlReact && {
       dataIndex: 'prefix',
       title: '前缀',
@@ -211,25 +211,25 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           )}
           {mode === Mode.HzeroIntlReact && (
             <Form.Item name="prefix" label="前缀">
-              <Input onPressEnter={() => update(new Date().getTime())} />
+              <Input onPressEnter={() => update(Date.now())} />
             </Form.Item>
           )}
           <Form.Item name="get" label="编码">
-            <Input onPressEnter={() => update(new Date().getTime())} />
+            <Input onPressEnter={() => update(Date.now())} />
           </Form.Item>
           <Form.Item name="d" label="描述">
-            <Input onPressEnter={() => update(new Date().getTime())} />
+            <Input onPressEnter={() => update(Date.now())} />
           </Form.Item>
         </Form>
         <Button
           onClick={() => {
             form.resetFields();
-            update(new Date().getTime());
+            update(Date.now());
           }}
         >
           重置
         </Button>
-        <Button onClick={() => update(new Date().getTime())}>筛选</Button>
+        <Button onClick={() => update(Date.now())}>筛选</Button>
       </div>
       <Table
         title={() => (
@@ -254,7 +254,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           </span>
         )}
         rowKey="path"
-        columns={columns}
+        columns={columns as ColumnType<IntlRecord>[]}
         dataSource={data}
         rowSelection={rowSelection}
       />

@@ -35,7 +35,7 @@ export function traversePath(
   const fileCallback =
     options?.fileCallback instanceof Function
       ? (ino, p) => {
-          options.fileCallback({
+          options.fileCallback!({
             uid: String(ino), // stat.uid是userId， ino才能代表文件
             content: readFile(p),
             path: p.replace(/\\/g, '/'),

@@ -1,14 +1,14 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-11-17 15:43:31
+ * @LastEditTime: 2022-11-18 16:14:56
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
  */
 import { omit } from 'lodash';
 import type { Options as PrettierOptions } from 'prettier';
-import { ProcessFile, TransferFile, IntlItem, IntlResult, Mode, ModeOptions } from './types';
+import { BasicFile, ProcessFile, TransferFile, IntlItem, IntlResult, Mode, ModeOptions } from './types';
 import { transformCh, transformVueCh, traverseIntl, traverseVueIntl } from './traverse';
 import * as StringUtils from './utils/stringUtils';
 import { readFile } from './utils/fileUtils';
@@ -100,19 +100,16 @@ export default class Manager {
   private filesUIDSet: Set<string> = new Set(); // 用于避免文件重复
   private files: ProcessFile[] = [];
 
-  addFile(file: ProcessFile) {
+  addFile(file: BasicFile) {
     if (!this.isFileAllowed(file.path)) return;
-    Object.assign(file, {
-      vars: {},
-      chTransformed: '',
-    });
-    if (this.filesUIDSet.has(file.uid)) {
-      const index = this.files.findIndex(f => f.uid === file.uid);
-      this.files[index] = file;
+    const processFile: ProcessFile = { ...file, vars: {}, chOriginalItems: [], chTransformedItems: [] };
+    if (this.filesUIDSet.has(processFile.uid)) {
+      const index = this.files.findIndex(f => f.uid === processFile.uid);
+      this.files[index] = processFile;
       return;
     }
-    this.filesUIDSet.add(file.uid);
-    this.files.push(file);
+    this.filesUIDSet.add(processFile.uid);
+    this.files.push(processFile);
   }
 
   removeFile(uid: string) {
@@ -130,7 +127,9 @@ export default class Manager {
       else parseJSFile(file);
       file.chTransformedContent = '';
       file.diffPatchOfChTransform = '';
-      file.chTransformed = '';
+      file.chOriginalItems = [];
+      file.chTransformedItems = [];
+      file.chTransformedInfo = [];
     });
   }
 
@@ -140,7 +139,7 @@ export default class Manager {
     this.resetIntl();
   }
 
-  getFileByUid(uid: string): ProcessFile {
+  getFileByUid(uid: string): ProcessFile | undefined {
     return this.files.find(f => f.uid === uid);
   }
 
@@ -150,7 +149,18 @@ export default class Manager {
 
   getFiles(): TransferFile[] {
     return this.files
-      .map(file => omit(file, ['vars', 'parseResult', 'vueParseResult']))
+      .map(file => {
+        if (file.chOriginalItems.length !== file.chTransformedItems.length) {
+          console.error(`${file.path}中文条数和替换条数不相等`);
+        }
+        return {
+          ...omit(file, ['vars', 'parseResult', 'vueParseResult']),
+          chTransformedInfo: file.chOriginalItems.map((original, index) => ({
+            original: original.str,
+            replace: file.chTransformedItems[index],
+          })),
+        };
+      })
       .sort((f1, f2) => {
         // 有parseError的排在前面
         if (f1.parseError || f2.parseError) return (f1.parseError ?? '') > (f2.parseError ?? '') ? -1 : 1;
@@ -193,11 +203,11 @@ export default class Manager {
 
   addIntlItem(item: IntlItem) {
     if (this.intlCodeMap.has(item.code)) {
-      if (this.intlCodeMap.get(item.code).d !== item.d && !this.intlDupSet.has(item.code + item.error)) {
+      if (this.intlCodeMap.get(item.code)!.d !== item.d && !this.intlDupSet.has(item.code + item.error)) {
         item.error = 'code重复，但中文不一致';
         this.intlResult.unshift(item);
         this.intlDupSet.add(item.code + item.error);
-      } else if (!this.intlCodeMap.get(item.code).prefix && item.prefix) {
+      } else if (!this.intlCodeMap.get(item.code)!.prefix && item.prefix) {
         // code一致且中文一致的，且原来没有prefix，更新prefix
         const index = this.intlResult.findIndex(i => i.code === item.code && i.d === item.d);
         this.intlResult[index] = item;
@@ -232,13 +242,13 @@ export default class Manager {
    * 注意参数数量需要是和对应函数匹配的，否则不调用。如果这个函数本身需要额外的参数却没有传递，也不会调用
    * 除了上述特殊被匹配的字符，prefixPattern中的其他字符均会保留
    */
-  processAllCh(prefixPattern?: string) {
+  processAllCh(prefixPattern = '') {
     this.files.forEach(file => {
       const paths = file.path.split(/\\|\//);
       const prefix = prefixPattern.replace(
         /\$(\d+)(?:{(\w+)})?(?:\[(.+)\])?/g,
         (str, pathIndex?: string, funcName?: string, params?: string) => {
-          const p = paths[+pathIndex];
+          const p = pathIndex ? paths[+pathIndex] : '';
           // 没有正确的path则直接返回匹配的字符串
           if (p) {
             // 检查传过来的funcName是否在内置的StringUtils里面
@@ -261,16 +271,18 @@ export default class Manager {
           } else return str;
         }
       );
-      if (file.path.endsWith('vue')) transformVueCh(file, { prefix, ...this.modeMap[this.mode], filepath: file.path });
-      else transformCh(file, { prefix, ...this.modeMap[this.mode], filepath: file.path });
+      const options = { prefix, ...this.modeMap[this.mode], filepath: file.path };
+      if (file.path.endsWith('vue')) transformVueCh(file, options);
+      else transformCh(file, options);
     });
   }
 
   traverseAllIntl() {
     this.resetIntl();
     this.files.forEach(file => {
-      if (file.path.endsWith('vue')) traverseVueIntl(file);
-      else traverseIntl(file, { prefix: '', ...this.modeMap[this.mode], filepath: file.path });
+      const options = { prefix: '', ...this.modeMap[this.mode], filepath: file.path };
+      if (file.path.endsWith('vue')) traverseVueIntl(file, options);
+      else traverseIntl(file, options);
     });
   }
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-11-17 15:45:03
+ * @LastEditTime: 2022-11-21 11:27:50
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -38,8 +38,7 @@ import {
   binaryExpression,
 } from '@babel/types';
 import { format as prettierFormat } from 'prettier';
-import { isESLintStringLiteral, toBabelLiteral } from '../utils/astUtils';
-import { containsCh } from '../utils/stringUtils';
+import { isESLintStringLiteral, toBabelLiteral, containsCh } from '../utils/astUtils';
 import { IntlOptions } from '../types';
 
 /**
@@ -62,7 +61,7 @@ export function generateIntlNode(
   nameMap = { l1: 'intl', l2: 'get', l3: 'd' },
   commonIntlData = {}
 ): Expression {
-  let getParam: ObjectExpression;
+  let getParam: ObjectExpression | null = null;
   if (typeof dValue === 'string') {
     dValue = dValue.trim();
     if (commonIntlData[dValue]) getString = commonIntlData[dValue];
@@ -74,7 +73,7 @@ export function generateIntlNode(
   } else if (isTemplateLiteral(dValue)) {
     // d里面使用了模板字符串且有表达式时，需要生成对应的get参数
     const properties = dValue.expressions.map((expr, index) =>
-      objectProperty(stringLiteral(`nameMe${index}`), isExpression(expr) ? expr : toBabelLiteral(expr))
+      objectProperty(stringLiteral(`var${index}`), isExpression(expr) ? expr : toBabelLiteral(expr))
     );
     getParam = properties.length ? objectExpression(properties) : null;
   } else if (isBinaryExpression(dValue) || isLogicalExpression(dValue)) {
@@ -144,7 +143,7 @@ export function format(code: string, options?: IntlOptions & { errorInfo?: any }
       printWidth: 120,
       endOfLine: 'crlf', // 统一为crlf
       vueIndentScriptAndStyle: true, // vue代码缩进script和style
-      ...(options.formatOptions || {}),
+      ...(options?.formatOptions || {}),
     })
   } catch (e) {
     console.error({ message: '格式化时发生错误' + e, path: options?.filepath });

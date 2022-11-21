@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 16:40:17
- * @LastEditTime: 2022-11-17 15:12:23
+ * @LastEditTime: 2022-11-18 18:07:10
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\astUtils.ts
@@ -19,7 +19,17 @@ import type {
   VExpressionContainer,
   VElement,
 } from 'vue-eslint-parser/ast/nodes';
-import type { StringLiteral, TemplateLiteral, TemplateElement, Expression, TSType, CallExpression } from '@babel/types';
+import type {
+  StringLiteral,
+  TemplateLiteral,
+  TemplateElement,
+  Expression,
+  TSType,
+  CallExpression,
+  ConditionalExpression,
+  BinaryExpression,
+  LogicalExpression,
+} from '@babel/types';
 import {
   isStringLiteral,
   isTemplateLiteral,
@@ -30,6 +40,8 @@ import {
   isIdentifier,
   isMemberExpression,
   isCallExpression,
+  isConditionalExpression,
+  nullLiteral,
 } from '@babel/types';
 import { shallowEqual } from './objectUtils';
 
@@ -67,6 +79,38 @@ export function isVText(node: any): node is VText {
 
 export function isVExpressionContainer(node: any): node is VExpressionContainer {
   return node?.type === 'VExpressionContainer';
+}
+
+/**
+ * @param input 字符串或AST字符串字面量节点、模板字符字面量节点、二元（仅限+ && || ??）、三元表达式，判断其中是否有中文，其他情况直接返回false
+ * @returns 是否包含中文
+ */
+ export function containsCh(
+  input?: any
+): input is
+  | string
+  | StringLiteral
+  | ESLintStringLiteral
+  | TemplateLiteral
+  | ConditionalExpression
+  | BinaryExpression
+  | LogicalExpression {
+  const reg = /[\u4e00-\u9fa5]/;
+  if (typeof input === 'string') {
+    return reg.test(input);
+  } else if (isStringLiteral(input) || isESLintStringLiteral(input)) {
+    return reg.test(input.value);
+  } else if (isTemplateLiteral(input)) {
+    return !!input.quasis.find(t => reg.test(t.value.cooked ?? ''));
+  } else if (isConditionalExpression(input)) {
+    return containsCh(input.consequent) || containsCh(input.alternate) || containsCh(input.test);
+  } else if (
+    ['BinaryExpression', 'LogicalExpression'].includes(input?.type) &&
+    ['+', '&&', '||', '??'].includes(input?.operator)
+  ) {
+    return containsCh(input.left) || containsCh(input.right);
+  }
+  return false;
 }
 
 /**
@@ -152,7 +196,7 @@ export function toBabelLiteral(literal: TSType) {
     case 'boolean':
       return booleanLiteral(literal);
     default:
-      return null;
+      return nullLiteral();
   }
 }
 

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:33:40
- * @LastEditTime: 2022-06-06 16:53:08
+ * @LastEditTime: 2022-11-18 17:30:16
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\utils\index.ts
@@ -18,7 +18,8 @@ export function execCopy(text: string) {
   return success;
 }
 
-export function copy(text: string) {
+export function copy(text: string | undefined | null) {
+  if (text == null) return false;
   if (navigator.clipboard) return navigator.clipboard.writeText(text);
   else return execCopy(text);
 }
@@ -53,4 +54,8 @@ export function parseCss(cssJson: string) {
 }
 
 export * from '../../electron/utils/objectUtils';
+/**
+ * 加了下面的代码之后发现渲染进程报错，process is not defined，查看报错代码是babel用到了process.env
+ * 嗯。。containsCh之前是写在stringUtils，里面确实引入了babel。。这个函数还是移到astUtils里去吧
+ */
 export * from '../../electron/utils/stringUtils';

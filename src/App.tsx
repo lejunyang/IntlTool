@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 10:11:01
- * @LastEditTime: 2022-06-08 15:38:04
+ * @LastEditTime: 2022-11-18 16:49:24
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\App.tsx
@@ -17,7 +17,7 @@ import { AppState } from './@types/index';
 import { Event, Message, Mode } from '../electron/types';
 
 const cacheMenus = (() => {
-  const menus = [],
+  const menus = [] as any[],
     map = {};
   return (currentMenu, pageData) => {
     if (!map[currentMenu.path]) {
