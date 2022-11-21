@@ -16,6 +16,7 @@ import Button from '../../components/Button';
 import { Event, IntlItem, Mode } from '../../../electron/types';
 import { AppState } from '../../@types';
 import { copy, getCSVLine } from '../../utils';
+import { filePathRender } from '../../utils/render';
 
 type IntlRecord = IntlItem & {
   path?: string;
@@ -29,27 +30,13 @@ const generateOnCell = (record: IntlRecord, key: keyof IntlRecord) => {
   };
 };
 
-const filePathRender = (record: IntlRecord) => {
-  const { path, code } = record;
-  return (
-    <a
-      onClick={() => {
-        if (copy(code)) notification.success({ message: `已复制 ${code}` });
-        window.Main.emit(Event.LaunchEditor, path);
-      }}
-    >
-      {path}
-    </a>
-  );
-};
-
 const errorRender = (text: string, record: IntlRecord) => {
   return (
     <Tooltip
       title={() => (
         <div>
           <div>{record.error}</div>
-          {filePathRender(record)}
+          {filePathRender(record.path, record.code)}
         </div>
       )}
     >

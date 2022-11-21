@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-11-21 14:07:25
+ * @LastEditTime: 2022-11-21 16:08:02
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\Manager.ts
@@ -102,7 +102,7 @@ export default class Manager {
 
   addFile(file: BasicFile) {
     if (!this.isFileAllowed(file.path)) return;
-    const processFile: ProcessFile = { ...file, vars: {}, chOriginalItems: [], chTransformedItems: [] };
+    const processFile: ProcessFile = { ...file, vars: {}, chTransformedInfo: [] };
     if (this.filesUIDSet.has(processFile.uid)) {
       const index = this.files.findIndex(f => f.uid === processFile.uid);
       this.files[index] = processFile;
@@ -127,8 +127,6 @@ export default class Manager {
       else parseJSFile(file);
       file.chTransformedContent = '';
       file.diffPatchOfChTransform = '';
-      file.chOriginalItems = [];
-      file.chTransformedItems = [];
       file.chTransformedInfo = [];
     });
   }
@@ -149,21 +147,11 @@ export default class Manager {
 
   getFiles(): TransferFile[] {
     return this.files
-      .map(file => {
-        if (file.chOriginalItems.length !== file.chTransformedItems.length) {
-          console.error(`${file.path}中文条数和替换条数不相等`);
-        }
-        return {
-          ...omit(file, ['vars', 'parseResult', 'vueParseResult']),
-          chTransformedInfo: file.chOriginalItems.map((original, index) => ({
-            original: original.str,
-            replace: file.chTransformedItems[index],
-          })),
-        };
-      })
+      .map(file => omit(file, ['vars', 'parseResult', 'vueParseResult']))
       .sort((f1, f2) => {
         // 有parseError的排在前面
         if (f1.parseError || f2.parseError) return (f1.parseError ?? '') > (f2.parseError ?? '') ? -1 : 1;
+        else if (f1.path.length !== f2.path.length) return f1.path.length - f2.path.length;
         else return f1.path < f2.path ? -1 : 1;
       });
   }
@@ -189,7 +177,7 @@ export default class Manager {
         if (result) return [result];
         else return [];
       } catch (e) {
-        console.error(`${result}不能转为正则，请检查`)
+        console.error(`${result}不能转为正则，请检查`);
         return [];
       }
     });

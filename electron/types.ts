@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
- * @LastEditTime: 2022-11-18 18:02:31
+ * @LastEditTime: 2022-11-21 16:08:47
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\types.ts
@@ -45,17 +45,23 @@ export type VueParseResult = AST.ESLintProgram & {
 
 export type BasicFile = {
   name?: string;
-  content: string
+  content: string;
   path: string;
   uid: string;
 };
 
+export type ReplaceAction = {
+  replace: string;
+  original: string;
+  location: string; // original的位置
+  start: number | null | undefined; // original代表的字符串在文件中的索引位置
+  end: number | null | undefined;
+}
+
 export type TransferFile = BasicFile & {
   chTransformedContent?: string;
   diffPatchOfChTransform?: string;
-  chOriginalItems: ({ start: number | null | undefined, end: number | null | undefined, str: string })[];
-  chTransformedItems: string[]; // 转换后的代码
-  chTransformedInfo?: ({ original: string, replace: string })[]; // 用给前端表格展示的
+  chTransformedInfo: ReplaceAction[]; // 用给前端表格展示的
   parseError?: string;
   intlResult?: IntlResult;
 };
