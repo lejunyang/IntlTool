@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-11-21 14:31:08
+ * @LastEditTime: 2022-11-22 10:44:32
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\generate\index.ts
@@ -148,7 +148,7 @@ export function format(code: string, options?: IntlOptions & { errorInfo?: any }
       ...(options?.formatOptions || {}),
     })
   } catch (error) {
-    console.error({ message: `${options?.filepath ?? ''}格式化时发生错误`, error });
+    console.error({ ...error, message: `${options?.filepath ?? ''}格式化时发生错误`, description: error.message });
     return code;
   }
 }

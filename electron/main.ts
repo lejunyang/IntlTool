@@ -68,7 +68,7 @@ console.error = (...args: any[]) => {
   }
   params.description += args.slice(1).map(i => typeof i === 'string' ? i : JSON.stringify(i)).join('，')
   sendMessage(params);
-  originalConsoleError(params.message, params.description);
+  originalConsoleError(...args);
 };
 
 async function registerListeners() {

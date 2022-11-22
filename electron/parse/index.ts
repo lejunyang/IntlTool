@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-02 16:05:03
- * @LastEditTime: 2022-11-21 11:55:07
+ * @LastEditTime: 2022-11-21 19:01:20
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\parse\index.ts
@@ -23,7 +23,8 @@ export function parseJSCode(code: string): ParseResult {
     plugins: ['decorators-legacy', 'jsx', 'typescript'], // 代码中有装饰器，需要decorators-legacy
   });
   if (ast.errors?.length > 0) {
-    ast.parseError = ast.errors.map(error => `${error.code}: ${error.reasonCode}`).join(', ');
+    // @ts-ignore 这个error是Error对象，所以是有message的
+    ast.parseError = ast.errors.map(error => `${error.code}: ${error.reasonCode}: ${error.message}`).join(', ');
   }
   return ast;
 }
@@ -37,7 +38,7 @@ export function parseJSFile(file: ProcessFile) {
     }
     file.parseResult = ast;
   } catch (e) {
-    const error = { ...e, message: `${file.path}发生Babel解析错误${e.message}` };
+    const error = { ...e, message: `${file.path}发生Babel解析致命错误${e.message}` };
     file.parseError = JSON.stringify(error);
     console.error(error);
   }
@@ -52,16 +53,16 @@ export function parseVueCode(code: string) {
   return ast;
 }
 
-export function parseVueFile(file: ProcessFile) {
+export function parseVueFile(file: ProcessFile, ignoreScripts?: boolean) {
   try {
-    const ast: VueParseResult = parseVueCode(file.content);
+    const ast: VueParseResult = parseVueCode(ignoreScripts ? file.content.replace(/(<script.*?>[\s\S]*?<\/script>)/g, '') : file.content);
     if (ast.parseError) {
       file.parseError = ast.parseError;
       console.error(`${file.path}发生Vue解析错误`, file.parseError);
     }
     file.vueParseResult = ast;
   } catch (e) {
-    const error = { ...e, message: `${file.path}发生Vue解析错误${e.message}` };
+    const error = { ...e, message: `${file.path}发生Vue解析致命错误${e.message}` };
     file.parseError = JSON.stringify(error);
     console.error(error);
   }
