@@ -1,12 +1,12 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-27 15:41:11
- * @LastEditTime: 2022-11-21 15:56:48
+ * @LastEditTime: 2023-02-07 23:47:22
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\components\FileDiff\index.tsx
  */
-import { Button, Modal, Table, Tooltip } from 'antd';
+import { Button, Modal, notification, Table, Tooltip } from 'antd';
 import { useState, FC, memo, useMemo } from 'react';
 import { parseDiff, Diff } from 'react-diff-view';
 import { Event, ProcessFile } from '../../../electron/types';
@@ -14,6 +14,7 @@ import { FileTextOutlined } from '@ant-design/icons';
 import 'react-diff-view/style/index.css';
 import './index.less';
 import { filePathRender } from '../../utils/render';
+import { copy } from '../../utils';
 
 const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'split' | 'unified' | 'table' }> = ({
   file,
@@ -77,18 +78,20 @@ const FileDiff: FC<{ file: ProcessFile; showContent: boolean; outputFormat: 'spl
                 dataIndex: 'original',
                 title: '替换前',
                 render: (original, record) => (
-                  <Tooltip
-                    title={() => (
-                      <div>
-                        {filePathRender(record.location, original)}
-                      </div>
-                    )}
-                  >
+                  <Tooltip title={() => <div>{filePathRender(record.location, original)}</div>}>
                     <span>{original}</span>
                   </Tooltip>
                 ),
               },
-              { dataIndex: 'replace', title: '替换后' },
+              {
+                dataIndex: 'replace',
+                title: '替换后',
+                onCell: record => ({
+                  onDoubleClick: () => {
+                    if (copy(record.replace)) notification.success({ message: '复制成功' });
+                  },
+                }),
+              },
             ]}
             pagination={{
               showTotal: total => `共 ${total} 条`,
