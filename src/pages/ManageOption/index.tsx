@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2022-06-08 15:46:03
+ * @LastEditTime: 2023-02-07 22:44:34
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageOption\index.tsx
@@ -21,7 +21,13 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
   const [form] = Form.useForm();
   const formatAfterTransformValue = Form.useWatch('formatAfterTransform', form); // 当该字段更新时刷新
   useEffect(() => {
-    form.setFieldsValue({ ...options, formatOptions: JSON.stringify(options.formatOptions, null, 2) });
+    form.setFieldsValue({
+      ...options,
+      formatOptions: JSON.stringify(options.formatOptions, null, 2),
+      l1: options.nameMap.l1,
+      l2: options.nameMap.l2,
+      l3: options.nameMap.l3,
+    });
   }, [options]);
   return (
     <div className="page-wrapper">
@@ -55,10 +61,20 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
         >
           <Input allowClear />
         </Form.Item>
-        <Form.Item name="allowedFileSuffix" initialValue={options.allowedFileSuffix} label="允许的文件格式" tooltip="在选择文件前设置有效，将仅能选择已设置的文件格式">
+        <Form.Item
+          name="allowedFileSuffix"
+          initialValue={options.allowedFileSuffix}
+          label="允许的文件格式"
+          tooltip="在选择文件前设置有效，将仅能选择已设置的文件格式"
+        >
           <Select mode="tags" />
         </Form.Item>
-        <Form.Item name="excludedPaths" initialValue={options.excludedPaths} label="排除的文件路径" tooltip="在选择文件前设置有效，将排除路径中有包含设置内容的文件">
+        <Form.Item
+          name="excludedPaths"
+          initialValue={options.excludedPaths}
+          label="排除的文件路径"
+          tooltip="在选择文件前设置有效，将排除路径中有包含设置内容的文件"
+        >
           <Select mode="tags" />
         </Form.Item>
         <Form.Item
@@ -117,7 +133,7 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
                 ...(values.formatAfterTransform ? { formatOptions: JSON.parse(values.formatOptions) } : {}),
                 nameMap: { l1: values.l1, l2: values.l2, l3: values.l3 },
               });
-              notification.success({ message: '设置成功' })
+              notification.success({ message: '设置成功' });
             })
             .catch(errorInfo => {
               if (errorInfo.errorFields) form.scrollToField(errorInfo.errorFields[0].name);
