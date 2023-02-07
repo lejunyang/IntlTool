@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-17 13:41:26
- * @LastEditTime: 2022-11-18 16:24:31
+ * @LastEditTime: 2023-02-07 22:20:03
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\utils\stringUtils.ts
@@ -21,8 +21,12 @@ export function toLowerCamel(input: string): string {
     .replace(/^([A-Z])/, (_, match: string) => match.toLowerCase());
 }
 
+export function getFileNameAndToLowerCamel(input: string): string {
+  return toLowerCamel(input.replace(/\..*$/, ''));
+}
+
 /**
- * 
+ *
  * @param columns null和undefined会被忽略
  * @returns 将若干列组装为一行csv字符串，特殊字符会用csv的规则转义
  */
