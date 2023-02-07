@@ -184,7 +184,7 @@ export const getIntlCallExpression = (options: IntlOptions) => {
       if (temp.error) result.error += temp.error;
       result.code = temp.content;
     }
-    if (!result.code.match(/^[\w.]+$/)) result.error += '编码只能由字母、数字、小数点和下划线组成';
+    if (!result.code.match(/^[\w.-]+$/)) result.error += '编码只能由字母、数字、小数点、横杠和下划线组成';
     if (options.requirePrefix) {
       for (const prefix of manager.getPrefixes()) {
         const reg = new RegExp(prefix);

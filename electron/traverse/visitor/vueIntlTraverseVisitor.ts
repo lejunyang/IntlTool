@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 14:33:35
- * @LastEditTime: 2022-11-21 14:08:21
+ * @LastEditTime: 2023-02-02 11:57:14
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueIntlTraverseVisitor.ts
@@ -107,7 +107,7 @@ export const getVueIntlTraverseVisitor = (
         if (temp.error) result.error += temp.error;
         result.code = temp.content;
       }
-      if (!result.code.match(/^[\w.]+$/)) result.error += '编码只能由字母、数字、小数点和下划线组成';
+      if (!result.code.match(/^[\w.-]+$/)) result.error += '编码只能由字母、数字、小数点、横杠和下划线组成';
       result.get = result.code;
       result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
       result.path = `${file.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
