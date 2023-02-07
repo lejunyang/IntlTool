@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-26 14:24:46
- * @LastEditTime: 2022-11-22 11:47:00
+ * @LastEditTime: 2023-02-07 22:37:09
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\vueTransformCh.ts
@@ -25,9 +25,10 @@ export function transformVueCh(file: ProcessFile, options: IntlOptions) {
   // 遍历vue的template
   // ...有些没有template的vue文件，然后下面也没进去，直接在外面赋一次值吧
   file.chTransformedContent = file.content;
+  file.chTransformedInfo = [];
   if (file.vueParseResult?.templateBody) {
     file.vueParseResult.templateBody.isRootTemplate = true; // 用于确定这个template是根结点，因为字符串替换是在离开template进行的
-    traverseNodes(file.vueParseResult.templateBody, getVueTemplateChToIntlVisitor(file, prefix));
+    traverseNodes(file.vueParseResult.templateBody, getVueTemplateChToIntlVisitor(file, options));
   }
   // 遍历vue的script，这部分用babel处理，有多个script标签的情况。。。。
   const scripts = file.chTransformedContent.match(/<script.*?>([\s\S]*?)<\/script>/g) || [];
