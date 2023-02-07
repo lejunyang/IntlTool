@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-25 11:01:11
- * @LastEditTime: 2022-05-19 22:08:09
+ * @LastEditTime: 2023-02-07 23:07:22
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\src\pages\ManageFiles\index.tsx
@@ -47,7 +47,7 @@ const Manage: FC<Pick<AppState, 'pageData'>> = props => {
           pageData.processing = true;
         }}
       >
-        选择文件夹
+        添加文件夹
       </Button>
       <Button
         onClick={() => {
@@ -55,7 +55,7 @@ const Manage: FC<Pick<AppState, 'pageData'>> = props => {
           pageData.processing = true;
         }}
       >
-        选择文件
+        添加文件
       </Button>
       {/* <Upload.Dragger {...draggerProps}>
         <p className="ant-upload-drag-icon">
