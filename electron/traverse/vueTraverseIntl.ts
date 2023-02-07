@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 20:53:09
- * @LastEditTime: 2022-11-21 11:59:14
+ * @LastEditTime: 2023-02-07 21:49:33
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\vueTraverseIntl.ts
@@ -22,7 +22,7 @@ export function traverseVueIntl(file: ProcessFile, options: IntlOptions) {
     if (file.vueParseResult?.templateBody)
       traverseNodes(
         file.vueParseResult.templateBody,
-        getVueIntlTraverseVisitor(file, { l2: options.nameMap.l2, l3: options.nameMap.l1 })
+        getVueIntlTraverseVisitor(file, { l2: options.nameMap.l2, l3: options.nameMap.l3 })
       );
     // 遍历vue的script
     file.vueParseResult?.body.forEach(node => {

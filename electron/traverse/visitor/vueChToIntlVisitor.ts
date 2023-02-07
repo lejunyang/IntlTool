@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2022-11-21 17:01:17
+ * @LastEditTime: 2023-02-07 22:36:01
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
@@ -9,10 +9,11 @@
 import type { Visitor } from 'vue-eslint-parser/ast/traverse';
 // import { isTemplateLiteral } from '@babel/types';
 import { isVLiteral, isVText, isVExpressionContainer, isVElement, containsCh } from '../../utils/astUtils';
-import type { ProcessFile, ReplaceAction } from '../../types';
+import type { IntlOptions, ProcessFile, ReplaceAction } from '../../types';
 import { generateCode } from '../../generate';
 
-export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') => {
+export const getVueTemplateChToIntlVisitor = (file: ProcessFile, options: IntlOptions) => {
+  const { prefix = '', nameMap } = options;
   file.chTransformedContent = file.content;
   // 由于是直接使用字符串进行替换，原AST上的range代表的index在进行一次替换后就有偏差了。。后面的节点index位置全是错的，直接爆炸
   // 用leftStartIndex标明最左边的进行过替换的节点开始位置，其后面的节点全部都要重算index，其前面的不用。indexAcc表示增加的长度
@@ -38,7 +39,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
           } else {
             // 不是v指令的情况（缩写也算指令），检查其值是否包含中文
             if (!isVLiteral(node.value) || !containsCh(node.value.value)) return;
-            replace = `:${node.key.name}="intl('${prefix}').d('${node.value.value.trim()}')"`;
+            replace = `:${node.key.name}="${nameMap.l2}('${prefix}').${nameMap.l2}('${node.value.value.trim()}')"`;
             replaceActions.push({
               start: node.range[0],
               replace,
@@ -79,7 +80,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, prefix = '') =>
               if (start && (index === node.children.length - 1 || isVElement(child))) {
                 // 到达结尾或者遇到VElement，进行替换，并重新计算intl
                 const intlArgStr = JSON.stringify(intlArg).replaceAll('"', '');
-                replace = `{{ intl('${prefix}'${intlArgStr === '{}' ? '' : `, ${intlArgStr}`}).d(\`${dStr}\`) }}`;
+                replace = `{{ ${nameMap.l2}('${prefix}'${intlArgStr === '{}' ? '' : `, ${intlArgStr}`}).${nameMap.l3}(\`${dStr}\`) }}`;
                 const end = index === node.children.length - 1 ? child.range[1] : child.range[0];
                 replaceActions.push({
                   start,
