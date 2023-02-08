@@ -49,7 +49,7 @@ const ProcessCh: FC<Pick<AppState, 'pageData'>> = ({
 假设path为C:\Users\Lenovo Thinkbook 16P\Desktop\Projects\o2
 \o2-console-share\packages\o2-product\src\routes\PlatformBrand\index.js
 假设我们需要o2.product.platformBrand
-那么prefixPattern为设为`}<strong>{`$8{replace}[-, .]$11{toLowerCamel}`}</strong>{`
+那么prefixPattern为设为`}<strong>{`$8{replace}[-, .].$11{toLowerCamel}`}</strong>{`
 其中$8代表path中的位置，即o2-product，{function}表示调用内置的工具函数
 这里这个replace将o2-product转化为o2.product，toLowerCamel将PlatformBrand转为小驼峰
 处理函数后面跟着的方括号是额外向处理函数传递的参数，写不写根据你调用的函数
