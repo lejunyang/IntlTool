@@ -1,7 +1,7 @@
 <!--
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-06-02 15:02:55
- * @LastEditTime: 2023-02-07 21:34:35
+ * @LastEditTime: 2023-02-08 10:08:13
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\tests\test.vue
@@ -13,6 +13,8 @@
 		><div>套娃</div>
 		末尾</span
 	>
+  <div> {{ dd }} div文本嵌套span <span> 哈哈 {{ bb }}</span></div>
+  <div> 二这种嵌套呢 {{ dd }} <span> {{ aa }} 哈哈 {{ bb }}</span></div>
 	<div :label="intl('common.label', { c }).d(`aaa${c}`)">{{ intl("common.txt", { a: 1 }).d(`文本${a}`) }}</div>
 </template>
 
