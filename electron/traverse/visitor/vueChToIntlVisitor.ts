@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-25 21:44:23
- * @LastEditTime: 2023-02-07 22:36:01
+ * @LastEditTime: 2023-02-08 10:02:55
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \tool\electron\traverse\visitor\vueChToIntlVisitor.ts
@@ -39,7 +39,7 @@ export const getVueTemplateChToIntlVisitor = (file: ProcessFile, options: IntlOp
           } else {
             // 不是v指令的情况（缩写也算指令），检查其值是否包含中文
             if (!isVLiteral(node.value) || !containsCh(node.value.value)) return;
-            replace = `:${node.key.name}="${nameMap.l2}('${prefix}').${nameMap.l2}('${node.value.value.trim()}')"`;
+            replace = `:${node.key.name}="${nameMap.l2}('${prefix}').${nameMap.l3}('${node.value.value.trim()}')"`;
             replaceActions.push({
               start: node.range[0],
               replace,
