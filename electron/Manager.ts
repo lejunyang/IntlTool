@@ -1,10 +1,10 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2022-11-21 16:08:02
+ * @LastEditTime: 2023-02-15 16:41:23
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\electron\Manager.ts
+ * @FilePath: \IntlTool\electron\Manager.ts
  */
 import { omit } from 'lodash';
 import type { Options as PrettierOptions } from 'prettier';
@@ -16,7 +16,7 @@ import { parseJSFile, parseVueFile } from './parse';
 
 export default class Manager {
   private commonOptions = {
-    excludedPaths: ['node_modules', 'lib', '.umi', 'dist'],
+    excludedPaths: ['node_modules', '/lib/', '\\lib\\', '.umi', '/dist/', '\\dist\\'],
     requirePrefix: false,
     formatAfterTransform: true,
     commonIntlData: {},

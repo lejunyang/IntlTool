@@ -2,10 +2,10 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2022-11-21 10:53:32
+ * @LastEditTime: 2023-02-15 16:43:16
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\src\pages\ScanIntl\index.tsx
+ * @FilePath: \IntlTool\src\pages\ScanIntl\index.tsx
  */
 import { Table, Tooltip, Form, Select, Input, notification } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
@@ -132,9 +132,13 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           if (exsited && exsited !== item.d) {
             // exsited如果是对象，说明你code路径写太短了，少写了后面的编码，这会把整个对象都给覆盖掉的！
             console[typeof exsited === 'object' ? 'error' : 'warn'](
-              `编码“${item.code}”已经存在值“${exsited}”`,
+              `编码“${item.code}”已经存在值`,
+              exsited,
               '它将被覆盖为:',
               item.d
+            );
+            console[typeof exsited === 'object' ? 'error' : 'warn'](
+              '已经存在值如果是对象，说明你code编码写太短了，code长的先被扫到了，短的编码会把整个对象都给覆盖掉的！'
             );
             isOverride = true;
           }
