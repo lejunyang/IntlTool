@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2023-02-15 16:43:16
+ * @LastEditTime: 2023-02-15 22:20:09
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ScanIntl\index.tsx
@@ -127,7 +127,9 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     };
     switch (mode) {
       case Mode.VueI18N:
-        for (const item of data) {
+        // 短的在前面，即可避免下面那个报错
+        const sortedData = data.sort((i, j) => i.code.length - j.code.length);
+        for (const item of sortedData) {
           const exsited = lodashGet(result, item.code);
           if (exsited && exsited !== item.d) {
             // exsited如果是对象，说明你code路径写太短了，少写了后面的编码，这会把整个对象都给覆盖掉的！
