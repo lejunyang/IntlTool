@@ -209,11 +209,17 @@ export default class Manager {
         this.intlResult[index] = item;
         this.intlCodeMap.set(item.code, item);
       }
+      const existItem = this.intlCodeMap.get(item.code);
+      if (existItem?.paths && item.path && !existItem.paths.includes(item.path)) {
+        // TODO 待优化
+        existItem.paths.push(item.path);
+      }
     } else {
       // 把有错误的放在前面
       if (item.error) this.intlResult.unshift(item);
       else this.intlResult.push(item);
       this.intlCodeMap.set(item.code, item);
+      item.paths = [item.path].filter(Boolean) as string[];
     }
   }
 

@@ -14,9 +14,12 @@ import { Event } from '../../electron/types';
 export function filePathRender(path: string | undefined | null, copyContent?: string) {
   return (
     <a
+      style={{
+        display: 'block',
+      }}
       onClick={() => {
         if (copyContent && copy(copyContent)) notification.success({ message: `已复制 ${copyContent}` });
-        if(path) window.Main.emit(Event.LaunchEditor, path);
+        if (path) window.Main.emit(Event.LaunchEditor, path);
       }}
     >
       {path}

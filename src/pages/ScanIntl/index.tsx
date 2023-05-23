@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2023-02-15 22:20:09
+ * @LastEditTime: 2023-05-24 00:12:31
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ScanIntl\index.tsx
@@ -25,7 +25,7 @@ type IntlRecord = IntlItem & {
 const generateOnCell = (record: IntlRecord, key: keyof IntlRecord) => {
   return {
     onDoubleClick: () => {
-      if (copy(record[key])) notification.success({ message: '复制成功' });
+      if (copy(String(record[key]))) notification.success({ message: '复制成功' });
     },
   };
 };
@@ -36,11 +36,14 @@ const errorRender = (text: string, record: IntlRecord) => {
       title={() => (
         <div>
           <div>{record.error}</div>
-          {filePathRender(record.path, record.code)}
+          {/* {filePathRender(record.path, record.code)} */}
+          {(record.paths || []).map(p => filePathRender(p, record.code))}
         </div>
       )}
     >
-      <span className={record.error ? 'text-red' : ''}>{text || record.error}</span>
+      <span className={record.error ? 'text-red' : record.paths?.length ? 'text-warning' : ''}>
+        {text || record.error}
+      </span>
     </Tooltip>
   );
 };
@@ -65,14 +68,21 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   const [_, update] = useState(1); // 用于刷新页面
   const [form] = Form.useForm();
   const { excludedPrefixes = excludedPrefixesDefault, prefix = '', get = '', d = '' } = form.getFieldsValue(true);
-  const data = intlResult.filter(
-    item =>
-      (!item.prefix || !excludedPrefixes.includes(item.prefix)) &&
-      (item.prefix || '').includes(prefix) &&
-      item.get.includes(get) &&
-      item.d.includes(d)
-  );
+  const data = intlResult
+    .filter(
+      item =>
+        (!item.prefix || !excludedPrefixes.includes(item.prefix)) &&
+        (item.prefix || '').includes(prefix) &&
+        item.get.includes(get) &&
+        item.d.includes(d)
+    )
+    .sort((i, j) => {
+      if (i.error || j.error) return j.error.length - i.error.length; // error更长的排在前面
+      if (i.paths || j.paths) return (j.paths?.length || 0) - (j.paths?.length || 0); // paths更长的排在前面
+      return 0;
+    });
   const errorLength = data.filter(item => item.error).length;
+  const usedByMultiFileNum = data.filter(item => (item.paths?.length || 0) > 1).length; // TODO 待优化
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
   let columns: (ColumnType<IntlRecord> | false)[] = [
@@ -242,7 +252,11 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
               </Tooltip>
             </div>
             <div>
-              总计：{data.length}条； <strong className={errorLength ? 'text-red' : ''}>错误：{errorLength}条</strong>
+              总计：{data.length}条；
+              <span className={usedByMultiFileNum ? 'text-warning' : ''}>
+                在多个文件重复使用的编码数量：{usedByMultiFileNum}条；
+              </span>
+              <strong className={errorLength ? 'text-red' : ''}>错误：{errorLength}条</strong>
             </div>
           </span>
         )}
