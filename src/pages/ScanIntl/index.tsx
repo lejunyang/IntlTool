@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2023-05-24 00:12:31
+ * @LastEditTime: 2023-05-24 09:26:11
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ScanIntl\index.tsx
@@ -41,7 +41,7 @@ const errorRender = (text: string, record: IntlRecord) => {
         </div>
       )}
     >
-      <span className={record.error ? 'text-red' : record.paths?.length ? 'text-warning' : ''}>
+      <span className={record.error ? 'text-red' : (record.paths?.length || 0) > 1 ? 'text-warning' : ''}>
         {text || record.error}
       </span>
     </Tooltip>
@@ -78,7 +78,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     )
     .sort((i, j) => {
       if (i.error || j.error) return j.error.length - i.error.length; // error更长的排在前面
-      if (i.paths || j.paths) return (j.paths?.length || 0) - (j.paths?.length || 0); // paths更长的排在前面
+      if (i.paths || j.paths) return (j.paths?.length || 0) - (i.paths?.length || 0); // paths更长的排在前面
       return 0;
     });
   const errorLength = data.filter(item => item.error).length;
@@ -239,7 +239,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
           <span className="flex justify-between">
             <div>
               <strong>Intl扫描结果</strong>
-              <Tooltip title="单元格双击可以复制，单击路径可以跳转并复制完整code，跳转需要有vscode且注册了code命令">
+              <Tooltip title="单元格双击可以复制，单击路径可以打开IDE跳转并复制完整code到剪贴板，跳转到IDE相应文件需要有已经打开了该IDE且打开了文件所在工程">
                 <QuestionCircleOutlined />
               </Tooltip>
               <Tooltip title="导出当前筛选出的数据，并过滤含有错误的条目">
