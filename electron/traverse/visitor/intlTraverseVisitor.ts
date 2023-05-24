@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2023-05-24 14:41:13
+ * @LastEditTime: 2023-05-24 14:48:08
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\electron\traverse\visitor\intlTraverseVisitor.ts
@@ -140,7 +140,6 @@ export function processTemplateLiteral<T extends ProcessParams['type']>(
   return result;
 }
 
-
 export const getIntlCallExpression = (options: IntlOptions) => {
   return ((path: NodePath<CallExpression>, state: State) => {
     const { node } = path;
@@ -159,12 +158,19 @@ export const getIntlCallExpression = (options: IntlOptions) => {
     // 检查get里面是否仅有一个参数且为字符串，或者有两个参数，第二个为对象表达式
     if (!isIntlGetArgs(getArgs)) return;
     const intlGetCallee = intlGetCallExpression.callee;
-    // 检查是否为成员表达式，且调用方式为xx.yy().d()，而不是xx['yy']().d()
-    if (!isMemberExpression(intlGetCallee, { computed: false })) return;
-    // 检查xx.get().d()中的get
-    if (!isIdentifier(intlGetCallee.property, { name: options.nameMap.l2 })) return;
-    // 检查intl.get().d()中的intl
-    if (options.nameMap.l1 && !isIdentifier(intlGetCallee.object, { name: options.nameMap.l1 })) return;
+    if (options.nameMap.l1) {
+      // 检查是否为成员表达式，且调用方式为xx.yy().d()，而不是xx['yy']().d()
+      if (!isMemberExpression(intlGetCallee, { computed: false })) return;
+      // 检查xx.get().d()中的get
+      if (!isIdentifier(intlGetCallee.property, { name: options.nameMap.l2 })) return;
+      // 检查intl.get().d()中的intl
+      if (!isIdentifier(intlGetCallee.object, { name: options.nameMap.l1 })) return;
+    } else {
+      // 如果没有设置l1，那就不检查l1，这里只需再检查第二个调用者的名字，即yy().d()中的yy，可能是yy().d()，也可能是xx.yy().d()，但是不检查xx
+      if (isIdentifier(intlGetCallee) && intlGetCallee.name !== options.nameMap.l2) return;
+      if (isMemberExpression(intlGetCallee) && !isIdentifier(intlGetCallee.property, { name: options.nameMap.l2 }))
+        return;
+    }
 
     const result: IntlItem = { get: '', d: '', code: '', error: '' };
     const dTemplateLiteral = dArgs[0];
@@ -178,7 +184,7 @@ export const getIntlCallExpression = (options: IntlOptions) => {
     }
 
     const getTemplateLiteral = getArgs[0];
-    if (isStringLiteral(getTemplateLiteral)) result.code = getTemplateLiteral.value
+    if (isStringLiteral(getTemplateLiteral)) result.code = getTemplateLiteral.value;
     else {
       const temp = processTemplateLiteral(getTemplateLiteral, 'get', state.vars);
       if (temp.error) result.error += temp.error;
