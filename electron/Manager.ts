@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2023-02-15 16:41:23
+ * @LastEditTime: 2023-05-24 18:27:16
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\electron\Manager.ts
@@ -39,7 +39,7 @@ export default class Manager {
     },
     [Mode.VueI18N]: {
       ...this.commonOptions,
-      nameMap: { l1: 'this', l2: 'intl', l3: 'd' },
+      nameMap: { l1: '', l2: 'intl', l3: 'd' },
       allowedFileSuffix: ['.vue'],
     },
     [Mode.UmiIntlReact]: {
@@ -210,16 +210,14 @@ export default class Manager {
         this.intlCodeMap.set(item.code, item);
       }
       const existItem = this.intlCodeMap.get(item.code);
-      if (existItem?.paths && item.path && !existItem.paths.includes(item.path)) {
-        // TODO 待优化
-        existItem.paths.push(item.path);
-      } else if (existItem && item.path) existItem.paths = [item.path];
+      if (existItem && item.path) {
+        existItem.paths.add(item.path);
+      }
     } else {
       // 把有错误的放在前面
       if (item.error) this.intlResult.unshift(item);
       else this.intlResult.push(item);
       this.intlCodeMap.set(item.code, item);
-      item.paths = [item.path].filter(Boolean) as string[];
     }
   }
 

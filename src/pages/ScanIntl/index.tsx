@@ -37,11 +37,11 @@ const errorRender = (text: string, record: IntlRecord) => {
         <div>
           <div>{record.error}</div>
           {/* {filePathRender(record.path, record.code)} */}
-          {(record.paths || []).map(p => filePathRender(p, record.code))}
+          {Array.from(record.paths || []).map(p => filePathRender(p, record.code))}
         </div>
       )}
     >
-      <span className={record.error ? 'text-red' : (record.paths?.length || 0) > 1 ? 'text-warning' : ''}>
+      <span className={record.error ? 'text-red' : record.paths.size > 1 ? 'text-warning' : ''}>
         {text || record.error}
       </span>
     </Tooltip>
@@ -78,11 +78,11 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     )
     .sort((i, j) => {
       if (i.error || j.error) return j.error.length - i.error.length; // error更长的排在前面
-      if (i.paths || j.paths) return (j.paths?.length || 0) - (i.paths?.length || 0); // paths更长的排在前面
+      if (i.paths || j.paths) return j.paths.size - i.paths.size; // paths更长的排在前面
       return 0;
     });
   const errorLength = data.filter(item => item.error).length;
-  const usedByMultiFileNum = data.filter(item => (item.paths?.length || 0) > 1).length; // TODO 待优化
+  const usedByMultiFileNum = data.filter(item => item.paths.size > 1).length;
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
   let columns: (ColumnType<IntlRecord> | false)[] = [

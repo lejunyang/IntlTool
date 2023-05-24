@@ -24,7 +24,7 @@ export type IntlItem = {
   error: string;
   prefix?: string;
   path?: string; // 当前项所在的文件路径
-  paths?: string[]; // 所有该编码所在项的文件路径
+  paths: Set<string>; // 所有该编码所在项的文件路径
 };
 
 export type IntlResult = IntlItem[];

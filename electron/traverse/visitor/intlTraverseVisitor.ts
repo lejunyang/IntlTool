@@ -172,7 +172,7 @@ export const getIntlCallExpression = (options: IntlOptions) => {
         return;
     }
 
-    const result: IntlItem = { get: '', d: '', code: '', error: '' };
+    const result: IntlItem = { get: '', d: '', code: '', error: '', paths: new Set() };
     const dTemplateLiteral = dArgs[0];
     // 普通字符串字面量
     if (isStringLiteral(dTemplateLiteral)) result.d = dTemplateLiteral.value;
@@ -206,6 +206,7 @@ export const getIntlCallExpression = (options: IntlOptions) => {
     if (!result.get) result.get = result.code;
     result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
     result.path = `${state.path}:${node.loc?.start.line || 0}:${node.loc?.start.column || 0}`; // 加上path，行，列，以方便定位
+    result.paths.add(result.path);
     manager.addIntlItem(result);
   }) as VisitNodeFunction<State, CallExpression>;
 };
