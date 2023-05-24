@@ -1,10 +1,10 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2023-02-07 22:44:34
+ * @LastEditTime: 2023-05-24 22:13:34
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\src\pages\ManageOption\index.tsx
+ * @FilePath: \IntlTool\src\pages\ManageOption\index.tsx
  */
 import { FC, useEffect } from 'react';
 import { Button, Select, Form, Switch, Input, notification } from 'antd';
@@ -85,6 +85,52 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
           tooltip="开启此项后会出现设置前缀菜单，所有intl的编码必须有那里设置的前缀，否则视为错误项"
         >
           <Switch />
+        </Form.Item>
+        <Form.Item
+          valuePropName="checked"
+          name="warningWhenUsedInMultiFiles"
+          initialValue={options.warningWhenUsedInMultiFiles}
+          label="同一多语言编码在多个文件使用时是否警告"
+        >
+          <Switch />
+        </Form.Item>
+        <Form.Item
+          name="customValidate"
+          initialValue={options.customValidate}
+          label="自定义Intl项校验"
+          rules={[
+            {
+              validator(rule, value) {
+                try {
+                  // eslint-disable-next-line no-new, no-new-func
+                  new Function('intlItem', value);
+                  return Promise.resolve();
+                } catch (e) {
+                  e.message = `函数体内容有误，${e.message}`;
+                  return Promise.reject(e);
+                }
+              },
+            },
+          ]}
+          tooltip={
+            <div>
+              <p>
+                你可以用js编写对扫描出的intl的校验，每个扫描出的intl行都会执行该函数，函数返回字符串则视为校验失败，该intl项将视为错误项
+              </p>
+              <p>
+                例如，你可以编写如下内容（示例只是方便查看，你只需编写函数体的内容，也就是下面示例中的return那一行）
+              </p>
+              <pre>
+                {`(intlItem) => {
+return intlItem.code.split('.').length !== 4
+? '多语言编码必须为4段'
+: '';
+}`}
+              </pre>
+            </div>
+          }
+        >
+          <Input.TextArea autoSize={{ minRows: 5 }} />
         </Form.Item>
         <Form.Item
           valuePropName="checked"

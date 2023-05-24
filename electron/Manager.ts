@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2023-05-24 18:27:16
+ * @LastEditTime: 2023-05-24 22:21:08
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\electron\Manager.ts
@@ -41,6 +41,8 @@ export default class Manager {
       ...this.commonOptions,
       nameMap: { l1: '', l2: 'intl', l3: 'd' },
       allowedFileSuffix: ['.vue'],
+      warningWhenUsedInMultiFiles: true,
+      customValidate: `return intlItem.code.split('.').length !== 4 ? '多语言编码必须为4段' : ''`,
     },
     [Mode.UmiIntlReact]: {
       ...this.commonOptions,
@@ -200,7 +202,7 @@ export default class Manager {
   addIntlItem(item: IntlItem) {
     if (this.intlCodeMap.has(item.code)) {
       if (this.intlCodeMap.get(item.code)!.d !== item.d && !this.intlDupSet.has(item.code + item.error)) {
-        item.error = 'code重复，但中文不一致';
+        item.error = 'code重复，但中文不一致;';
         this.intlResult.unshift(item);
         this.intlDupSet.add(item.code + item.error);
       } else if (!this.intlCodeMap.get(item.code)!.prefix && item.prefix) {
@@ -210,8 +212,8 @@ export default class Manager {
         this.intlCodeMap.set(item.code, item);
       }
       const existItem = this.intlCodeMap.get(item.code);
-      if (existItem && item.path) {
-        existItem.paths.add(item.path);
+      if (existItem && item.path && !existItem.paths.includes(item.path)) {
+        existItem.paths.push(item.path);
       }
     } else {
       // 把有错误的放在前面
@@ -221,11 +223,33 @@ export default class Manager {
     }
   }
 
+  getIntlResult() {
+    const options = this.modeMap[this.mode];
+    let validateFunc: Function | null;
+    try {
+      // eslint-disable-next-line no-new-func
+      validateFunc = options.customValidate ? new Function('intlItem', options.customValidate) : null;
+    } catch (e) {
+      console.error('尝试创建Intl校验函数失败，请检查函数体内容！', e);
+      return this.intlResult;
+    }
+    return this.intlResult.map(intl => {
+      if (validateFunc) {
+        try {
+          intl.error += validateFunc({ ...intl, paths: [...intl.paths] }) || '';
+        } catch (e) {
+          console.error('Intl校验函数执行错误', e);
+        }
+      }
+      return intl;
+    });
+  }
+
   getRemoteData() {
     return {
       mode: this.mode,
       prefixes: this.getPrefixes(),
-      intlResult: this.intlResult,
+      intlResult: this.getIntlResult(),
       files: this.getFiles(),
       options: this.modeMap[this.mode],
     };

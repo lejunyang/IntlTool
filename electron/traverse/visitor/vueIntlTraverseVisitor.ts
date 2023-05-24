@@ -89,7 +89,7 @@ export const getVueIntlTraverseVisitor = (
         else if (options.l1 !== 'this' && !isIdentifier(intlCallee.object, { name: options.l1 })) return;
       }
 
-      const result: IntlItem = { get: '', d: '', code: '', error: '', paths: new Set() };
+      const result: IntlItem = { get: '', d: '', code: '', error: '', paths: [] };
       const dTemplateLiteral = dArgs[0];
       // 普通字符串字面量
       if (isStringLiteral(dTemplateLiteral) || isESLintStringLiteral(dTemplateLiteral))
@@ -109,11 +109,11 @@ export const getVueIntlTraverseVisitor = (
         if (temp.error) result.error += temp.error;
         result.code = temp.content;
       }
-      if (!result.code.match(/^[\w.-]+$/)) result.error += '编码只能由字母、数字、小数点、横杠和下划线组成';
+      if (!result.code.match(/^[\w.-]+$/)) result.error += '编码只能由字母、数字、小数点、横杠和下划线组成；';
       result.get = result.code;
       result.error = result.error.substring(0, result.error.length - 1); // 去除最后的一个分号
       result.path = `${file.path}:${node.loc.start.line}:${node.loc.start.column}`; // 加上path，行，列，以方便定位
-      result.paths.add(result.path);
+      result.paths.push(result.path);
       manager.addIntlItem(result);
     },
     leaveNode: () => {},

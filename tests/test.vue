@@ -1,7 +1,7 @@
 <!--
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-06-02 15:02:55
- * @LastEditTime: 2023-05-24 14:21:22
+ * @LastEditTime: 2023-05-24 22:21:28
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\tests\test.vue
@@ -17,7 +17,7 @@
 	<div>{{ 5 }}个</div>
   <div> {{ dd }} div文本嵌套span <span> 哈哈 {{ bb }}</span></div>
   <div> 二这种嵌套呢 {{ dd }} <span> {{ aa }} 哈哈 {{ bb }}</span></div>
-	<div :label="intl('common.label', { c }).d(`aaa${c}`)">{{ intl("common.txt", { a: 1 }).d(`文本${a}`) }}</div>
+	<div :label="intl('page.common.label.text', { c }).d(`aaa${c}`)">{{ intl("common.txt", { a: 1 }).d(`文本${a}`) }}</div>
 </template>
 
 <script>
@@ -37,6 +37,7 @@ export default {
 			const txt = vm.intl('changeThis').d('改变了this的');
 			console.log("这是注释");
 			const def = "我是";
+			this.addressList[0] = this.addressList[0].search('市') !== -1 ? this.addressList[0].slice(0, 2) : this.addressList[0]; // FIXME
 			const condition = true ? "你" : "abc";
 			const add = def + "无上" || "上午";
 			add = "上面" && "我";

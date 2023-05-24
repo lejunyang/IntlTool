@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2023-05-24 09:26:11
+ * @LastEditTime: 2023-05-24 22:24:11
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ScanIntl\index.tsx
@@ -30,24 +30,6 @@ const generateOnCell = (record: IntlRecord, key: keyof IntlRecord) => {
   };
 };
 
-const errorRender = (text: string, record: IntlRecord) => {
-  return (
-    <Tooltip
-      title={() => (
-        <div>
-          <div>{record.error}</div>
-          {/* {filePathRender(record.path, record.code)} */}
-          {Array.from(record.paths || []).map(p => filePathRender(p, record.code))}
-        </div>
-      )}
-    >
-      <span className={record.error ? 'text-red' : record.paths.size > 1 ? 'text-warning' : ''}>
-        {text || record.error}
-      </span>
-    </Tooltip>
-  );
-};
-
 const excludedPrefixesDefault = [
   'hzero.common',
   'hzero.c7nProUI',
@@ -61,9 +43,35 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
   pageData: {
     existedIntlData,
-    remoteData: { intlResult, mode },
+    remoteData: { intlResult, mode, options },
   },
 }) => {
+  const errorRender = (text: string, record: IntlRecord) => {
+    return (
+      <Tooltip
+        title={() => (
+          <div>
+            <div>{record.error}</div>
+            {/* {filePathRender(record.path, record.code)} */}
+            {Array.from(record.paths || []).map(p => filePathRender(p, record.code))}
+          </div>
+        )}
+      >
+        <span
+          className={
+            record.error
+              ? 'text-red'
+              : options.warningWhenUsedInMultiFiles && record.paths.length > 1
+              ? 'text-warning'
+              : ''
+          }
+        >
+          {text || record.error}
+        </span>
+      </Tooltip>
+    );
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, update] = useState(1); // 用于刷新页面
   const [form] = Form.useForm();
@@ -78,11 +86,11 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     )
     .sort((i, j) => {
       if (i.error || j.error) return j.error.length - i.error.length; // error更长的排在前面
-      if (i.paths || j.paths) return j.paths.size - i.paths.size; // paths更长的排在前面
+      if (i.paths || j.paths) return j.paths.length - i.paths.length; // paths更长的排在前面
       return 0;
     });
   const errorLength = data.filter(item => item.error).length;
-  const usedByMultiFileNum = data.filter(item => item.paths.size > 1).length;
+  const usedByMultiFileNum = data.filter(item => item.paths.length > 1).length;
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
 
   let columns: (ColumnType<IntlRecord> | false)[] = [
@@ -253,9 +261,11 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
             </div>
             <div>
               总计：{data.length}条；
-              <span className={usedByMultiFileNum ? 'text-warning' : ''}>
-                在多个文件重复使用的编码数量：{usedByMultiFileNum}条；
-              </span>
+              {options.warningWhenUsedInMultiFiles && (
+                <span className={usedByMultiFileNum ? 'text-warning' : ''}>
+                  在多个文件重复使用的编码数量：{usedByMultiFileNum}条；
+                </span>
+              )}
               <strong className={errorLength ? 'text-red' : ''}>错误：{errorLength}条</strong>
             </div>
           </span>
