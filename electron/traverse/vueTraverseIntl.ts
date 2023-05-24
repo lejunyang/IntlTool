@@ -1,10 +1,10 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-24 20:53:09
- * @LastEditTime: 2023-02-07 21:49:33
+ * @LastEditTime: 2023-05-24 14:19:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\electron\traverse\vueTraverseIntl.ts
+ * @FilePath: \IntlTool\electron\traverse\vueTraverseIntl.ts
  */
 import { AST } from 'vue-eslint-parser';
 import { parseVueFile } from '../parse';

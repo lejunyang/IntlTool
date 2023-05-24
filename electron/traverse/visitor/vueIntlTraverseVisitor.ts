@@ -45,7 +45,7 @@ function isIntlArgs(
 /**
  * 用于统计Vue代码中的intl的visitor
  * @param options l1,l2,l3代表了调用者的名字及顺序，例如this.intl('xx').d('yy')，l1就是this，l2就是intl。如果不传l1，那就是在template里面，intl().d()
- * @returns 
+ * @returns
  */
 export const getVueIntlTraverseVisitor = (
   file: ProcessFile,
@@ -75,9 +75,11 @@ export const getVueIntlTraverseVisitor = (
       // 检查intl里面是否仅有一个参数且为字符串，或者有两个参数，第二个为对象表达式
       if (!isIntlArgs(intlArgs)) return;
       const intlCallee = intlCallExpression.callee;
-      // 如果没有设置l1，那么检查到此为止，这里只需再检查第二个调用者的名字，即yy().d()中的yy
-      if (!options.l1 && !isIdentifier(intlCallee, { name: options.l2 })) return;
-      else if (options.l1) {
+      // 如果没有设置l1，那就不检查l1，这里只需再检查第二个调用者的名字，即yy().d()中的yy，可能是yy().d()，也可能是xx.yy().d()，但是不检查xx
+      if (!options.l1) {
+        if (isIdentifier(intlCallee) && intlCallee.name !== options.l2) return;
+        if (isMemberExpression(intlCallee) && !isIdentifier(intlCallee.property, { name: options.l2 })) return;
+      } else if (options.l1) {
         // 检查是否为成员表达式，且调用方式为xx.yy().d()，而不是xx['yy']().d()
         if (!isMemberExpression(intlCallee, { computed: false })) return;
         // 检查xx.intl().d()中的intl
@@ -86,7 +88,7 @@ export const getVueIntlTraverseVisitor = (
         if (options.l1 === 'this' && intlCallee.object.type !== 'ThisExpression') return;
         else if (options.l1 !== 'this' && !isIdentifier(intlCallee.object, { name: options.l1 })) return;
       }
-      
+
       const result: IntlItem = { get: '', d: '', code: '', error: '' };
       const dTemplateLiteral = dArgs[0];
       // 普通字符串字面量

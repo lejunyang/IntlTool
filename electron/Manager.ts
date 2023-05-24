@@ -213,7 +213,7 @@ export default class Manager {
       if (existItem?.paths && item.path && !existItem.paths.includes(item.path)) {
         // TODO 待优化
         existItem.paths.push(item.path);
-      }
+      } else if (existItem && item.path) existItem.paths = [item.path];
     } else {
       // 把有错误的放在前面
       if (item.error) this.intlResult.unshift(item);

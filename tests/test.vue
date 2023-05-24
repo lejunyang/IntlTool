@@ -1,10 +1,10 @@
 <!--
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-06-02 15:02:55
- * @LastEditTime: 2023-02-08 10:08:13
+ * @LastEditTime: 2023-05-24 14:21:22
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\tests\test.vue
+ * @FilePath: \IntlTool\tests\test.vue
 -->
 <template>
 	<p data="神祇">还剩{{ count }}秒</p>
@@ -13,6 +13,8 @@
 		><div>套娃</div>
 		末尾</span
 	>
+	<div>{{ 5 + '个' }}</div>
+	<div>{{ 5 }}个</div>
   <div> {{ dd }} div文本嵌套span <span> 哈哈 {{ bb }}</span></div>
   <div> 二这种嵌套呢 {{ dd }} <span> {{ aa }} 哈哈 {{ bb }}</span></div>
 	<div :label="intl('common.label', { c }).d(`aaa${c}`)">{{ intl("common.txt", { a: 1 }).d(`文本${a}`) }}</div>
@@ -31,6 +33,8 @@ export default {
 	},
 	methods: {
 		go() {
+			const vm = this;
+			const txt = vm.intl('changeThis').d('改变了this的');
 			console.log("这是注释");
 			const def = "我是";
 			const condition = true ? "你" : "abc";

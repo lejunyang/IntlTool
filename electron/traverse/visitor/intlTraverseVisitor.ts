@@ -1,10 +1,10 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:16:51
- * @LastEditTime: 2022-11-21 13:49:18
+ * @LastEditTime: 2023-05-24 14:41:13
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\electron\traverse\visitor\intlTraverseVisitor.ts
+ * @FilePath: \IntlTool\electron\traverse\visitor\intlTraverseVisitor.ts
  */
 import type { Visitor, NodePath, VisitNodeFunction } from '@babel/traverse';
 import type { ESLintObjectExpression, ESLintTemplateLiteral } from 'vue-eslint-parser/ast/nodes';
@@ -151,7 +151,7 @@ export const getIntlCallExpression = (options: IntlOptions) => {
     // 检查是否为成员表达式，且调用方式为xx.yy()，而不是xx['yy']()
     if (!isMemberExpression(dCallee, { computed: false })) return;
     // 检查是不是xx.yy()中的yy是不是'd'
-    if (!isIdentifier(dCallee.property, { name: 'd' })) return;
+    if (!isIdentifier(dCallee.property, { name: options.nameMap.l3 })) return;
     const intlGetCallExpression = dCallee.object; // xx.d()中的xx
     // 检查上面的xx是否为函数调用，即yy().d()
     if (!isCallExpression(intlGetCallExpression)) return;
@@ -162,9 +162,9 @@ export const getIntlCallExpression = (options: IntlOptions) => {
     // 检查是否为成员表达式，且调用方式为xx.yy().d()，而不是xx['yy']().d()
     if (!isMemberExpression(intlGetCallee, { computed: false })) return;
     // 检查xx.get().d()中的get
-    if (!isIdentifier(intlGetCallee.property, { name: 'get' })) return;
+    if (!isIdentifier(intlGetCallee.property, { name: options.nameMap.l2 })) return;
     // 检查intl.get().d()中的intl
-    if (!isIdentifier(intlGetCallee.object, { name: 'intl' })) return;
+    if (options.nameMap.l1 && !isIdentifier(intlGetCallee.object, { name: options.nameMap.l1 })) return;
 
     const result: IntlItem = { get: '', d: '', code: '', error: '' };
     const dTemplateLiteral = dArgs[0];
