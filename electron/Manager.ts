@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2023-05-24 22:21:08
+ * @LastEditTime: 2023-05-30 14:33:44
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\electron\Manager.ts
@@ -16,7 +16,7 @@ import { parseJSFile, parseVueFile } from './parse';
 
 export default class Manager {
   private commonOptions = {
-    excludedPaths: ['node_modules', '/lib/', '\\lib\\', '.umi', '/dist/', '\\dist\\'],
+    excludedPaths: ['node_modules', '/lib/', '\\lib\\', '.umi', '/dist/', '\\dist\\', '\\demo\\', '/demo/'],
     requirePrefix: false,
     formatAfterTransform: true,
     commonIntlData: {},
@@ -159,14 +159,13 @@ export default class Manager {
   }
 
   private prefixes: string[] = [
+    '^o2.common.',
     '^hzero.common.',
     '^o2.2[cb].\\w+.\\w+.',
     '^o2.\\w+.\\w+.',
     '^hzero.c7nProUI.',
     '^hzero.c7nUI.',
     '^hzero.hzeroUI.',
-    '^hpfm.tenantSelect.',
-    '^hadm.marketclient.',
   ];
 
   setPrefixes(prefixString: string) {
