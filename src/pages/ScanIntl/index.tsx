@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2023-05-24 22:24:11
+ * @LastEditTime: 2023-05-30 14:47:30
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ScanIntl\index.tsx
@@ -15,7 +15,7 @@ import { set, get as lodashGet } from 'lodash';
 import Button from '../../components/Button';
 import { Event, IntlItem, Mode } from '../../../electron/types';
 import { AppState } from '../../@types';
-import { copy, getCSVLine } from '../../utils';
+import { asyncConfirm, copy, getCSVLine } from '../../utils';
 import { filePathRender } from '../../utils/render';
 
 type IntlRecord = IntlItem & {
@@ -128,7 +128,7 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
     },
   };
 
-  const getData = () => {
+  const getData = async () => {
     if (data.length === 0) {
       notification.info({ message: '没有数据可以导出' });
       return;
@@ -177,9 +177,30 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
         checkOverride();
         return `export default ${JSON.stringify(result, null, 2)}`;
       case Mode.HzeroIntlReact:
-        let head = `模板代码,代码,语言,描述\n`;
+        const choice = await asyncConfirm({
+          cancelText: '旧版',
+          okText: '新版',
+          title: '请选择多语言导出模板',
+          width: 600,
+          content: (
+            <>
+              <p>
+                旧版的hzero多语言模板的格式为：<strong>模板代码,代码,语言,描述</strong>
+              </p>
+              <p>
+                新版的hzero多语言模板的格式为：<strong>模板代码,代码,描述(中文),描述(English)</strong>
+              </p>
+              <p>至于在哪个版本发生的变化不得而知，请前往“平台多语言”下载模板自行查看</p>
+            </>
+          ),
+        });
+        let head = choice === 'ok' ? `模板代码,代码,描述(中文)\n` : `模板代码,代码,语言,描述\n`;
         for (const item of data) {
-          if (!item.error) head += getCSVLine(item.prefix, item.get, 'zh_CN', item.d);
+          if (!item.error)
+            head +=
+              choice === 'ok'
+                ? getCSVLine(item.prefix, item.get, item.d)
+                : getCSVLine(item.prefix, item.get, 'zh_CN', item.d);
         }
         return head;
     }
@@ -187,14 +208,16 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
 
   return (
     <div className="page-wrapper">
-      <Button
-        onClick={async () => {
-          window.Main.emit(Event.ScanIntl);
-          pageData.processing = true;
-        }}
-      >
-        开始扫描
-      </Button>
+      {!data.length && (
+        <Button
+          onClick={async () => {
+            window.Main.emit(Event.ScanIntl);
+            pageData.processing = true;
+          }}
+        >
+          开始扫描
+        </Button>
+      )}
       {!!data.length && (
         <Button
           onClick={async () => {
@@ -252,7 +275,10 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
               </Tooltip>
               <Tooltip title="导出当前筛选出的数据，并过滤含有错误的条目">
                 <Button
-                  onClick={() => window.Main.emit(Event.DownloadIntlResult, getData())}
+                  onClick={async () => {
+                    const data = await getData();
+                    data && window.Main.emit(Event.DownloadIntlResult, data);
+                  }}
                   style={{ marginLeft: 15 }}
                 >
                   导出

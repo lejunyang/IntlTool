@@ -6,6 +6,7 @@
  * @Description: your description
  * @FilePath: \tool\src\utils\index.ts
  */
+import { Modal, ModalFuncProps } from 'antd';
 
 const input = document.createElement('textarea');
 export function execCopy(text: string) {
@@ -59,3 +60,19 @@ export * from '../../electron/utils/objectUtils';
  * 嗯。。containsCh之前是写在stringUtils，里面确实引入了babel。。这个函数还是移到astUtils里去吧
  */
 export * from '../../electron/utils/stringUtils';
+
+export function asyncConfirm(props: ModalFuncProps): Promise<'ok' | 'cancel'> {
+  return new Promise(resolve => {
+    Modal.confirm({
+      ...props,
+      onOk(...args) {
+        props?.onOk?.(...args);
+        resolve('ok');
+      },
+      onCancel(...args) {
+        props?.onCancel?.(...args);
+        resolve('cancel');
+      },
+    });
+  });
+}
