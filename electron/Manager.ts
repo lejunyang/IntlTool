@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2023-05-30 14:33:44
+ * @LastEditTime: 2023-05-31 16:44:03
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\electron\Manager.ts
@@ -13,6 +13,7 @@ import { transformCh, transformVueCh, traverseIntl, traverseVueIntl } from './tr
 import * as StringUtils from './utils/stringUtils';
 import { readFile } from './utils/fileUtils';
 import { parseJSFile, parseVueFile } from './parse';
+import { TranslateParam, defaultTranslatorConfigMap, translate } from './translator';
 
 export default class Manager {
   private commonOptions = {
@@ -28,6 +29,7 @@ export default class Manager {
       endOfLine: 'crlf',
       vueIndentScriptAndStyle: true,
     } as PrettierOptions,
+    translatorConfigMap: JSON.parse(JSON.stringify(defaultTranslatorConfigMap)),
   };
 
   private modeMap: { [mode: string]: ModeOptions } = {
@@ -308,5 +310,43 @@ export default class Manager {
       else traverseIntl(file, options);
     });
   }
+
+  async translateIntlItem(intlCode: string, translator: TranslateParam['name']) {
+    const item = this.intlResult.find(i => i.code === intlCode);
+    if (!item) return;
+    const result = await translate({ from: 'zh-CN', to: 'en', text: item.d, name: translator });
+    item.en_US = result?.trans.paragraphs.join('');
+  }
+
+  /** ------ 翻译相关 -------- */
+  async translateAll(param: Pick<TranslateParam, 'name'>) {
+    const options = this.modeMap[this.mode];
+    const config = options.translatorConfigMap?.[param.name];
+    if (!config) {
+      console.error(`缺少${param.name}翻译源相关配置`);
+      return;
+    } else {
+      const defaultConfig = defaultTranslatorConfigMap[param.name];
+      const valid = Object.keys(defaultConfig).every(key => {
+        return config[key] != null && config[key] !== '';
+      });
+      if (!valid) {
+        console.error(`${param.name}翻译源缺少相关配置`, `请检查${Object.keys(defaultConfig).join(',')}`);
+        return;
+      }
+    }
+    for (const i of this.intlResult) {
+      if (i.error) return;
+      await translate({ name: param.name, config, from: 'zh-CN', to: 'en', text: i.d })
+        .then(result => {
+          console.log('result', result);
+          if (result) i.en_US = result.trans.paragraphs.join('');
+        })
+        .catch(e => {
+          console.error(`翻译"${i.code}"时发生错误`, e.message);
+        });
+    }
+  }
+  /** ------ 翻译相关 -------- */
 }
 export const manager = new Manager();

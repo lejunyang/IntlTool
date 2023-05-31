@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2023-05-24 22:13:34
+ * @LastEditTime: 2023-05-31 16:11:36
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ManageOption\index.tsx
@@ -24,6 +24,7 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
     form.setFieldsValue({
       ...options,
       formatOptions: JSON.stringify(options.formatOptions, null, 2),
+      translatorConfigMap: JSON.stringify(options.translatorConfigMap, null, 2),
       l1: options.nameMap.l1,
       l2: options.nameMap.l2,
       l3: options.nameMap.l3,
@@ -166,6 +167,29 @@ return intlItem.code.split('.').length !== 4
             <Input.TextArea autoSize={{ minRows: 5 }} />
           </Form.Item>
         )}
+        <Form.Item
+          name="translatorConfigMap"
+          initialValue={JSON.stringify(options.translatorConfigMap, null, 2)}
+          label="翻译源API设置"
+          rules={[
+            {
+              validator: (_, val) => {
+                try {
+                  if (!val?.trim()) return Promise.reject(new Error('翻译源API设置必须为JSON对象'));
+                  const result = JSON.parse(val.trim());
+                  if (!result || typeof result !== 'object' || result instanceof Array)
+                    return Promise.reject(new Error('翻译源API设置必须为JSON对象'));
+                  return Promise.resolve();
+                } catch (e) {
+                  e.message = `翻译源API设置必须为JSON对象,${e.message}`;
+                  return Promise.reject(e);
+                }
+              },
+            },
+          ]}
+        >
+          <Input.TextArea autoSize={{ minRows: 5 }} />
+        </Form.Item>
       </Form>
       <Button
         onClick={() => {
@@ -177,6 +201,7 @@ return intlItem.code.split('.').length !== 4
               window.Main.emit(Event.SetModeOptions, {
                 ...omit(values, ['l1', 'l2', 'l3']),
                 ...(values.formatAfterTransform ? { formatOptions: JSON.parse(values.formatOptions) } : {}),
+                ...(values.translatorConfigMap ? { translatorConfigMap: JSON.parse(values.translatorConfigMap) } : {}),
                 nameMap: { l1: values.l1, l2: values.l2, l3: values.l3 },
               });
               notification.success({ message: '设置成功' });

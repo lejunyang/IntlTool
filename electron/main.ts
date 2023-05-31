@@ -13,6 +13,7 @@ import { manager } from './Manager';
 import launchEditor from './utils/launchEditor';
 import { traversePaths } from './utils/fileUtils';
 import { handleSquirrelEvent } from './squirrel-startup';
+import { TranslatorType } from './translator';
 
 handleSquirrelEvent();
 
@@ -215,6 +216,11 @@ async function registerListeners() {
         message: '保存成功',
       });
     }
+  });
+
+  ipcMain.on(Event.TranslateAll, async (_, translator: TranslatorType) => {
+    await manager.translateAll({ name: translator });
+    updateRemoteData();
   });
 }
 

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-14 17:23:24
@@ -10,6 +11,7 @@ import type { ParseResult as BabelParseResult } from '@babel/parser';
 import type { File as BabelFile } from '@babel/types';
 import type { AST } from 'vue-eslint-parser';
 import type { Options as PrettierOptions } from 'prettier';
+import { TranslatorConfigMap } from './translator';
 
 export type Message = {
   type: 'error' | 'warning' | 'success' | 'info';
@@ -25,6 +27,7 @@ export type IntlItem = {
   prefix?: string;
   path?: string; // 当前项所在的文件路径
   paths: string[]; // 所有该编码所在项的文件路径
+  en_US?: string;
 };
 
 export type IntlResult = IntlItem[];
@@ -94,6 +97,7 @@ export enum Event {
   SelectFile = 'select-file',
   SetCommonIntlData = 'set-common-intl-data',
   SetModeOptions = 'set-mode-options',
+  TranslateAll = 'translate-all',
 }
 
 export enum Mode {
@@ -117,7 +121,8 @@ export type ModeOptions = {
   allowedFileSuffix?: string[];
   excludedPaths?: string[];
   warningWhenUsedInMultiFiles?: boolean;
-  customValidate?: string
+  customValidate?: string;
+  translatorConfigMap?: TranslatorConfigMap;
 };
 
 export type IntlOptions = ModeOptions & {

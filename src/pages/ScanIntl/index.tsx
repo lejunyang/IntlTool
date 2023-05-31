@@ -2,12 +2,12 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2023-05-30 14:47:30
+ * @LastEditTime: 2023-05-31 18:00:57
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ScanIntl\index.tsx
  */
-import { Table, Tooltip, Form, Select, Input, notification } from 'antd';
+import { Table, Tooltip, Form, Select, Input, notification, Modal } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import type { ColumnType } from 'antd/lib/table';
 import { useState, FC } from 'react';
@@ -30,14 +30,7 @@ const generateOnCell = (record: IntlRecord, key: keyof IntlRecord) => {
   };
 };
 
-const excludedPrefixesDefault = [
-  'hzero.common',
-  'hzero.c7nProUI',
-  'hzero.c7nUI',
-  'hzero.hzeroUI',
-  'hpfm.tenantSelect',
-  'hadm.marketclient',
-];
+const excludedPrefixesDefault = ['hzero.common', 'hzero.c7nProUI', 'hzero.c7nUI', 'hzero.hzeroUI'];
 
 const Intl: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
@@ -118,6 +111,14 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
       },
       render: errorRender,
     },
+    data.some(i => i.en_US) && {
+      dataIndex: 'en_US',
+      title: '英文',
+      onCell: record => {
+        return generateOnCell(record, 'en_US');
+      },
+      render: errorRender,
+    },
   ];
   columns = columns.filter(i => i);
 
@@ -143,36 +144,47 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
         });
       }
     };
+    const chooseExportLang = () => {
+      if (data.some(i => i.en_US)) {
+        return asyncConfirm({
+          cancelText: '英文',
+          okText: '中文',
+          title: '请选择导出语言',
+        });
+      }
+    };
+    const langChoice = [Mode.VueI18N, Mode.UmiIntlReact].includes(mode) && (await chooseExportLang());
+    const getItemD = item => (langChoice === 'cancel' ? item.en_US || item.d : item.d);
     switch (mode) {
       case Mode.VueI18N:
         // 短的在前面，即可避免下面那个报错
         const sortedData = data.sort((i, j) => i.code.length - j.code.length);
         for (const item of sortedData) {
           const exsited = lodashGet(result, item.code);
-          if (exsited && exsited !== item.d) {
+          if (exsited && exsited !== getItemD(item)) {
             // exsited如果是对象，说明你code路径写太短了，少写了后面的编码，这会把整个对象都给覆盖掉的！
             console[typeof exsited === 'object' ? 'error' : 'warn'](
               `编码“${item.code}”已经存在值`,
               exsited,
               '它将被覆盖为:',
-              item.d
+              getItemD(item)
             );
             console[typeof exsited === 'object' ? 'error' : 'warn'](
               '已经存在值如果是对象，说明你code编码写太短了，code长的先被扫到了，短的编码会把整个对象都给覆盖掉的！'
             );
             isOverride = true;
           }
-          set(result, item.code, item.d);
+          set(result, item.code, getItemD(item));
         }
         checkOverride();
         return JSON.stringify(result, null, 2);
       case Mode.UmiIntlReact:
         for (const item of data) {
-          if (result[item.code] && result[item.code] !== item.d) {
-            console.warn(`编码“${item.code}”已经存在值“${result[item.code]}”`, '它将被覆盖为:', item.d);
+          if (result[item.code] && result[item.code] !== getItemD(item)) {
+            console.warn(`编码“${item.code}”已经存在值“${result[item.code]}”`, '它将被覆盖为:', getItemD(item));
             isOverride = true;
           }
-          result[item.code] = item.d;
+          result[item.code] = getItemD(item);
         }
         checkOverride();
         return `export default ${JSON.stringify(result, null, 2)}`;
@@ -194,13 +206,16 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
             </>
           ),
         });
-        let head = choice === 'ok' ? `模板代码,代码,描述(中文)\n` : `模板代码,代码,语言,描述\n`;
+        let head = choice === 'ok' ? `模板代码,代码,描述(中文),描述(英文)\n` : `模板代码,代码,语言,描述\n`;
         for (const item of data) {
           if (!item.error)
             head +=
               choice === 'ok'
-                ? getCSVLine(item.prefix, item.get, item.d)
+                ? getCSVLine(item.prefix, item.get, item.d, item.en_US)
                 : getCSVLine(item.prefix, item.get, 'zh_CN', item.d);
+          if (choice !== 'ok' && item.en_US) {
+            head += getCSVLine(item.prefix, item.get, 'en_US', item.en_US);
+          }
         }
         return head;
     }
@@ -284,6 +299,49 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
                   导出
                 </Button>
               </Tooltip>
+              {!!data.length && (
+                <Button
+                  onClick={async () => {
+                    let choice;
+                    Modal.confirm({
+                      content: (
+                        <>
+                          选择翻译源：
+                          <Select
+                            style={{ width: '230px' }}
+                            options={[
+                              { value: 'bing', label: '必应（免费）' },
+                              { value: 'caiyun', label: '彩云小译' },
+                              {
+                                value: 'google',
+                                label: '谷歌',
+                              },
+                              {
+                                value: 'baidu',
+                                label: '百度',
+                              },
+                            ]}
+                            onChange={val => {
+                              choice = val;
+                            }}
+                          ></Select>
+                        </>
+                      ),
+                      onOk() {
+                        if (choice) {
+                          window.Main.emit(Event.TranslateAll, choice);
+                          pageData.processing = true;
+                        } else {
+                          return Promise.reject(new Error('请选择翻译源'));
+                        }
+                      },
+                    });
+                  }}
+                  style={{ marginLeft: 15 }}
+                >
+                  全部翻译
+                </Button>
+              )}
             </div>
             <div>
               总计：{data.length}条；
