@@ -2,7 +2,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 14:24:21
- * @LastEditTime: 2023-05-31 18:00:57
+ * @LastEditTime: 2023-06-08 11:06:51
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ScanIntl\index.tsx
@@ -300,47 +300,57 @@ const Intl: FC<Pick<AppState, 'pageData'>> = ({
                 </Button>
               </Tooltip>
               {!!data.length && (
-                <Button
-                  onClick={async () => {
-                    let choice;
-                    Modal.confirm({
-                      content: (
-                        <>
-                          选择翻译源：
-                          <Select
-                            style={{ width: '230px' }}
-                            options={[
-                              { value: 'bing', label: '必应（免费）' },
-                              { value: 'caiyun', label: '彩云小译' },
-                              {
-                                value: 'google',
-                                label: '谷歌',
-                              },
-                              {
-                                value: 'baidu',
-                                label: '百度',
-                              },
-                            ]}
-                            onChange={val => {
-                              choice = val;
-                            }}
-                          ></Select>
-                        </>
-                      ),
-                      onOk() {
-                        if (choice) {
-                          window.Main.emit(Event.TranslateAll, choice);
-                          pageData.processing = true;
-                        } else {
-                          return Promise.reject(new Error('请选择翻译源'));
-                        }
-                      },
-                    });
-                  }}
-                  style={{ marginLeft: 15 }}
-                >
-                  全部翻译
-                </Button>
+                <Tooltip title="翻译前需要在设置里配置相应apiKey，必应不用；翻译可能导致文本中的变量占位符出现问题，程序会检查一遍，将有问题的标注出来">
+                  <Button
+                    onClick={async () => {
+                      let choice;
+                      Modal.confirm({
+                        content: (
+                          <>
+                            选择翻译源：
+                            <Select
+                              style={{ width: '230px' }}
+                              options={[
+                                { value: 'bing', label: '必应（免费）' },
+                                { value: 'caiyun', label: '彩云小译' },
+                                {
+                                  value: 'google',
+                                  label: '谷歌',
+                                },
+                                {
+                                  value: 'baidu',
+                                  label: '百度',
+                                },
+                                {
+                                  value: 'tecent',
+                                  label: '腾讯',
+                                },
+                                {
+                                  value: 'youdao',
+                                  label: '有道',
+                                },
+                              ]}
+                              onChange={val => {
+                                choice = val;
+                              }}
+                            ></Select>
+                          </>
+                        ),
+                        onOk() {
+                          if (choice) {
+                            window.Main.emit(Event.TranslateAll, choice);
+                            pageData.processing = true;
+                          } else {
+                            return Promise.reject(new Error('请选择翻译源'));
+                          }
+                        },
+                      });
+                    }}
+                    style={{ marginLeft: 15 }}
+                  >
+                    全部翻译
+                  </Button>
+                </Tooltip>
               )}
             </div>
             <div>

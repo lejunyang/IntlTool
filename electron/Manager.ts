@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2023-05-31 16:44:03
+ * @LastEditTime: 2023-06-08 11:01:11
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\electron\Manager.ts
@@ -341,6 +341,15 @@ export default class Manager {
         .then(result => {
           console.log('result', result);
           if (result) i.en_US = result.trans.paragraphs.join('');
+          // 检查一下翻译后是否丢失了变量占位符
+          const intlVarPlaceholder = i.d.match(/{[a-zA-Z0-9]+}/g);
+          if (intlVarPlaceholder && result) {
+            intlVarPlaceholder.forEach(p => {
+              if (!i.en_US?.includes(p)) {
+                i.error += `翻译后缺失变量占位符${p}；`;
+              }
+            });
+          }
         })
         .catch(e => {
           console.error(`翻译"${i.code}"时发生错误`, e.message);
