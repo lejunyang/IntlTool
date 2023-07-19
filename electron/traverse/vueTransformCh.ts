@@ -1,10 +1,10 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-05-26 14:24:46
- * @LastEditTime: 2023-02-07 22:37:09
+ * @LastEditTime: 2023-07-19 16:01:14
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\electron\traverse\vueTransformCh.ts
+ * @FilePath: \IntlTool\electron\traverse\vueTransformCh.ts
  */
 import { AST } from 'vue-eslint-parser';
 import { parseVueFile, parseJSCode } from '../parse';
@@ -33,7 +33,7 @@ export function transformVueCh(file: ProcessFile, options: IntlOptions) {
   // 遍历vue的script，这部分用babel处理，有多个script标签的情况。。。。
   const scripts = file.chTransformedContent.match(/<script.*?>([\s\S]*?)<\/script>/g) || [];
   scripts.forEach(script => {
-    const scriptCode = (script.match(/<script>([\s\S]+?)<\/script>/) || [])[1];
+    const scriptCode = (script.match(/<script.*?>([\s\S]+?)<\/script>/) || [])[1];
     if (scriptCode) {
       try {
         // 去掉uniappt条件编译注释，为这段代码套上一个{}，防止babel编译报错（有写了几个条件编译，然后定义了相同的变量的情况。。），后面再把//TEMP以及花括号去掉

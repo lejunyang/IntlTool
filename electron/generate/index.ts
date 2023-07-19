@@ -1,10 +1,10 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2021-12-24 17:28:17
- * @LastEditTime: 2022-11-22 10:44:32
+ * @LastEditTime: 2023-07-19 15:41:56
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
- * @FilePath: \tool\electron\generate\index.ts
+ * @FilePath: \IntlTool\electron\generate\index.ts
  */
 import template from '@babel/template';
 import babelGenerate from '@babel/generator';
@@ -102,7 +102,7 @@ export function generateIntlNode(
     );
   }
   const build = template.expression(
-    `${nameMap.l1}.${nameMap.l2}(%%getString%%${getParam ? ', %%getParam%%' : ''}).${nameMap.l3}(%%dValue%%)`
+    `${nameMap.l1 ? nameMap.l1 + '.' : ''}${nameMap.l2}(%%getString%%${getParam ? ', %%getParam%%' : ''}).${nameMap.l3}(%%dValue%%)`
   );
   return build({
     getString: stringLiteral(getString),

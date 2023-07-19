@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-20 22:37:59
- * @LastEditTime: 2023-06-08 11:01:11
+ * @LastEditTime: 2023-07-19 16:04:53
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\electron\Manager.ts
@@ -42,7 +42,7 @@ export default class Manager {
     [Mode.VueI18N]: {
       ...this.commonOptions,
       nameMap: { l1: '', l2: 'intl', l3: 'd' },
-      allowedFileSuffix: ['.vue'],
+      allowedFileSuffix: ['.vue', '.tsx'],
       warningWhenUsedInMultiFiles: true,
       customValidate: `return intlItem.code.split('.').length !== 4 ? '多语言编码必须为4段' : ''`,
     },

@@ -1,7 +1,7 @@
 /*
  * @Author: junyang.le@hand-china.com
  * @Date: 2022-01-29 17:08:10
- * @LastEditTime: 2023-05-31 16:11:36
+ * @LastEditTime: 2023-07-19 15:20:43
  * @LastEditors: junyang.le@hand-china.com
  * @Description: your description
  * @FilePath: \IntlTool\src\pages\ManageOption\index.tsx
@@ -11,6 +11,8 @@ import { Button, Select, Form, Switch, Input, notification } from 'antd';
 import { Event } from '../../../electron/types';
 import { AppState } from '../../@types';
 import { omit } from 'lodash';
+
+const notAllowChar = /[^a-zA-Z-_$\d]/g;
 
 const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
   pageData,
@@ -34,13 +36,13 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
     <div className="page-wrapper">
       <Form form={form}>
         <div style={{ marginBottom: 24 }}>
-          注：Intl的格式为l1.l2().l3()，其中l2和l3一定是函数调用，l1为变量或者this，或者不写也可以（不写就只有两个调用）它们仅支持设置为字母
+          注：Intl的格式为l1.l2().l3()，其中l2和l3一定是函数调用，l1为变量或者this，或者不写也可以（不写就只有两个调用）它们仅支持设置为字母、数字以及$ _ -三个特殊字符
         </div>
         <Form.Item
           name="l1"
           initialValue={options.nameMap.l1}
           label="l1"
-          normalize={val => val?.replace(/[^a-zA-Z]/g, '')}
+          normalize={val => val?.replace(notAllowChar, '')}
         >
           <Input allowClear />
         </Form.Item>
@@ -49,7 +51,7 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
           initialValue={options.nameMap.l2}
           label="l2"
           rules={[{ required: true }]}
-          normalize={val => val?.replace(/[^a-zA-Z]/g, '')}
+          normalize={val => val?.replace(notAllowChar, '')}
         >
           <Input allowClear />
         </Form.Item>
@@ -58,7 +60,7 @@ const ManageOption: FC<Pick<AppState, 'pageData'>> = ({
           initialValue={options.nameMap.l3}
           label="l3"
           rules={[{ required: true, pattern: /\w+/ }]}
-          normalize={val => val?.replace(/[^a-zA-Z]/g, '')}
+          normalize={val => val?.replace(notAllowChar, '')}
         >
           <Input allowClear />
         </Form.Item>
